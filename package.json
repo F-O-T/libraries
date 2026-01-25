@@ -9,7 +9,6 @@
       "@swc-node/register": "1.11.1",
       "@swc/core": "1.15.7",
       "@swc/helpers": "0.5.17",
-      "@tooling/typescript": "workspace:*",
       "husky": "9.1.7",
       "nx": "22.3.1",
       "typescript": "catalog:development"
