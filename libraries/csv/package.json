@@ -3,7 +3,7 @@
       "url": "https://github.com/F-O-T/montte-nx/issues"
    },
    "dependencies": {
-      "zod": "4.3.4"
+      "zod": "4.3.6"
    },
    "description": "RFC 4180 compliant CSV parser with streaming support",
    "devDependencies": {
