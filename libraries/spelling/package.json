@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/spelling",
-   "version": "1.0.0",
+   "version": "1.0.1",
    "description": "Hunspell-compatible spell checking library with Zod schemas",
    "type": "module",
    "private": false,

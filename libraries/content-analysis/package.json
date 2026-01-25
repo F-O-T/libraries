@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/content-analysis",
-   "version": "1.0.0",
+   "version": "1.0.1",
    "description": "Content analysis library for SEO, readability, structure, and pattern detection",
    "type": "module",
    "private": false,
