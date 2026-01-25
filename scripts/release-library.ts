@@ -232,9 +232,14 @@ function setupNpmAuth() {
 
 function ensureWorkspaceDependencies() {
    console.log("\n🔧 Ensuring workspace dependencies...");
-   execSync("bun install", {
-      stdio: "inherit",
-   });
+   try {
+      execSync("bun install --frozen-lockfile", {
+         stdio: "inherit",
+      });
+   } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Workspace dependency install failed: ${message}`);
+   }
 }
 
 async function releaseLibrary(
