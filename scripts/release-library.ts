@@ -230,6 +230,13 @@ function setupNpmAuth() {
    }
 }
 
+function ensureWorkspaceDependencies() {
+   console.log("\n🔧 Ensuring workspace dependencies...");
+   execSync("bun install", {
+      stdio: "inherit",
+   });
+}
+
 async function releaseLibrary(
    lib: Library,
    token: string,
@@ -326,6 +333,7 @@ export async function run() {
    if (!token) throw new Error("GITHUB_TOKEN required");
 
    setupNpmAuth();
+   ensureWorkspaceDependencies();
 
    const specificLibrary = process.env.INPUT_LIBRARY || undefined;
 
