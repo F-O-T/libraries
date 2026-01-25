@@ -1,23 +1,21 @@
 {
    "devDependencies": {
-      "bun-types": "latest",
-      "@biomejs/biome": "2.3.11",
-      "@commitlint/cli": "20.2.0",
-      "@commitlint/config-conventional": "20.2.0",
-      "@elysiajs/eden": "^1.4.6",
-      "@nx/js": "22.3.1",
+      "@biomejs/biome": "2.3.12",
+      "@commitlint/cli": "20.3.1",
+      "@commitlint/config-conventional": "20.3.1",
+      "@nx/js": "22.4.1",
       "@swc-node/register": "1.11.1",
-      "@swc/core": "1.15.7",
-      "@swc/helpers": "0.5.17",
+      "@swc/core": "1.15.10",
+      "@swc/helpers": "0.5.18",
       "husky": "9.1.7",
-      "nx": "22.3.1",
-      "typescript": "catalog:development"
+      "nx": "22.4.1",
+      "typescript": "^5.9.3"
    },
    "engines": {
       "node": ">=20"
    },
    "license": "Apache-2.0",
-   "name": "contentta-nx",
+   "name": "libraries",
    "repository": {
       "type": "git",
       "url": "https://github.com/F-O-T/contentta-nx.git"
@@ -66,118 +64,5 @@
       "protobufjs"
    ],
    "type": "module",
-   "version": "0.2.0",
-   "workspaces": {
-      "catalogs": {
-         "astro": {
-            "@astrojs/check": "^0.9.4",
-            "@astrojs/mdx": "^4.2.0",
-            "@astrojs/node": "^9.2.2",
-            "@astrojs/react": "^4.3.0",
-            "@astrojs/rss": "^4.0.11",
-            "@astrojs/sitemap": "^3.4.1",
-            "@astrojs/starlight": "0.35.2",
-            "@astrojs/starlight-tailwind": "4.0.1",
-            "@astrojs/ts-plugin": "^1.10.4",
-            "@lucide/astro": "^0.511.0",
-            "astro": "5.13.0"
-         },
-         "payments": {
-            "stripe": "^20.0.0"
-         },
-         "auth": {
-            "better-auth": "1.4.12",
-            "@better-auth/stripe": "1.4.12"
-         },
-         "database": {
-            "@types/pg": "^8.15.4",
-            "drizzle-kit": "^0.31.4",
-            "drizzle-orm": "^0.44.2",
-            "drizzle-zod": "0.8.3",
-            "pg": "^8.16.3"
-         },
-         "development": {
-            "typescript": "5.9.3"
-         },
-         "enviroment": {
-            "dotenv-cli": "8.0.0",
-            "shx": "0.4.0"
-         },
-         "files": {
-            "fflate": "^0.8.2",
-            "minio": "^8.0.5",
-            "sharp": "^0.34.3"
-         },
-         "openrouter": {
-            "@ai-sdk/openai": "1.3.22",
-            "@openrouter/ai-sdk-provider": "1.1.2",
-            "ai": "5.0.5"
-         },
-         "react": {
-            "@types/react": "19.2.0",
-            "@types/react-dom": "19.2.0",
-            "react": "19.2.0",
-            "react-dom": "19.2.0",
-            "react-error-boundary": "6.0.0"
-         },
-         "server": {
-            "@elysiajs/cors": "1.4.0",
-            "compression": "^1.7.5",
-            "elysia": "1.4.21"
-         },
-         "tanstack": {
-            "@tanstack/react-form": "^1.26.0",
-            "@tanstack/react-query": "^5.66.5",
-            "@tanstack/react-query-devtools": "^5.66.5",
-            "@tanstack/react-router": "^1.147.3",
-            "@tanstack/react-router-devtools": "^1.147.3",
-            "@tanstack/router-cli": "^1.147.3",
-            "@tanstack/router-plugin": "^1.147.3"
-         },
-         "testing": {
-            "msw": "^2.10.4",
-            "msw-trpc": "^2.0.1"
-         },
-         "transactional": {
-            "@react-email/components": "1.0.4",
-            "react-email": "5.2.0",
-            "resend": "6.4.2"
-         },
-         "trpc": {
-            "@trpc/client": "^11.4.3",
-            "@trpc/server": "^11.4.3",
-            "@trpc/tanstack-react-query": "^11.4.3",
-            "superjson": "^2.2.2",
-            "url-join": "^5.0.0"
-         },
-         "ui": {
-            "@tailwindcss/vite": "^4.1.8",
-            "framer-motion": "^12.23.12",
-            "sonner": "^2.0.5",
-            "tailwindcss": "^4.1.16"
-         },
-         "validation": {
-            "zod": "4.2.1"
-         },
-         "vite": {
-            "@tailwindcss/vite": "^4.1.8",
-            "@vitejs/plugin-react": "^4.3.4",
-            "vite": "7.2.4",
-            "vite-tsconfig-paths": "^5.1.4"
-         },
-         "workers": {
-            "bullmq": "5.58.7",
-            "ioredis": "5.8.2"
-         }
-      },
-      "packages": [
-         "tooling/*",
-         "libraries/*",
-         "packages/*",
-         "apps/*"
-      ]
-   },
-   "peerDependencies": {
-      "quansync": "^0.2.11"
-   }
+   "version": "0.2.0"
 }
