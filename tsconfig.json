@@ -1,8 +1,4 @@
 {
    "files": [],
-   "references": [
-      {
-         "path": "./packages/editor"
-      }
-   ]
+   "references": []
 }

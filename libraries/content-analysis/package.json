@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/content-analysis",
-   "version": "1.0.1",
+   "version": "1.0.2",
    "description": "Content analysis library for SEO, readability, structure, and pattern detection",
    "type": "module",
    "private": false,
@@ -13,7 +13,7 @@
             "default": "./dist/index.js",
             "types": "./dist/index.d.ts"
          },
-         "types": "./src/index.ts"
+         "types": "./dist/index.d.ts"
       },
       "./types": {
          "bun": "./src/types.ts",
@@ -21,7 +21,7 @@
             "default": "./dist/types.js",
             "types": "./dist/types.d.ts"
          },
-         "types": "./src/types.ts"
+         "types": "./dist/types.d.ts"
       },
       "./package.json": "./package.json"
    },
