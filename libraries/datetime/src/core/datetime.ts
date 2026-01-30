@@ -117,6 +117,160 @@ export class DateTime {
       return this._date.getTime();
    }
 
+   // ============================================
+   // Arithmetic Methods
+   // ============================================
+
+   /**
+    * Adds milliseconds to the date
+    * @param amount - Number of milliseconds to add (can be negative)
+    * @returns New DateTime instance with added milliseconds
+    */
+   public addMilliseconds(amount: number): DateTime {
+      return new DateTime(this.valueOf() + amount);
+   }
+
+   /**
+    * Adds seconds to the date
+    * @param amount - Number of seconds to add (can be negative)
+    * @returns New DateTime instance with added seconds
+    */
+   public addSeconds(amount: number): DateTime {
+      return this.addMilliseconds(amount * 1000);
+   }
+
+   /**
+    * Adds minutes to the date
+    * @param amount - Number of minutes to add (can be negative)
+    * @returns New DateTime instance with added minutes
+    */
+   public addMinutes(amount: number): DateTime {
+      return this.addMilliseconds(amount * 60 * 1000);
+   }
+
+   /**
+    * Adds hours to the date
+    * @param amount - Number of hours to add (can be negative)
+    * @returns New DateTime instance with added hours
+    */
+   public addHours(amount: number): DateTime {
+      return this.addMilliseconds(amount * 60 * 60 * 1000);
+   }
+
+   /**
+    * Adds days to the date
+    * @param amount - Number of days to add (can be negative)
+    * @returns New DateTime instance with added days
+    */
+   public addDays(amount: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setDate(newDate.getDate() + amount);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Adds weeks to the date
+    * @param amount - Number of weeks to add (can be negative)
+    * @returns New DateTime instance with added weeks
+    */
+   public addWeeks(amount: number): DateTime {
+      return this.addDays(amount * 7);
+   }
+
+   /**
+    * Adds months to the date
+    * @param amount - Number of months to add (can be negative)
+    * @returns New DateTime instance with added months
+    */
+   public addMonths(amount: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setMonth(newDate.getMonth() + amount);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Adds years to the date
+    * @param amount - Number of years to add (can be negative)
+    * @returns New DateTime instance with added years
+    */
+   public addYears(amount: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setFullYear(newDate.getFullYear() + amount);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Subtracts milliseconds from the date
+    * @param amount - Number of milliseconds to subtract (can be negative)
+    * @returns New DateTime instance with subtracted milliseconds
+    */
+   public subtractMilliseconds(amount: number): DateTime {
+      return this.addMilliseconds(-amount);
+   }
+
+   /**
+    * Subtracts seconds from the date
+    * @param amount - Number of seconds to subtract (can be negative)
+    * @returns New DateTime instance with subtracted seconds
+    */
+   public subtractSeconds(amount: number): DateTime {
+      return this.addSeconds(-amount);
+   }
+
+   /**
+    * Subtracts minutes from the date
+    * @param amount - Number of minutes to subtract (can be negative)
+    * @returns New DateTime instance with subtracted minutes
+    */
+   public subtractMinutes(amount: number): DateTime {
+      return this.addMinutes(-amount);
+   }
+
+   /**
+    * Subtracts hours from the date
+    * @param amount - Number of hours to subtract (can be negative)
+    * @returns New DateTime instance with subtracted hours
+    */
+   public subtractHours(amount: number): DateTime {
+      return this.addHours(-amount);
+   }
+
+   /**
+    * Subtracts days from the date
+    * @param amount - Number of days to subtract (can be negative)
+    * @returns New DateTime instance with subtracted days
+    */
+   public subtractDays(amount: number): DateTime {
+      return this.addDays(-amount);
+   }
+
+   /**
+    * Subtracts weeks from the date
+    * @param amount - Number of weeks to subtract (can be negative)
+    * @returns New DateTime instance with subtracted weeks
+    */
+   public subtractWeeks(amount: number): DateTime {
+      return this.addWeeks(-amount);
+   }
+
+   /**
+    * Subtracts months from the date
+    * @param amount - Number of months to subtract (can be negative)
+    * @returns New DateTime instance with subtracted months
+    */
+   public subtractMonths(amount: number): DateTime {
+      return this.addMonths(-amount);
+   }
+
+   /**
+    * Subtracts years from the date
+    * @param amount - Number of years to subtract (can be negative)
+    * @returns New DateTime instance with subtracted years
+    */
+   public subtractYears(amount: number): DateTime {
+      return this.addYears(-amount);
+   }
+
    /**
     * Registers a plugin to extend DateTime functionality
     * @param plugin - The plugin to register

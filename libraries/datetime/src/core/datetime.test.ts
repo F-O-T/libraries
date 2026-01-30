@@ -246,4 +246,388 @@ describe("DateTime", () => {
          });
       });
    });
+
+   describe("Arithmetic Operations", () => {
+      describe("addMilliseconds()", () => {
+         it("should add milliseconds and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMilliseconds(500);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() + 500);
+            expect(dt.valueOf()).toBe(
+               new DateTime("2024-01-15T10:30:00.000Z").valueOf(),
+            ); // Original unchanged
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMilliseconds(-500);
+            expect(result.valueOf()).toBe(dt.valueOf() - 500);
+         });
+
+         it("should handle zero", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMilliseconds(0);
+            expect(result.valueOf()).toBe(dt.valueOf());
+            expect(result).not.toBe(dt); // Still returns new instance
+         });
+      });
+
+      describe("addSeconds()", () => {
+         it("should add seconds and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addSeconds(30);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() + 30000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addSeconds(-30);
+            expect(result.valueOf()).toBe(dt.valueOf() - 30000);
+         });
+      });
+
+      describe("addMinutes()", () => {
+         it("should add minutes and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMinutes(15);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() + 15 * 60 * 1000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMinutes(-15);
+            expect(result.valueOf()).toBe(dt.valueOf() - 15 * 60 * 1000);
+         });
+      });
+
+      describe("addHours()", () => {
+         it("should add hours and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addHours(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() + 2 * 60 * 60 * 1000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addHours(-2);
+            expect(result.valueOf()).toBe(dt.valueOf() - 2 * 60 * 60 * 1000);
+         });
+
+         it("should handle daylight saving time transitions", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addHours(24);
+            expect(result.valueOf()).toBe(dt.valueOf() + 24 * 60 * 60 * 1000);
+         });
+      });
+
+      describe("addDays()", () => {
+         it("should add days and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addDays(5);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-20T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addDays(-5);
+            expect(result.toISO()).toBe("2024-01-10T10:30:00.000Z");
+         });
+
+         it("should handle month boundaries", () => {
+            const dt = new DateTime("2024-01-30T10:30:00.000Z");
+            const result = dt.addDays(5);
+            expect(result.toISO()).toBe("2024-02-04T10:30:00.000Z");
+         });
+
+         it("should handle year boundaries", () => {
+            const dt = new DateTime("2024-12-30T10:30:00.000Z");
+            const result = dt.addDays(5);
+            expect(result.toISO()).toBe("2025-01-04T10:30:00.000Z");
+         });
+      });
+
+      describe("addWeeks()", () => {
+         it("should add weeks and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addWeeks(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-29T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addWeeks(-2);
+            expect(result.toISO()).toBe("2024-01-01T10:30:00.000Z");
+         });
+
+         it("should handle month boundaries", () => {
+            const dt = new DateTime("2024-01-25T10:30:00.000Z");
+            const result = dt.addWeeks(2);
+            expect(result.toISO()).toBe("2024-02-08T10:30:00.000Z");
+         });
+      });
+
+      describe("addMonths()", () => {
+         it("should add months and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMonths(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-03-15T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-03-15T10:30:00.000Z");
+            const result = dt.addMonths(-2);
+            expect(result.toISO()).toBe("2024-01-15T10:30:00.000Z");
+         });
+
+         it("should handle year boundaries", () => {
+            const dt = new DateTime("2024-11-15T10:30:00.000Z");
+            const result = dt.addMonths(3);
+            expect(result.toISO()).toBe("2025-02-15T10:30:00.000Z");
+         });
+
+         it("should handle day overflow (Jan 31 -> Feb 28/29)", () => {
+            const dt = new DateTime("2024-01-31T10:30:00.000Z");
+            const result = dt.addMonths(1);
+            // JavaScript Date automatically adjusts - Jan 31 + 1 month = Mar 2 (since Feb 29 exists but Jan has 31 days)
+            expect(result.toISO()).toBe("2024-03-02T10:30:00.000Z");
+         });
+
+         it("should handle day overflow in non-leap year", () => {
+            const dt = new DateTime("2025-01-31T10:30:00.000Z");
+            const result = dt.addMonths(1);
+            // JavaScript Date automatically adjusts - Jan 31 + 1 month = Mar 3 (since Feb has only 28 days)
+            expect(result.toISO()).toBe("2025-03-03T10:30:00.000Z");
+         });
+
+         it("should handle multiple month overflow", () => {
+            const dt = new DateTime("2024-01-31T10:30:00.000Z");
+            const result = dt.addMonths(13);
+            // 13 months from Jan 31, 2024 = Feb 31, 2025 -> Mar 3, 2025
+            expect(result.toISO()).toBe("2025-03-03T10:30:00.000Z");
+         });
+      });
+
+      describe("addYears()", () => {
+         it("should add years and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addYears(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2026-01-15T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addYears(-2);
+            expect(result.toISO()).toBe("2022-01-15T10:30:00.000Z");
+         });
+
+         it("should handle leap year to non-leap year (Feb 29 -> Feb 28)", () => {
+            const dt = new DateTime("2024-02-29T10:30:00.000Z");
+            const result = dt.addYears(1);
+            // JavaScript Date automatically adjusts Feb 29 -> Mar 1 in non-leap year
+            expect(result.toISO()).toBe("2025-03-01T10:30:00.000Z");
+         });
+
+         it("should handle large year additions", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addYears(100);
+            expect(result.toISO()).toBe("2124-01-15T10:30:00.000Z");
+         });
+      });
+
+      describe("subtractMilliseconds()", () => {
+         it("should subtract milliseconds and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.500Z");
+            const result = dt.subtractMilliseconds(500);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() - 500);
+         });
+
+         it("should handle negative values (effectively adds)", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractMilliseconds(-500);
+            expect(result.valueOf()).toBe(dt.valueOf() + 500);
+         });
+      });
+
+      describe("subtractSeconds()", () => {
+         it("should subtract seconds and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:30.000Z");
+            const result = dt.subtractSeconds(30);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() - 30000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractSeconds(-30);
+            expect(result.valueOf()).toBe(dt.valueOf() + 30000);
+         });
+      });
+
+      describe("subtractMinutes()", () => {
+         it("should subtract minutes and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractMinutes(15);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() - 15 * 60 * 1000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractMinutes(-15);
+            expect(result.valueOf()).toBe(dt.valueOf() + 15 * 60 * 1000);
+         });
+      });
+
+      describe("subtractHours()", () => {
+         it("should subtract hours and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractHours(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.valueOf()).toBe(dt.valueOf() - 2 * 60 * 60 * 1000);
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractHours(-2);
+            expect(result.valueOf()).toBe(dt.valueOf() + 2 * 60 * 60 * 1000);
+         });
+      });
+
+      describe("subtractDays()", () => {
+         it("should subtract days and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractDays(5);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-10T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractDays(-5);
+            expect(result.toISO()).toBe("2024-01-20T10:30:00.000Z");
+         });
+
+         it("should handle month boundaries", () => {
+            const dt = new DateTime("2024-02-05T10:30:00.000Z");
+            const result = dt.subtractDays(10);
+            expect(result.toISO()).toBe("2024-01-26T10:30:00.000Z");
+         });
+      });
+
+      describe("subtractWeeks()", () => {
+         it("should subtract weeks and return new DateTime", () => {
+            const dt = new DateTime("2024-01-29T10:30:00.000Z");
+            const result = dt.subtractWeeks(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractWeeks(-2);
+            expect(result.toISO()).toBe("2024-01-29T10:30:00.000Z");
+         });
+      });
+
+      describe("subtractMonths()", () => {
+         it("should subtract months and return new DateTime", () => {
+            const dt = new DateTime("2024-03-15T10:30:00.000Z");
+            const result = dt.subtractMonths(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractMonths(-2);
+            expect(result.toISO()).toBe("2024-03-15T10:30:00.000Z");
+         });
+
+         it("should handle year boundaries", () => {
+            const dt = new DateTime("2024-02-15T10:30:00.000Z");
+            const result = dt.subtractMonths(3);
+            expect(result.toISO()).toBe("2023-11-15T10:30:00.000Z");
+         });
+
+         it("should handle day overflow", () => {
+            const dt = new DateTime("2024-03-31T10:30:00.000Z");
+            const result = dt.subtractMonths(1);
+            // JavaScript Date automatically adjusts Mar 31 -> Feb 31 -> Mar 2
+            expect(result.toISO()).toBe("2024-03-02T10:30:00.000Z");
+         });
+      });
+
+      describe("subtractYears()", () => {
+         it("should subtract years and return new DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractYears(2);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2022-01-15T10:30:00.000Z");
+         });
+
+         it("should handle negative values", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.subtractYears(-2);
+            expect(result.toISO()).toBe("2026-01-15T10:30:00.000Z");
+         });
+
+         it("should handle leap year to non-leap year", () => {
+            const dt = new DateTime("2024-02-29T10:30:00.000Z");
+            const result = dt.subtractYears(1);
+            // JavaScript Date automatically adjusts Feb 29 -> Mar 1 in non-leap year
+            expect(result.toISO()).toBe("2023-03-01T10:30:00.000Z");
+         });
+      });
+
+      describe("Chaining arithmetic operations", () => {
+         it("should allow chaining multiple operations", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt
+               .addDays(5)
+               .addHours(2)
+               .addMinutes(30)
+               .subtractSeconds(15);
+            expect(result).toBeInstanceOf(DateTime);
+            // 10:30 + 2h = 12:30, + 30m = 13:00, - 15s = 12:59:45
+            expect(result.toISO()).toBe("2024-01-20T12:59:45.000Z");
+         });
+
+         it("should maintain immutability during chaining", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const original = dt.valueOf();
+            dt.addDays(5).addHours(2);
+            expect(dt.valueOf()).toBe(original); // Original unchanged
+         });
+      });
+
+      describe("Edge cases", () => {
+         it("should handle invalid dates", () => {
+            const dt = new DateTime("invalid");
+            const result = dt.addDays(1);
+            expect(result.isValid()).toBe(false);
+         });
+
+         it("should handle very large numbers", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addDays(10000);
+            expect(result.isValid()).toBe(true);
+         });
+
+         it("should handle floating point numbers", () => {
+            const dt = new DateTime("2024-01-15T10:30:00.000Z");
+            const result = dt.addMilliseconds(123.456);
+            // JavaScript Date truncates to integer milliseconds
+            expect(result.valueOf()).toBe(dt.valueOf() + 123);
+         });
+      });
+   });
 });
