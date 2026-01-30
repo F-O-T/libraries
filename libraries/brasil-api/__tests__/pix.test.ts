@@ -1,15 +1,49 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { getPixParticipants } from "../src/pix";
 
 describe("getPixParticipants", () => {
    describe("successful API calls", () => {
       test("should return array of PIX participants", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+               {
+                  ispb: "87654321",
+                  nome: "Outro Banco",
+                  nome_reduzido: "OUTRO BANCO",
+                  modalidade_participacao: "INDIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          expect(Array.isArray(participants)).toBe(true);
          expect(participants.length).toBeGreaterThan(0);
       });
 
       test("should return participants with correct schema", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          const participant = participants[0];
 
@@ -29,6 +63,19 @@ describe("getPixParticipants", () => {
       });
 
       test("should return valid ISPB format", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          const participant = participants[0];
 
@@ -37,6 +84,19 @@ describe("getPixParticipants", () => {
       });
 
       test("should return valid date format for inicio_operacao", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          const participant = participants[0];
 
@@ -47,6 +107,19 @@ describe("getPixParticipants", () => {
       });
 
       test("should include financial institutions", async () => {
+         global.fetch = mock(async () =>
+            Response.json(
+               Array.from({ length: 15 }, (_, i) => ({
+                  ispb: `${12345678 + i}`.padStart(8, "0"),
+                  nome: `Banco ${i}`,
+                  nome_reduzido: `BANCO ${i}`,
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               })),
+            ),
+         );
+
          const participants = await getPixParticipants();
 
          // Just verify we have a reasonable number of participants
@@ -60,6 +133,19 @@ describe("getPixParticipants", () => {
       });
 
       test("should have valid modalidade_participacao values", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          const participant = participants[0];
 
@@ -68,6 +154,19 @@ describe("getPixParticipants", () => {
       });
 
       test("should have valid tipo_participacao values", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  ispb: "12345678",
+                  nome: "Banco Exemplo",
+                  nome_reduzido: "BANCO EXEMPLO",
+                  modalidade_participacao: "DIRETA",
+                  tipo_participacao: "PAGADOR",
+                  inicio_operacao: "2020-11-03T00:00:00.000Z",
+               },
+            ]),
+         );
+
          const participants = await getPixParticipants();
          const participant = participants[0];
 

@@ -1,10 +1,30 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { BrasilApiValidationError } from "../src/errors";
 import { getIsbn } from "../src/isbn";
 
 describe("getIsbn", () => {
    describe("successful API calls", () => {
       test("should return book info for valid ISBN-10", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "8545702264",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: ["Robert C. Martin"],
+               publisher: "Prentice Hall",
+               synopsis: "A book about clean code",
+               dimensions: { width: 23.0, height: 23.0, unit: "CM" },
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: ["Programming"],
+               location: "Brazil",
+               retail_price: null,
+               cover_url: "https://example.com/cover.jpg",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "8545702264";
          const book = await getIsbn(isbn);
 
@@ -15,6 +35,26 @@ describe("getIsbn", () => {
       });
 
       test("should return book info for valid ISBN-13", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "9788545702269",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: ["Robert C. Martin"],
+               publisher: "Prentice Hall",
+               synopsis: "A book about clean code",
+               dimensions: { width: 23.0, height: 23.0, unit: "CM" },
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: ["Programming"],
+               location: "Brazil",
+               retail_price: null,
+               cover_url: "https://example.com/cover.jpg",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "9788545702269";
          const book = await getIsbn(isbn);
 
@@ -25,6 +65,26 @@ describe("getIsbn", () => {
       });
 
       test("should return book with all required fields", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "9788545702269",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: ["Robert C. Martin"],
+               publisher: "Prentice Hall",
+               synopsis: "A book about clean code",
+               dimensions: { width: 23.0, height: 23.0, unit: "CM" },
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: ["Programming"],
+               location: "Brazil",
+               retail_price: null,
+               cover_url: "https://example.com/cover.jpg",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "9788545702269";
          const book = await getIsbn(isbn);
 
@@ -46,6 +106,26 @@ describe("getIsbn", () => {
       });
 
       test("should return authors as array", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "9788545702269",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: ["Robert C. Martin"],
+               publisher: "Prentice Hall",
+               synopsis: "",
+               dimensions: null,
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: [],
+               location: "",
+               retail_price: null,
+               cover_url: "",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "9788545702269";
          const book = await getIsbn(isbn);
 
@@ -53,6 +133,26 @@ describe("getIsbn", () => {
       });
 
       test("should return subjects as array", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "9788545702269",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: [],
+               publisher: "Prentice Hall",
+               synopsis: "",
+               dimensions: null,
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: ["Programming"],
+               location: "",
+               retail_price: null,
+               cover_url: "",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "9788545702269";
          const book = await getIsbn(isbn);
 
@@ -60,6 +160,26 @@ describe("getIsbn", () => {
       });
 
       test("should return dimensions as object or null", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               isbn: "9788545702269",
+               title: "Clean Code",
+               subtitle: "A Handbook of Agile Software Craftsmanship",
+               authors: [],
+               publisher: "Prentice Hall",
+               synopsis: "",
+               dimensions: null,
+               year: 2008,
+               format: "PHYSICAL",
+               page_count: 464,
+               subjects: [],
+               location: "",
+               retail_price: null,
+               cover_url: "",
+               provider: "cbl",
+            }),
+         );
+
          const isbn = "9788545702269";
          const book = await getIsbn(isbn);
 

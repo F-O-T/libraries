@@ -1,9 +1,21 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { getDomainStatus } from "../src/registrobr";
 
 describe("getDomainStatus", () => {
    describe("successful API calls", () => {
       test("should return domain status for valid .br domain", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: ["ns1.google.com", "ns2.google.com"],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const result = await getDomainStatus("google.com.br");
 
          expect(result).toHaveProperty("status_code");
@@ -16,6 +28,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should return correct types for all fields", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: ["ns1.google.com", "ns2.google.com"],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const result = await getDomainStatus("google.com.br");
 
          expect(typeof result.status_code).toBe("number");
@@ -28,6 +52,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should return fqdn matching queried domain", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: [],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const domain = "google.com.br";
          const result = await getDomainStatus(domain);
 
@@ -35,6 +71,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should return valid hosts array", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: ["ns1.google.com", "ns2.google.com"],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const result = await getDomainStatus("google.com.br");
 
          expect(Array.isArray(result.hosts)).toBe(true);
@@ -46,6 +94,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should return valid expires_at date format", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: [],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const result = await getDomainStatus("google.com.br");
 
          // Check if expires-at is a valid ISO date string
@@ -55,6 +115,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should return valid suggestions array", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "google.com.br",
+               hosts: [],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: ["google.br", "google.net.br"],
+            }),
+         );
+
          const result = await getDomainStatus("google.com.br");
 
          expect(Array.isArray(result.suggestions)).toBe(true);
@@ -66,6 +138,18 @@ describe("getDomainStatus", () => {
       });
 
       test("should handle different .br domains", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               status_code: 1,
+               status: "REGISTERED",
+               fqdn: "uol.com.br",
+               hosts: [],
+               "publication-status": "published",
+               "expires-at": "2025-12-31T23:59:59.000Z",
+               suggestions: [],
+            }),
+         );
+
          const result = await getDomainStatus("uol.com.br");
 
          expect(result).toHaveProperty("fqdn");

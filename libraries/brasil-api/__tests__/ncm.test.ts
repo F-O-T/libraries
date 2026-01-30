@@ -1,15 +1,52 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { getNcm, getNcms } from "../src/ncm";
 
 describe("getNcms", () => {
    describe("successful API calls", () => {
       test("should return array of NCM codes", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  codigo: "01012100",
+                  descricao: "Cavalos reprodutores de raça pura",
+                  data_inicio: "2022-04-01",
+                  data_fim: "2099-12-31",
+                  tipo_ato: "Res Camex",
+                  numero_ato: "125",
+                  ano_ato: "2021",
+               },
+               {
+                  codigo: "01012900",
+                  descricao: "Outros cavalos vivos",
+                  data_inicio: "2022-04-01",
+                  data_fim: "2099-12-31",
+                  tipo_ato: "Res Camex",
+                  numero_ato: "125",
+                  ano_ato: "2021",
+               },
+            ]),
+         );
+
          const ncms = await getNcms();
          expect(Array.isArray(ncms)).toBe(true);
          expect(ncms.length).toBeGreaterThan(0);
       });
 
       test("should return NCM codes with correct schema", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  codigo: "01012100",
+                  descricao: "Cavalos reprodutores de raça pura",
+                  data_inicio: "2022-04-01",
+                  data_fim: "2099-12-31",
+                  tipo_ato: "Res Camex",
+                  numero_ato: "125",
+                  ano_ato: "2021",
+               },
+            ]),
+         );
+
          const ncms = await getNcms();
          const ncm = ncms[0];
 
@@ -31,6 +68,20 @@ describe("getNcms", () => {
       });
 
       test("should return valid NCM code format", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  codigo: "01012100",
+                  descricao: "Cavalos reprodutores de raça pura",
+                  data_inicio: "2022-04-01",
+                  data_fim: "2099-12-31",
+                  tipo_ato: "Res Camex",
+                  numero_ato: "125",
+                  ano_ato: "2021",
+               },
+            ]),
+         );
+
          const ncms = await getNcms();
          const ncm = ncms[0];
 
@@ -44,6 +95,18 @@ describe("getNcms", () => {
 describe("getNcm", () => {
    describe("successful API calls", () => {
       test("should return NCM for valid code", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               codigo: "0101.21.00",
+               descricao: "Cavalos reprodutores de raça pura",
+               data_inicio: "2022-04-01",
+               data_fim: "2099-12-31",
+               tipo_ato: "Res Camex",
+               numero_ato: "125",
+               ano_ato: "2021",
+            }),
+         );
+
          const code = "01012100";
          const ncm = await getNcm(code);
 
@@ -54,6 +117,18 @@ describe("getNcm", () => {
       });
 
       test("should return NCM with all required fields", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               codigo: "0101.21.00",
+               descricao: "Cavalos reprodutores de raça pura",
+               data_inicio: "2022-04-01",
+               data_fim: "2099-12-31",
+               tipo_ato: "Res Camex",
+               numero_ato: "125",
+               ano_ato: "2021",
+            }),
+         );
+
          const code = "01012100";
          const ncm = await getNcm(code);
 
@@ -67,6 +142,18 @@ describe("getNcm", () => {
       });
 
       test("should return NCM code that matches or is formatted version", async () => {
+         global.fetch = mock(async () =>
+            Response.json({
+               codigo: "0101.21.00",
+               descricao: "Cavalos reprodutores de raça pura",
+               data_inicio: "2022-04-01",
+               data_fim: "2099-12-31",
+               tipo_ato: "Res Camex",
+               numero_ato: "125",
+               ano_ato: "2021",
+            }),
+         );
+
          const code = "01012100";
          const ncm = await getNcm(code);
 

@@ -1,16 +1,46 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { BrasilApiValidationError } from "../src/errors";
 import { getEstados, getMunicipios } from "../src/ibge";
 
 describe("getEstados", () => {
    describe("successful API calls", () => {
       test("should return array of states", async () => {
+         global.fetch = mock(async () =>
+            Response.json(
+               Array.from({ length: 27 }, (_, i) => ({
+                  id: i + 1,
+                  sigla: "SP",
+                  nome: "São Paulo",
+                  regiao: {
+                     id: 3,
+                     sigla: "SE",
+                     nome: "Sudeste",
+                  },
+               })),
+            ),
+         );
+
          const estados = await getEstados();
          expect(Array.isArray(estados)).toBe(true);
          expect(estados.length).toBe(27); // Brazil has 26 states + 1 federal district
       });
 
       test("should return states with correct schema", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  id: 35,
+                  sigla: "SP",
+                  nome: "São Paulo",
+                  regiao: {
+                     id: 3,
+                     sigla: "SE",
+                     nome: "Sudeste",
+                  },
+               },
+            ]),
+         );
+
          const estados = await getEstados();
          const estado = estados[0];
 
@@ -26,6 +56,21 @@ describe("getEstados", () => {
       });
 
       test("should return states with valid regiao schema", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  id: 35,
+                  sigla: "SP",
+                  nome: "São Paulo",
+                  regiao: {
+                     id: 3,
+                     sigla: "SE",
+                     nome: "Sudeste",
+                  },
+               },
+            ]),
+         );
+
          const estados = await getEstados();
          const estado = estados[0];
 
@@ -39,6 +84,35 @@ describe("getEstados", () => {
       });
 
       test("should include expected Brazilian states", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               {
+                  id: 35,
+                  sigla: "SP",
+                  nome: "São Paulo",
+                  regiao: { id: 3, sigla: "SE", nome: "Sudeste" },
+               },
+               {
+                  id: 33,
+                  sigla: "RJ",
+                  nome: "Rio de Janeiro",
+                  regiao: { id: 3, sigla: "SE", nome: "Sudeste" },
+               },
+               {
+                  id: 31,
+                  sigla: "MG",
+                  nome: "Minas Gerais",
+                  regiao: { id: 3, sigla: "SE", nome: "Sudeste" },
+               },
+               {
+                  id: 53,
+                  sigla: "DF",
+                  nome: "Distrito Federal",
+                  regiao: { id: 5, sigla: "CO", nome: "Centro-Oeste" },
+               },
+            ]),
+         );
+
          const estados = await getEstados();
          const siglas = estados.map((e) => e.sigla);
 
@@ -81,26 +155,40 @@ describe("getMunicipios", () => {
       });
 
       test("should accept valid state code in lowercase", () => {
+         global.fetch = mock(async () => Response.json([]));
          expect(() => getMunicipios("sp")).not.toThrow();
       });
 
       test("should accept valid state code in uppercase", () => {
+         global.fetch = mock(async () => Response.json([]));
          expect(() => getMunicipios("SP")).not.toThrow();
       });
 
       test("should accept valid state code in mixed case", () => {
+         global.fetch = mock(async () => Response.json([]));
          expect(() => getMunicipios("Sp")).not.toThrow();
       });
    });
 
    describe("successful API calls", () => {
       test("should return array of municipalities", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               { nome: "São Paulo", codigo_ibge: "3550308" },
+               { nome: "Campinas", codigo_ibge: "3509502" },
+            ]),
+         );
+
          const municipios = await getMunicipios("SP");
          expect(Array.isArray(municipios)).toBe(true);
          expect(municipios.length).toBeGreaterThan(0);
       });
 
       test("should return municipalities with correct schema", async () => {
+         global.fetch = mock(async () =>
+            Response.json([{ nome: "São Paulo", codigo_ibge: "3550308" }]),
+         );
+
          const municipios = await getMunicipios("SP");
          const municipio = municipios[0];
 
@@ -112,6 +200,10 @@ describe("getMunicipios", () => {
       });
 
       test("should convert state code to uppercase", async () => {
+         global.fetch = mock(async () =>
+            Response.json([{ nome: "São Paulo", codigo_ibge: "3550308" }]),
+         );
+
          const municipiosLower = await getMunicipios("sp");
          const municipiosUpper = await getMunicipios("SP");
 
@@ -120,6 +212,13 @@ describe("getMunicipios", () => {
       });
 
       test("should include expected São Paulo municipalities", async () => {
+         global.fetch = mock(async () =>
+            Response.json([
+               { nome: "SÃO PAULO", codigo_ibge: "3550308" },
+               { nome: "CAMPINAS", codigo_ibge: "3509502" },
+            ]),
+         );
+
          const municipios = await getMunicipios("SP");
          const nomes = municipios.map((m) => m.nome);
 
@@ -133,6 +232,20 @@ describe("getMunicipios", () => {
       });
 
       test("should return different results for different states", async () => {
+         let callCount = 0;
+         global.fetch = mock(async () => {
+            callCount++;
+            if (callCount === 1) {
+               return Response.json([
+                  { nome: "São Paulo", codigo_ibge: "3550308" },
+                  { nome: "Campinas", codigo_ibge: "3509502" },
+               ]);
+            }
+            return Response.json([
+               { nome: "Rio de Janeiro", codigo_ibge: "3304557" },
+            ]);
+         });
+
          const municipiosSP = await getMunicipios("SP");
          const municipiosRJ = await getMunicipios("RJ");
 
