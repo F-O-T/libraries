@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import {
-   configureBrasilApi,
-   getConfig,
-   resetConfig,
+   type Bank,
    // Configuration
    type BrasilApiConfig,
    // Errors
@@ -10,69 +8,71 @@ import {
    BrasilApiNetworkError,
    BrasilApiResponseError,
    BrasilApiValidationError,
-   // CEP
-   getCep,
-   getCepV2,
    type CepResponse,
    type CepV2Response,
+   type Cidade,
+   type CnpjResponse,
+   type Corretora,
+   type Cotacao,
+   configureBrasilApi,
+   type DddResponse,
+   type DomainStatus,
+   type Estado,
+   type Feriado,
+   type FipeMarca,
+   type FipePreco,
+   type FipeTabela,
    // Banks
    getBank,
    getBanks,
-   type Bank,
+   // CEP
+   getCep,
+   getCepV2,
+   // CPTEC
+   getCidades,
    // CNPJ
    getCnpj,
-   type CnpjResponse,
-   // DDD
-   getDdd,
-   type DddResponse,
-   // Feriados
-   getFeriados,
-   type Feriado,
-   // IBGE
-   getEstados,
-   getMunicipios,
-   type Estado,
-   type Municipio,
-   // ISBN
-   getIsbn,
-   type IsbnResponse,
-   // NCM
-   getNcm,
-   getNcms,
-   type Ncm,
-   // PIX
-   getPixParticipants,
-   type PixParticipant,
-   // Registro.br
-   getDomainStatus,
-   type DomainStatus,
-   // Taxas
-   getTaxa,
-   getTaxas,
-   type Taxa,
+   getConfig,
    // Corretoras
    getCorretora,
    getCorretoras,
-   type Corretora,
-   // CPTEC
-   getCidades,
-   getPrevisao,
-   getPrevisaoOndas,
-   type Cidade,
-   type Previsao,
-   type PrevisaoOndas,
    // Cambio
    getCotacao,
-   getMoedas,
-   type Cotacao,
-   type Moeda,
+   // DDD
+   getDdd,
+   // Registro.br
+   getDomainStatus,
+   // IBGE
+   getEstados,
+   // Feriados
+   getFeriados,
    // FIPE
    getFipeMarcas,
    getFipePreco,
    getFipeTabelas,
-   type FipeMarca,
-   type FipePreco,
-   type FipeTabela,
+   // ISBN
+   getIsbn,
+   getMoedas,
+   getMunicipios,
+   // NCM
+   getNcm,
+   getNcms,
+   // PIX
+   getPixParticipants,
+   getPrevisao,
+   getPrevisaoOndas,
+   // Taxas
+   getTaxa,
+   getTaxas,
+   type IsbnResponse,
+   type Moeda,
+   type Municipio,
+   type Ncm,
+   type PixParticipant,
+   type Previsao,
+   type PrevisaoOndas,
+   resetConfig,
+   type Taxa,
    type TipoVeiculo,
 } from "../src/index";
 
