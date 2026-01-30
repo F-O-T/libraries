@@ -107,7 +107,7 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 ## License
 
-Licensed under the [Apache-2.0 License](./LICENSE.md). Individual libraries may have their own licenses (typically MIT) - check each library's package.json.
+Licensed under the [MIT License](./LICENSE.md). Individual libraries may have their own licenses (typically MIT) - check each library's package.json.
 
 ## Support
 
