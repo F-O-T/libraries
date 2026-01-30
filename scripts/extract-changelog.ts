@@ -1,5 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export async function readChangelog(file = "CHANGELOG.md"): Promise<string> {
    const p = path.resolve(file);
