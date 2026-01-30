@@ -1,5 +1,20 @@
-// Placeholder - will be populated in later tasks
+// Core exports
 export { DateTime } from "./core/datetime.ts";
-export * from "./errors.ts";
-export * from "./schemas.ts";
-export * from "./types.ts";
+export { datetime } from "./core/factory.ts";
+
+// Type exports
+export type {
+   TimeUnit,
+   DateInput,
+   DateTimePlugin,
+   DateTimeConfig,
+   FormatOptions,
+   ParseOptions,
+   DateTimeClass,
+} from "./types.ts";
+
+// Schema exports
+export { DateInputSchema } from "./schemas.ts";
+
+// Error exports
+export { InvalidDateError, PluginError } from "./errors.ts";
