@@ -1,8 +1,8 @@
 import type {
+   PDFArray,
+   PDFDictionary,
    PDFName,
    PDFRef,
-   PDFDictionary,
-   PDFArray,
    PDFStream,
    PDFValue,
 } from "../types.ts";
@@ -19,9 +19,7 @@ export function createName(value: string): PDFName {
  */
 export function createRef(objectNumber: number, generation = 0): PDFRef {
    if (objectNumber < 1) {
-      throw new Error(
-         `Object number must be positive, got ${objectNumber}`,
-      );
+      throw new Error(`Object number must be positive, got ${objectNumber}`);
    }
    if (generation < 0 || generation > 65535) {
       throw new Error(

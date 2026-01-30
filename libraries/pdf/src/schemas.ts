@@ -120,14 +120,14 @@ export const PDFMetadataSchema = z.object({
  * PDF Dictionary schema (recursive)
  */
 export const PDFDictionarySchema: z.ZodType<Record<string, any>> = z.lazy(() =>
-   z.record(z.string(), PDFValueSchema)
+   z.record(z.string(), PDFValueSchema),
 );
 
 /**
  * PDF Array schema (recursive)
  */
 export const PDFArraySchema: z.ZodType<any[]> = z.lazy(() =>
-   z.array(PDFValueSchema)
+   z.array(PDFValueSchema),
 );
 
 /**
@@ -152,7 +152,7 @@ export const PDFValueSchema: z.ZodType<any> = z.lazy(() =>
       PDFStreamSchema,
       z.null(),
       PDFRefSchema,
-   ])
+   ]),
 );
 
 /**

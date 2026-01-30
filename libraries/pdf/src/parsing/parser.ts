@@ -9,8 +9,10 @@ export class PDFParser {
    private lexer: PDFLexer;
    private currentToken: Token;
    private nextToken: Token | null = null;
+   private data: Uint8Array;
 
    constructor(data: Uint8Array) {
+      this.data = data;
       this.lexer = new PDFLexer(data);
       this.currentToken = this.lexer.nextToken();
    }
@@ -195,10 +197,27 @@ export class PDFParser {
     * Parse stream (dictionary already parsed)
     */
    private parseStream(dictionary: PDFDictionary): PDFStream {
+      // Get current position where 'stream' keyword is
+      const streamKeywordPos = this.currentToken.position;
       this.advance(); // Skip 'stream'
 
-      // Skip newline after stream keyword
-      // (lexer should handle this, but be defensive)
+      // Find the actual start of stream data (after 'stream' keyword and newline)
+      // The stream keyword is followed by either \n or \r\n
+      let streamDataStart = streamKeywordPos + 6; // 'stream' is 6 characters
+      
+      // Skip the newline after 'stream'
+      while (streamDataStart < this.data.length) {
+         const byte = this.data[streamDataStart];
+         if (byte === 0x0D || byte === 0x0A) { // \r or \n
+            streamDataStart++;
+            // Handle \r\n
+            if (byte === 0x0D && this.data[streamDataStart] === 0x0A) {
+               streamDataStart++;
+            }
+            break;
+         }
+         streamDataStart++;
+      }
 
       // Get stream length
       const length = dictionary.Length as number;
@@ -206,8 +225,8 @@ export class PDFParser {
          throw new Error("Stream dictionary missing Length");
       }
 
-      // Read stream data (simplified - real implementation needs byte position)
-      const data = new Uint8Array(0); // Placeholder
+      // Extract stream data
+      const data = this.data.slice(streamDataStart, streamDataStart + length);
 
       // Skip to endstream
       while (this.currentToken.type !== TokenType.ENDSTREAM && this.currentToken.type !== TokenType.EOF) {

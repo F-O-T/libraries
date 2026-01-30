@@ -1,15 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import {
+   createArray,
+   createDictionary,
    createName,
    createRef,
-   createDictionary,
-   createArray,
    createStream,
-   isRef,
-   isName,
-   isDictionary,
-   isStream,
    isArray,
+   isDictionary,
+   isName,
+   isRef,
+   isStream,
 } from "./objects.ts";
 
 describe("PDF Objects", () => {
