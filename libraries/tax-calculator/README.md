@@ -24,31 +24,40 @@ bun add @f-o-t/tax-calculator
 ## Quick Start
 
 ```typescript
-import { configureTaxRates, calculate } from "@f-o-t/tax-calculator";
-import { Money } from "@f-o-t/money";
+import { configureTaxRates, calculateICMS } from "@f-o-t/tax-calculator";
+import { of as moneyOf } from "@f-o-t/money";
 
-// Configure tax rates using rules
-const taxConfig = configureTaxRates({
-   icms: [
-      { conditions: { state: "SP" }, rate: 0.18 },
-      { conditions: { state: "RJ" }, rate: 0.20 },
-   ],
-   pis: [
-      { conditions: {}, rate: 0.0165 },
-   ],
-   cofins: [
-      { conditions: {}, rate: 0.076 },
-   ],
+// Configure tax rates
+configureTaxRates({
+   icms: {
+      SP: { internal: 0.18, interstate: 0.12 },
+      RJ: { internal: 0.20, interstate: 0.12 },
+   },
+   pis: {
+      lucro_real: 0.0165,
+      lucro_presumido: 0.0165,
+      simples_nacional: 0.0,
+   },
+   cofins: {
+      lucro_real: 0.076,
+      lucro_presumido: 0.076,
+      simples_nacional: 0.0,
+   },
 });
 
-// Calculate taxes for a transaction
-const baseValue = Money.fromDecimal("1000.00", "BRL");
-const context = { state: "SP" };
+// Calculate ICMS for a transaction
+const baseValue = moneyOf("1000.00", "BRL");
 
-const result = calculate(baseValue, taxConfig, context);
+const result = calculateICMS({
+   baseValue,
+   state: "SP",
+   operation: "internal",
+   ncm: "12345678",
+   cfop: "5101",
+});
 
-console.log(result.icms?.toString()); // "180.00 BRL"
-console.log(result.total.toString()); // "256.50 BRL"
+console.log(result.amount); // { value: "180.00", currency: "BRL" }
+console.log(result.base); // { value: "1000.00", currency: "BRL" }
 ```
 
 ## License

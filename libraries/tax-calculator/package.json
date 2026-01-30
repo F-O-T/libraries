@@ -29,6 +29,7 @@
       "release": "bumpp --commit --push --tag"
    },
    "dependencies": {
+      "@f-o-t/condition-evaluator": "^2.0.0",
       "@f-o-t/money": "^1.0.0",
       "@f-o-t/rules-engine": "^2.0.0",
       "zod": "4.3.4"
