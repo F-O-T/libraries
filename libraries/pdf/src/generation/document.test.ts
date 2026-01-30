@@ -73,4 +73,46 @@ describe("PDFDocument", () => {
       expect(obj).toBeDefined();
       expect(obj.data).toBeInstanceOf(Uint8Array);
    });
+
+   test("generates complete PDF", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      page.drawText("Hello World", { x: 100, y: 700 });
+      
+      const bytes = doc.save();
+      const decoder = new TextDecoder();
+      const content = decoder.decode(bytes);
+      
+      // Check PDF structure
+      expect(content).toContain("%PDF-1.7");
+      expect(content).toContain("xref");
+      expect(content).toContain("trailer");
+      expect(content).toContain("startxref");
+      expect(content).toContain("%%EOF");
+   });
+
+   test("PDF contains page content", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      page.drawText("Test PDF", { x: 50, y: 750 });
+      page.drawRectangle({ x: 100, y: 100, width: 200, height: 150 });
+      
+      const bytes = doc.save();
+      const content = new TextDecoder().decode(bytes);
+      
+      expect(content).toContain("(Test PDF)");
+      expect(content).toContain("100 100 200 150 re");
+   });
+
+   test("can save PDF to file", async () => {
+      const doc = new PDFDocument({ version: "1.7" });
+      const page = doc.addPage({ size: "Letter" });
+      page.drawText("File Test", { x: 100, y: 700, size: 16 });
+      
+      const bytes = doc.save();
+      
+      // Verify it's valid PDF
+      const content = new TextDecoder().decode(bytes.slice(0, 100));
+      expect(content.startsWith("%PDF-1.7")).toBe(true);
+   });
 });

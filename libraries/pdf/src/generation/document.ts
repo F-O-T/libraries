@@ -7,6 +7,7 @@ import {
 import { PDFMetadataSchema, PDFVersionSchema } from "../schemas.ts";
 import type { PDFMetadata, PDFRef, PDFVersion } from "../types.ts";
 import { PDFPage } from "./page.ts";
+import { serializeValue, serializeObject } from "./writer.ts";
 
 export type PDFDocumentOptions = {
    version?: PDFVersion;
@@ -104,8 +105,72 @@ export class PDFDocument {
     * Save PDF to bytes
     */
    save(): Uint8Array {
-      // For now, just return header
-      const header = `%PDF-${this.version}\n`;
-      return new TextEncoder().encode(header);
+      // Refresh all objects (pages might have changed)
+      for (const page of this.pagesArray) {
+         this.objects.set(page.ref.objectNumber, page.toDictionary());
+         const contentStreamRef = page.getContentStreamRef();
+         this.objects.set(contentStreamRef.objectNumber, page.toContentStream());
+      }
+
+      const parts: Uint8Array[] = [];
+
+      // 1. PDF Header with binary marker
+      const header = new TextEncoder().encode(`%PDF-${this.version}\n%\xE2\xE3\xCF\xD3\n`);
+      parts.push(header);
+
+      // 2. Write objects and track byte offsets
+      const offsets: number[] = [0]; // Object 0 is always at offset 0
+      let currentOffset = header.length;
+
+      // Sort object numbers to write in order
+      const objectNumbers = Array.from(this.objects.keys()).sort((a, b) => a - b);
+
+      for (const objNum of objectNumbers) {
+         const obj = this.objects.get(objNum);
+         const objBytes = serializeObject(objNum, 0, obj);
+         parts.push(objBytes);
+         offsets[objNum] = currentOffset;
+         currentOffset += objBytes.length;
+      }
+
+      // 3. Cross-reference table
+      const xrefStart = currentOffset;
+      const xrefLines = [`xref\n0 ${offsets.length}\n`];
+
+      // Object 0 entry (free)
+      xrefLines.push("0000000000 65535 f \n");
+
+      // In-use objects
+      for (let i = 1; i < offsets.length; i++) {
+         const offset = offsets[i] || 0;
+         const offsetStr = offset.toString().padStart(10, "0");
+         xrefLines.push(`${offsetStr} 00000 n \n`);
+      }
+
+      const xref = new TextEncoder().encode(xrefLines.join(""));
+      parts.push(xref);
+
+      // 4. Trailer
+      const trailerDict = serializeValue(
+         createDictionary({
+            Size: offsets.length,
+            Root: this.catalog,
+         })
+      );
+      const trailer = new TextEncoder().encode(
+         `trailer\n${trailerDict}\nstartxref\n${xrefStart}\n%%EOF\n`
+      );
+      parts.push(trailer);
+
+      // 5. Combine all parts
+      const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
+      const result = new Uint8Array(totalLength);
+      let position = 0;
+      for (const part of parts) {
+         result.set(part, position);
+         position += part.length;
+      }
+
+      return result;
    }
 }
