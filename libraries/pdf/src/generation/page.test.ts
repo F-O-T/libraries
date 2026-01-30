@@ -37,4 +37,39 @@ describe("PDFPage", () => {
       const page = new PDFPage(createRef(1, 0));
       expect(page.contentStream).toBeDefined();
    });
+
+   test("can draw text", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawText("Hello World", { x: 50, y: 750 });
+      expect(page.contentStream.length).toBeGreaterThan(0);
+   });
+
+   test("draws text with default font", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawText("Test", { x: 100, y: 700 });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("BT"); // Begin text
+      expect(content).toContain("ET"); // End text
+      expect(content).toContain("100 700 Td"); // Position
+      expect(content).toContain("(Test) Tj"); // Show text
+   });
+
+   test("draws text with custom font and size", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawText("Test", { x: 50, y: 50, font: "Helvetica-Bold", size: 24 });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("/Helvetica-Bold");
+      expect(content).toContain("24 Tf"); // Font size
+   });
+
+   test("draws text with color", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawText("Red", {
+         x: 100,
+         y: 100,
+         color: { type: "rgb", r: 1, g: 0, b: 0 },
+      });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("1 0 0 rg"); // RGB color
+   });
 });

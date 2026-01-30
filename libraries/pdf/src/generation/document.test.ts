@@ -46,4 +46,11 @@ describe("PDFDocument", () => {
       const pagesDict = (doc as any).objects.get(doc.pages.objectNumber);
       expect(pagesDict.Count).toBe(3);
    });
+
+   test("can draw text on page", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      page.drawText("Hello PDF!", { x: 100, y: 700 });
+      expect(page.contentStream.length).toBeGreaterThan(0);
+   });
 });

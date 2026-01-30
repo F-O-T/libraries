@@ -1,11 +1,11 @@
-import type { PDFRef, PDFDictionary, PageSize } from "../types.ts";
+import type { PDFRef, PDFDictionary, PageSize, TextOptions } from "../types.ts";
 import {
    createDictionary,
    createName,
    createArray,
    createRef,
 } from "../core/objects.ts";
-import { PageSizeSchema } from "../schemas.ts";
+import { PageSizeSchema, TextOptionsSchema } from "../schemas.ts";
 
 export type PDFPageOptions = {
    size?: PageSize;
@@ -49,6 +49,52 @@ export class PDFPage {
          return PAGE_SIZES[this.size];
       }
       return this.size;
+   }
+
+   /**
+    * Draw text on the page
+    */
+   drawText(text: string, options: TextOptions): void {
+      const validOptions = TextOptionsSchema.parse(options);
+      const { x, y, size = 12, font = "Helvetica", color, align = "left" } = validOptions;
+
+      // Register font in resources
+      const fontDict = this.resources.Font as PDFDictionary;
+      if (!fontDict[font]) {
+         fontDict[font] = createName(font);
+      }
+
+      // Calculate text position based on alignment
+      let xPos = x;
+      if (align === "center") {
+         // Approximate centering (proper calculation needs font metrics)
+         xPos = x - (text.length * size * 0.3);
+      } else if (align === "right") {
+         xPos = x - (text.length * size * 0.6);
+      }
+
+      // Set color if provided
+      if (color) {
+         if (color.type === "rgb") {
+            this.contentStream.push(`${color.r} ${color.g} ${color.b} rg`);
+         } else if (color.type === "cmyk") {
+            this.contentStream.push(
+               `${color.c} ${color.m} ${color.y} ${color.k} k`,
+            );
+         } else if (color.type === "gray") {
+            this.contentStream.push(`${color.gray} g`);
+         }
+      }
+
+      // Draw text
+      this.contentStream.push("BT"); // Begin text
+      this.contentStream.push(`/${font} ${size} Tf`); // Set font and size
+      this.contentStream.push(`${xPos} ${y} Td`); // Position
+      
+      // Escape special characters in text
+      const escapedText = text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+      this.contentStream.push(`(${escapedText}) Tj`); // Show text
+      this.contentStream.push("ET"); // End text
    }
 
    /**
