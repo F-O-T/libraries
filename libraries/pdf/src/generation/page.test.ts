@@ -155,4 +155,21 @@ describe("PDFPage", () => {
       const content = page.contentStream.join("\n");
       expect(content).toMatch(/\/F\d+ 12 Tf/); // Font reference with number
    });
+
+   test("generates content stream", () => {
+      const page = new PDFPage(createRef(3, 0));
+      page.drawText("Hello", { x: 50, y: 750 });
+      page.drawRectangle({ x: 100, y: 100, width: 50, height: 50 });
+      
+      const stream = page.toContentStream();
+      expect(stream.data).toBeInstanceOf(Uint8Array);
+      expect(stream.dictionary.Length).toBeGreaterThan(0);
+   });
+
+   test("content stream ref matches pattern", () => {
+      const page = new PDFPage(createRef(5, 0));
+      const ref = page.getContentStreamRef();
+      expect(ref.objectNumber).toBe(6); // Page ref + 1
+      expect(ref.generation).toBe(0);
+   });
 });

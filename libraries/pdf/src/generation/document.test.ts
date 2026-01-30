@@ -61,4 +61,16 @@ describe("PDFDocument", () => {
       page.drawLine({ x1: 0, y1: 0, x2: 100, y2: 100 });
       expect(page.contentStream.length).toBeGreaterThan(0);
    });
+
+   test("stores content stream in objects", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      page.drawText("Test", { x: 100, y: 700 });
+      
+      // Content stream should be stored
+      const contentStreamRef = page.getContentStreamRef();
+      const obj = (doc as any).objects.get(contentStreamRef.objectNumber);
+      expect(obj).toBeDefined();
+      expect(obj.data).toBeInstanceOf(Uint8Array);
+   });
 });

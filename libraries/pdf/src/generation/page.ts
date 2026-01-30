@@ -1,9 +1,10 @@
-import type { PDFRef, PDFDictionary, PageSize, TextOptions, RectOptions, LineOptions, PDFColor } from "../types.ts";
+import type { PDFRef, PDFDictionary, PageSize, TextOptions, RectOptions, LineOptions, PDFColor, PDFStream } from "../types.ts";
 import {
    createDictionary,
    createName,
    createArray,
    createRef,
+   createStream,
 } from "../core/objects.ts";
 import { PageSizeSchema, TextOptionsSchema, RectOptionsSchema, LineOptionsSchema } from "../schemas.ts";
 import { STANDARD_FONTS, isStandardFont, getFontRefName, type StandardFont } from "./fonts.ts";
@@ -195,6 +196,28 @@ export class PDFPage {
    }
 
    /**
+    * Get content stream reference
+    */
+   getContentStreamRef(): PDFRef {
+      // Content stream ref is page ref + 1
+      return createRef(this.ref.objectNumber + 1, 0);
+   }
+
+   /**
+    * Generate content stream as PDFStream
+    */
+   toContentStream(): PDFStream {
+      const content = this.contentStream.join("\n");
+      const data = new TextEncoder().encode(content);
+      
+      const dict = createDictionary({
+         Length: data.length,
+      });
+
+      return createStream(data, dict);
+   }
+
+   /**
     * Convert page to PDF dictionary
     */
    toDictionary(): PDFDictionary {
@@ -202,7 +225,7 @@ export class PDFPage {
       const dict = createDictionary({
          Type: createName("Page"),
          MediaBox: createArray([0, 0, dims.width, dims.height]),
-         Contents: createRef(this.ref.objectNumber + 1, 0), // Placeholder
+         Contents: this.getContentStreamRef(),
          Resources: this.resources,
       });
 

@@ -5,11 +5,7 @@ import {
    createRef,
 } from "../core/objects.ts";
 import { PDFMetadataSchema, PDFVersionSchema } from "../schemas.ts";
-import type {
-   PDFMetadata,
-   PDFRef,
-   PDFVersion,
-} from "../types.ts";
+import type { PDFMetadata, PDFRef, PDFVersion } from "../types.ts";
 import { PDFPage } from "./page.ts";
 
 export type PDFDocumentOptions = {
@@ -21,7 +17,7 @@ export type { PDFPageOptions } from "./page.ts";
 
 /**
  * Main PDF Document class for generation
- * 
+ *
  * @property version - PDF version (1.4, 1.5, 1.6, or 1.7)
  * @property metadata - Document metadata (title, author, etc.)
  * @property catalog - Reference to the document catalog
@@ -82,17 +78,24 @@ export class PDFDocument {
     */
    addPage(options?: import("./page.ts").PDFPageOptions): PDFPage {
       const pageRef = this.allocateRef();
+      const contentStreamRef = this.allocateRef(); // Allocate content stream ref
+      
       const page = new PDFPage(pageRef, { ...options, parent: this.pages });
       this.pagesArray.push(page);
 
       // Update pages dictionary
-      const pagesDict = this.objects.get(this.pages.objectNumber) as import("../types.ts").PDFDictionary;
+      const pagesDict = this.objects.get(
+         this.pages.objectNumber,
+      ) as import("../types.ts").PDFDictionary;
       const kids = pagesDict.Kids as PDFRef[];
       kids.push(pageRef);
       pagesDict.Count = (pagesDict.Count as number) + 1;
 
       // Store page dictionary
       this.objects.set(pageRef.objectNumber, page.toDictionary());
+
+      // Store content stream
+      this.objects.set(contentStreamRef.objectNumber, page.toContentStream());
 
       return page;
    }
