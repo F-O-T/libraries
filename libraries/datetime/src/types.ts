@@ -1,5 +1,5 @@
-import type { DateTime as DateTimeInstance } from "./core/datetime";
 import type { z } from "zod";
+import type { DateTime as DateTimeInstance } from "./core/datetime";
 
 /**
  * Time units supported by the library
