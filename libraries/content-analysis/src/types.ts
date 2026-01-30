@@ -184,6 +184,18 @@ export type TopKeyword = {
    density: number;
 };
 
+export type TopTerm = {
+   term: string;
+   count: number;
+   density: number;
+};
+
+export type TopPhrase = {
+   phrase: string;
+   count: number;
+   density: number;
+};
+
 export type KeywordMetrics = {
    totalWordCount: number;
    uniqueWordCount: number;
@@ -194,6 +206,8 @@ export type KeywordAnalysisResult = {
    analysis: KeywordAnalysisItem[];
    overallScore: number;
    topKeywords: TopKeyword[];
+   topTerms: TopTerm[];
+   topPhrases: TopPhrase[];
    recommendations: string[];
    metrics: KeywordMetrics;
 };

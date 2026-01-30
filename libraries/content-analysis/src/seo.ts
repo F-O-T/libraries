@@ -3,10 +3,10 @@
  * Analyzes content for search engine optimization factors
  */
 
+import { extractFromMarkdown } from "./markdown";
 import type { SeoInput, SeoIssue, SeoMetrics, SeoResult } from "./types";
 import {
    clampScore,
-   extractParagraphs,
    extractWords,
    hasConclusionSection,
    hasQuickAnswerPattern,
@@ -21,19 +21,19 @@ export function analyzeSeo(input: SeoInput): SeoResult {
    const recommendations: string[] = [];
 
    // Basic content analysis
-   const words = extractWords(content);
+   const extracted = extractFromMarkdown(content);
+   const words = extractWords(extracted.text);
    const wordCount = words.length;
-   const paragraphs = extractParagraphs(content);
-   const headings = content.match(/^#{1,6}\s.+$/gm) || [];
-   const h2Headings = content.match(/^##\s.+$/gm) || [];
-   const links = content.match(/\[.+?\]\(.+?\)/g) || [];
-   const images = content.match(/!\[.+?\]\(.+?\)/g) || [];
+   const paragraphs = extracted.paragraphs;
+   const headings = extracted.headings;
+   const h2Headings = headings.filter((heading) => heading.level === 2);
+   const links = extracted.links;
+   const images = extracted.images;
 
-   // Get first paragraph (before first heading or first 100 words)
-   const firstH2Index = content.search(/^##\s/m);
+   // Get first paragraph or fallback to first 100 words
    const firstParagraphText =
-      firstH2Index > 0
-         ? content.slice(0, firstH2Index)
+      paragraphs.length > 0
+         ? (paragraphs[0] ?? "")
          : words.slice(0, 100).join(" ");
 
    let score = 100;
@@ -130,7 +130,7 @@ export function analyzeSeo(input: SeoInput): SeoResult {
    }
 
    // Check heading hierarchy - no H1 in content
-   const h1Headings = content.match(/^#\s.+$/gm) || [];
+   const h1Headings = headings.filter((heading) => heading.level === 1);
    if (h1Headings.length > 0) {
       issues.push({
          type: "headings",
@@ -144,9 +144,9 @@ export function analyzeSeo(input: SeoInput): SeoResult {
 
    // Check for keywords in H2 headings
    if (targetKeywords && targetKeywords.length > 0 && h2Headings.length > 0) {
-      const h2Text = h2Headings.join(" ").toLowerCase();
+      const h2Text = h2Headings.map((heading) => heading.text).join(" ");
       const hasKeywordInH2 = targetKeywords.some((kw) =>
-         h2Text.includes(kw.toLowerCase()),
+         h2Text.toLowerCase().includes(kw.toLowerCase()),
       );
       if (!hasKeywordInH2) {
          issues.push({
@@ -245,7 +245,7 @@ export function analyzeSeo(input: SeoInput): SeoResult {
    // Keyword density
    const keywordDensity: Record<string, number> = {};
    if (targetKeywords && targetKeywords.length > 0) {
-      const contentLower = content.toLowerCase();
+      const contentLower = extracted.text.toLowerCase();
       for (const keyword of targetKeywords) {
          const regex = new RegExp(keyword.toLowerCase(), "gi");
          const matches = contentLower.match(regex) || [];

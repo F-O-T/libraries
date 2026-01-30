@@ -17,6 +17,9 @@
    },
    "license": "Apache-2.0",
    "name": "libraries",
+   "workspaces": [
+      "libraries/*"
+   ],
    "repository": {
       "type": "git",
       "url": "https://github.com/F-O-T/contentta-nx.git"

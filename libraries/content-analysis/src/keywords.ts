@@ -3,14 +3,17 @@
  * Analyzes keyword usage, density, and placement in content
  */
 
+import { extractFromMarkdown } from "./markdown";
 import type {
    KeywordAnalysisItem,
    KeywordAnalysisResult,
    KeywordInput,
    KeywordMetrics,
    TopKeyword,
+   TopPhrase,
+   TopTerm,
 } from "./types";
-import { extractWords } from "./utils";
+import { extractWords, tokenize } from "./utils";
 
 /**
  * Analyze keyword usage in content
@@ -20,15 +23,18 @@ export function analyzeKeywords(input: KeywordInput): KeywordAnalysisResult {
    const analysis: KeywordAnalysisItem[] = [];
    const recommendations: string[] = [];
 
-   const words = extractWords(content);
+   const extracted = extractFromMarkdown(content);
+   const words = extractWords(extracted.text);
    const totalWordCount = words.length;
    const uniqueWords = new Set(words.map((w) => w.toLowerCase()));
-   const contentLower = content.toLowerCase();
+   const contentLower = extracted.text.toLowerCase();
    const titleLower = title?.toLowerCase() || "";
 
    // Extract headings
-   const headings = content.match(/^#{2,6}\s+(.+)$/gm) || [];
-   const headingsText = headings.join(" ").toLowerCase();
+   const headingsText = extracted.headings
+      .map((heading) => heading.text)
+      .join(" ")
+      .toLowerCase();
 
    // First and last 100 words
    const first100Words = words.slice(0, 100).join(" ").toLowerCase();
@@ -118,9 +124,9 @@ export function analyzeKeywords(input: KeywordInput): KeywordAnalysisResult {
    }
 
    // Top keywords (most used phrases in content)
+   const tokenList = tokenize(extracted.text);
    const phraseCount: Record<string, number> = {};
-   const tokens = contentLower.match(/\b[a-záàâãéèêíïóôõöúç]{3,}\b/g) || [];
-   for (const token of tokens) {
+   for (const token of tokenList) {
       phraseCount[token] = (phraseCount[token] || 0) + 1;
    }
 
@@ -138,6 +144,64 @@ export function analyzeKeywords(input: KeywordInput): KeywordAnalysisResult {
          density: Math.round((count / totalWordCount) * 10000) / 100,
       }));
 
+   const stopwords = new Set([
+      "the",
+      "and",
+      "for",
+      "with",
+      "that",
+      "this",
+      "from",
+      "have",
+      "been",
+      "your",
+      "you",
+      "are",
+      "was",
+      "were",
+      "not",
+      "can",
+      "will",
+      "its",
+      "their",
+      "about",
+      "into",
+      "more",
+      "than",
+      "when",
+      "what",
+      "which",
+      "who",
+      "how",
+      "why",
+   ]);
+
+   const topTerms: TopTerm[] = Object.entries(phraseCount)
+      .filter(([term]) => term.length > 3 && !stopwords.has(term))
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([term, count]) => ({
+         term,
+         count,
+         density: Math.round((count / totalWordCount) * 10000) / 100,
+      }));
+
+   const bigramCount: Record<string, number> = {};
+   for (let index = 0; index < tokenList.length - 1; index += 1) {
+      const phrase = `${tokenList[index]} ${tokenList[index + 1]}`;
+      bigramCount[phrase] = (bigramCount[phrase] || 0) + 1;
+   }
+
+   const topPhrases: TopPhrase[] = Object.entries(bigramCount)
+      .filter(([phrase]) => phrase.length > 5)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([phrase, count]) => ({
+         phrase,
+         count,
+         density: Math.round((count / totalWordCount) * 10000) / 100,
+      }));
+
    const metrics: KeywordMetrics = {
       totalWordCount,
       uniqueWordCount: uniqueWords.size,
@@ -151,6 +215,8 @@ export function analyzeKeywords(input: KeywordInput): KeywordAnalysisResult {
       analysis,
       overallScore,
       topKeywords,
+      topTerms,
+      topPhrases,
       recommendations,
       metrics,
    };

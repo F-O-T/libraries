@@ -38,6 +38,28 @@ SEO is an ongoing process that requires continuous effort and optimization. [Lea
       expect(result.metrics.hasQuickAnswer).toBe(true);
    });
 
+   it("should count headings/links/images via markdown AST", () => {
+      const result = analyzeSeo({
+         content:
+            "## Intro\n\nText with a [link](https://example.com).\n\n![Alt text](img.png)",
+      });
+
+      expect(result.metrics.headingCount).toBe(1);
+      expect(result.metrics.linkCount).toBe(1);
+      expect(result.metrics.imageCount).toBe(1);
+   });
+
+   it("should count headings/links/images via markdown AST", () => {
+      const result = analyzeSeo({
+         content:
+            "## Intro\n\nText with a [link](https://example.com).\n\n![Alt text](img.png)",
+      });
+
+      expect(result.metrics.headingCount).toBe(1);
+      expect(result.metrics.linkCount).toBe(1);
+      expect(result.metrics.imageCount).toBe(1);
+   });
+
    it("should flag missing title", () => {
       const result = analyzeSeo({
          content: "This is some content without proper structure.",
@@ -81,6 +103,14 @@ SEO optimization involves many techniques. SEO best practices include keyword re
 
       expect(result.metrics.keywordDensity).toBeDefined();
       expect(result.metrics.keywordDensity?.["SEO"]).toBeGreaterThan(0);
+   });
+
+   it("should not count code block words toward seo metrics", () => {
+      const result = analyzeSeo({
+         content: `## Intro\n\nText here.\n\n\`\`\`\nconst x = 1;\n\`\`\``,
+      });
+
+      expect(result.metrics.wordCount).toBeLessThan(10);
    });
 
    it("should detect missing quick answer", () => {

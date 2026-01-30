@@ -2,6 +2,8 @@
  * Shared utility functions for content analysis
  */
 
+import { extractFromMarkdown } from "./markdown";
+
 /**
  * Count syllables in a word using a simplified vowel group algorithm
  */
@@ -77,13 +79,14 @@ export function findOccurrences(regex: RegExp, text: string): string[] {
    const matches: string[] = [];
    const flags = regex.flags.includes("g") ? regex.flags : `${regex.flags}g`;
    const globalRegex = new RegExp(regex.source, flags);
-   let match: RegExpExecArray | null;
+   let match: RegExpExecArray | null = globalRegex.exec(text);
 
-   while ((match = globalRegex.exec(text)) !== null) {
+   while (match) {
       const start = Math.max(0, match.index - 20);
       const end = Math.min(text.length, match.index + match[0].length + 20);
       const context = text.slice(start, end);
       matches.push(`...${context}...`);
+      match = globalRegex.exec(text);
    }
 
    return matches;
@@ -94,6 +97,27 @@ export function findOccurrences(regex: RegExp, text: string): string[] {
  */
 export function extractWords(content: string): string[] {
    return content.split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Extract plain text from markdown using AST parsing
+ */
+export function extractPlainTextFromMarkdown(content: string): string {
+   return extractFromMarkdown(content).text;
+}
+
+/**
+ * Tokenize content into normalized terms
+ */
+export function tokenize(content: string): string[] {
+   const normalized = content
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+   if (!normalized) return [];
+   return normalized.split(" ").filter(Boolean);
 }
 
 /**
