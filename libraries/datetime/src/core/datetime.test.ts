@@ -1378,4 +1378,121 @@ describe("DateTime", () => {
          });
       });
    });
+
+   describe("Difference Method", () => {
+      describe("diff()", () => {
+         it("should calculate difference in milliseconds by default", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:01.500Z");
+            expect(dt1.diff(dt2)).toBe(-1500);
+            expect(dt2.diff(dt1)).toBe(1500);
+         });
+
+         it("should calculate difference in seconds", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:01:30.000Z");
+            expect(dt1.diff(dt2, "second")).toBe(-90);
+            expect(dt2.diff(dt1, "second")).toBe(90);
+         });
+
+         it("should calculate difference in minutes", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:30:00.000Z");
+            expect(dt1.diff(dt2, "minute")).toBe(-90);
+            expect(dt2.diff(dt1, "minute")).toBe(90);
+         });
+
+         it("should calculate difference in hours", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T22:00:00.000Z");
+            expect(dt1.diff(dt2, "hour")).toBe(-12);
+            expect(dt2.diff(dt1, "hour")).toBe(12);
+         });
+
+         it("should calculate difference in days", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-20T10:00:00.000Z");
+            expect(dt1.diff(dt2, "day")).toBe(-5);
+            expect(dt2.diff(dt1, "day")).toBe(5);
+         });
+
+         it("should calculate difference in weeks", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-29T10:00:00.000Z");
+            expect(dt1.diff(dt2, "week")).toBe(-2);
+            expect(dt2.diff(dt1, "week")).toBe(2);
+         });
+
+         it("should calculate difference in months", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-04-15T10:00:00.000Z");
+            expect(dt1.diff(dt2, "month")).toBe(-3);
+            expect(dt2.diff(dt1, "month")).toBe(3);
+         });
+
+         it("should calculate difference in years", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2026-01-15T10:00:00.000Z");
+            expect(dt1.diff(dt2, "year")).toBeCloseTo(-2, 1);
+            expect(dt2.diff(dt1, "year")).toBeCloseTo(2, 1);
+         });
+
+         it("should return 0 for same dates", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.diff(dt2)).toBe(0);
+            expect(dt1.diff(dt2, "second")).toBe(0);
+            expect(dt1.diff(dt2, "day")).toBe(0);
+         });
+
+         it("should handle fractional results for seconds", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.500Z");
+            expect(dt1.diff(dt2, "second")).toBe(-0.5);
+         });
+
+         it("should handle fractional results for minutes", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:30.000Z");
+            expect(dt1.diff(dt2, "minute")).toBe(-0.5);
+         });
+
+         it("should handle fractional results for hours", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:30:00.000Z");
+            expect(dt1.diff(dt2, "hour")).toBe(-0.5);
+         });
+
+         it("should handle fractional results for days", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T22:00:00.000Z");
+            expect(dt1.diff(dt2, "day")).toBe(-0.5);
+         });
+
+         it("should handle month boundaries correctly", () => {
+            const dt1 = new DateTime("2024-01-31T10:00:00.000Z");
+            const dt2 = new DateTime("2024-02-29T10:00:00.000Z"); // Leap year
+            expect(dt1.diff(dt2, "month")).toBe(-1);
+         });
+
+         it("should handle year boundaries correctly", () => {
+            const dt1 = new DateTime("2023-12-31T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-01T10:00:00.000Z");
+            expect(dt1.diff(dt2, "year")).toBeCloseTo(0, 2); // Less than 1 year
+         });
+
+         it("should handle leap years in year calculations", () => {
+            const dt1 = new DateTime("2024-01-01T00:00:00.000Z");
+            const dt2 = new DateTime("2025-01-01T00:00:00.000Z");
+            // 366 days in 2024 (leap year)
+            expect(dt1.diff(dt2, "year")).toBeCloseTo(-1, 2);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.diff(dt2, "hour")).toBe(-1);
+         });
+      });
+   });
 });

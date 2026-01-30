@@ -1,6 +1,6 @@
 import { InvalidDateError, PluginError } from "../errors";
 import { DateInputSchema } from "../schemas";
-import type { DateInput, DateTimePlugin } from "../types";
+import type { DateInput, DateTimePlugin, TimeUnit } from "../types";
 
 /**
  * Core DateTime class that wraps the native JavaScript Date object
@@ -602,6 +602,51 @@ export class DateTime {
       newDate.setUTCMonth(11, 31);
       newDate.setUTCHours(23, 59, 59, 999);
       return new DateTime(newDate);
+   }
+
+   // ============================================
+   // Difference Method
+   // ============================================
+
+   /**
+    * Calculates the difference between this date and another date
+    * @param other - DateTime instance to compare against
+    * @param unit - Unit of measurement (default: 'millisecond')
+    * @returns The difference (can be negative)
+    */
+   public diff(other: DateTime, unit: TimeUnit = "millisecond"): number {
+      const diff = this.valueOf() - other.valueOf();
+
+      switch (unit) {
+         case "millisecond":
+            return diff;
+         case "second":
+            return diff / 1000;
+         case "minute":
+            return diff / (1000 * 60);
+         case "hour":
+            return diff / (1000 * 60 * 60);
+         case "day":
+            return diff / (1000 * 60 * 60 * 24);
+         case "week":
+            return diff / (1000 * 60 * 60 * 24 * 7);
+         case "month": {
+            // For months, we calculate based on the actual month difference
+            const thisDate = this.toDate();
+            const otherDate = other.toDate();
+            const yearDiff =
+               thisDate.getUTCFullYear() - otherDate.getUTCFullYear();
+            const monthDiff = thisDate.getUTCMonth() - otherDate.getUTCMonth();
+            return yearDiff * 12 + monthDiff;
+         }
+         case "year": {
+            // For years, we calculate based on milliseconds
+            // Average year length accounting for leap years
+            return diff / (1000 * 60 * 60 * 24 * 365.25);
+         }
+         default:
+            return diff;
+      }
    }
 
    /**
