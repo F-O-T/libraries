@@ -85,12 +85,13 @@ export function getWeightUnit(code: string): UnitDefinition {
 
    // Check aliases
    for (const unit of Object.values(WEIGHT_UNITS)) {
-      if (unit.aliases?.includes(code)) {
-         return unit;
+      const unitDef = unit as UnitDefinition;
+      if (unitDef.aliases?.includes(code)) {
+         return unitDef;
       }
    }
 
-   throw new UnknownUnitError(code, "weight");
+   throw new UnknownUnitError(code);
 }
 
 /**

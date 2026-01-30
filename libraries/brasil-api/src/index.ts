@@ -10,3 +10,12 @@ export { getFeriados } from "./feriados";
 export type { Estado, Municipio } from "./ibge";
 // IBGE (Brazilian Institute of Geography and Statistics)
 export { getEstados, getMunicipios } from "./ibge";
+// ISBN
+export type { IsbnResponse } from "./isbn";
+export { getIsbn } from "./isbn";
+// NCM (Nomenclatura Comum do Mercosul)
+export type { Ncm } from "./ncm";
+export { getNcm, getNcms } from "./ncm";
+// PIX
+export type { PixParticipant } from "./pix";
+export { getPixParticipants } from "./pix";
