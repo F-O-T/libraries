@@ -81,7 +81,7 @@ async function main() {
         break;
 
       case "generate":
-        await generateConfigFiles();
+        await generateConfigFiles(process.cwd());
         break;
 
       case "create": {

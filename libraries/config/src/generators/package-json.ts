@@ -55,8 +55,8 @@ export function generatePackageJson(
    for (const plugin of config.plugins) {
       if (plugin.enabled !== false) {
          exports[`./plugins/${plugin.name}`] = {
-            types: `./dist/plugins/${plugin.name}.d.ts`,
-            default: `./dist/plugins/${plugin.name}.js`,
+            types: `./dist/plugins/${plugin.name}/index.d.ts`,
+            default: `./dist/plugins/${plugin.name}/index.js`,
          };
       }
    }

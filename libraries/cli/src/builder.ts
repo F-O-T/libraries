@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { build as bunBuild } from "bun";
+import { $ } from "bun";
 import type { BuildFormat } from "@f-o-t/config";
 import { loadFotConfig } from "./config-loader";
 
@@ -42,7 +43,7 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
   // Plugin entry points
   for (const plugin of config.plugins) {
     if (plugin.enabled !== false) {
-      const pluginEntry = join(cwd, "src", "plugins", `${plugin.name}.ts`);
+      const pluginEntry = join(cwd, "src", "plugins", plugin.name, "index.ts");
       entryPoints.push(pluginEntry);
     }
   }
@@ -83,6 +84,19 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
   }
 
   console.log("Build completed successfully!");
+
+  // Generate TypeScript declarations if enabled
+  if (config.typescript.declaration) {
+    console.log("Generating TypeScript declarations...");
+    try {
+      await $`cd ${cwd} && bun tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist --noEmit false`.quiet();
+      console.log("✓ TypeScript declarations generated");
+    } catch (error) {
+      throw new Error(
+        `Declaration generation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
 
   if (watch) {
     console.log("Watching for changes...");
