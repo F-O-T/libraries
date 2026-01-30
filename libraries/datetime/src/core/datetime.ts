@@ -410,6 +410,87 @@ export class DateTime {
       return this._date.getUTCMilliseconds();
    }
 
+   // ============================================
+   // Setter Methods
+   // ============================================
+
+   /**
+    * Sets the UTC year
+    * @param year - The year to set
+    * @returns New DateTime instance with updated year
+    */
+   public setYear(year: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCFullYear(year);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC month (0-indexed)
+    * @param month - The month to set (0-11, where 0=January)
+    * @returns New DateTime instance with updated month
+    */
+   public setMonth(month: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMonth(month);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC day of the month
+    * @param date - The day to set (1-31)
+    * @returns New DateTime instance with updated date
+    */
+   public setDate(date: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCDate(date);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC hour
+    * @param hour - The hour to set (0-23)
+    * @returns New DateTime instance with updated hour
+    */
+   public setHour(hour: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCHours(hour);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC minute
+    * @param minute - The minute to set (0-59)
+    * @returns New DateTime instance with updated minute
+    */
+   public setMinute(minute: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMinutes(minute);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC second
+    * @param second - The second to set (0-59)
+    * @returns New DateTime instance with updated second
+    */
+   public setSecond(second: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCSeconds(second);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Sets the UTC millisecond
+    * @param millisecond - The millisecond to set (0-999)
+    * @returns New DateTime instance with updated millisecond
+    */
+   public setMillisecond(millisecond: number): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMilliseconds(millisecond);
+      return new DateTime(newDate);
+   }
+
    /**
     * Registers a plugin to extend DateTime functionality
     * @param plugin - The plugin to register

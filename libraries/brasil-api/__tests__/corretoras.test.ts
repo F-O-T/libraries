@@ -16,13 +16,13 @@ describe("getCorretoras", () => {
 
          // Required fields
          expect(broker).toHaveProperty("cnpj");
-         expect(broker).toHaveProperty("tipo");
+         expect(broker).toHaveProperty("type");
          expect(broker).toHaveProperty("nome_social");
          expect(broker).toHaveProperty("nome_comercial");
          expect(broker).toHaveProperty("status");
 
          expect(typeof broker.cnpj).toBe("string");
-         expect(typeof broker.tipo).toBe("string");
+         expect(typeof broker.type).toBe("string");
          expect(typeof broker.nome_social).toBe("string");
          expect(typeof broker.nome_comercial).toBe("string");
          expect(typeof broker.status).toBe("string");
@@ -61,7 +61,7 @@ describe("getCorretoras", () => {
          const brokers = await getCorretoras();
 
          brokers.forEach((broker) => {
-            expect(broker.tipo.length).toBeGreaterThan(0);
+            expect(broker.type.length).toBeGreaterThan(0);
          });
       });
 
@@ -101,13 +101,13 @@ describe("getCorretora", () => {
          const result = await getCorretora(firstBroker.cnpj);
 
          expect(result).toHaveProperty("cnpj");
-         expect(result).toHaveProperty("tipo");
+         expect(result).toHaveProperty("type");
          expect(result).toHaveProperty("nome_social");
          expect(result).toHaveProperty("nome_comercial");
          expect(result).toHaveProperty("status");
 
          expect(typeof result.cnpj).toBe("string");
-         expect(typeof result.tipo).toBe("string");
+         expect(typeof result.type).toBe("string");
          expect(typeof result.nome_social).toBe("string");
          expect(typeof result.nome_comercial).toBe("string");
          expect(typeof result.status).toBe("string");

@@ -990,8 +990,175 @@ describe("DateTime", () => {
          });
 
          it("should return correct millisecond for different times", () => {
-            expect(new DateTime("2024-01-15T10:30:45.000Z").millisecond()).toBe(0);
-            expect(new DateTime("2024-01-15T10:30:45.999Z").millisecond()).toBe(999);
+            expect(new DateTime("2024-01-15T10:30:45.000Z").millisecond()).toBe(
+               0,
+            );
+            expect(new DateTime("2024-01-15T10:30:45.999Z").millisecond()).toBe(
+               999,
+            );
+         });
+      });
+   });
+
+   describe("Setter Methods", () => {
+      describe("setYear()", () => {
+         it("should return new DateTime with updated year", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setYear(2025);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.year()).toBe(2025);
+            expect(result.toISO()).toBe("2025-01-15T10:30:45.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setYear(2025);
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("setMonth()", () => {
+         it("should return new DateTime with updated month", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setMonth(5); // June (0-indexed)
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.month()).toBe(5);
+            expect(result.toISO()).toBe("2024-06-15T10:30:45.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setMonth(5);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle day overflow", () => {
+            const dt = new DateTime("2024-01-31T10:30:45.123Z");
+            const result = dt.setMonth(1); // February
+            // Jan 31 -> Feb 31 -> Mar 2 (2024 is leap year, Feb has 29 days)
+            expect(result.toISO()).toBe("2024-03-02T10:30:45.123Z");
+         });
+      });
+
+      describe("setDate()", () => {
+         it("should return new DateTime with updated date", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setDate(25);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.date()).toBe(25);
+            expect(result.toISO()).toBe("2024-01-25T10:30:45.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setDate(25);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle day overflow", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setDate(32);
+            // Jan 32 -> Feb 1
+            expect(result.toISO()).toBe("2024-02-01T10:30:45.123Z");
+         });
+      });
+
+      describe("setHour()", () => {
+         it("should return new DateTime with updated hour", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setHour(15);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.hour()).toBe(15);
+            expect(result.toISO()).toBe("2024-01-15T15:30:45.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setHour(15);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle hour overflow", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setHour(25);
+            // Hour 25 -> next day, hour 1
+            expect(result.toISO()).toBe("2024-01-16T01:30:45.123Z");
+         });
+      });
+
+      describe("setMinute()", () => {
+         it("should return new DateTime with updated minute", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setMinute(45);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.minute()).toBe(45);
+            expect(result.toISO()).toBe("2024-01-15T10:45:45.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setMinute(45);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle minute overflow", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setMinute(65);
+            // Minute 65 -> next hour, minute 5
+            expect(result.toISO()).toBe("2024-01-15T11:05:45.123Z");
+         });
+      });
+
+      describe("setSecond()", () => {
+         it("should return new DateTime with updated second", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setSecond(30);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.second()).toBe(30);
+            expect(result.toISO()).toBe("2024-01-15T10:30:30.123Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setSecond(30);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle second overflow", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setSecond(65);
+            // Second 65 -> next minute, second 5
+            expect(result.toISO()).toBe("2024-01-15T10:31:05.123Z");
+         });
+      });
+
+      describe("setMillisecond()", () => {
+         it("should return new DateTime with updated millisecond", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setMillisecond(456);
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.millisecond()).toBe(456);
+            expect(result.toISO()).toBe("2024-01-15T10:30:45.456Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.setMillisecond(456);
+            expect(dt.toISO()).toBe(original);
+         });
+
+         it("should handle millisecond overflow", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.setMillisecond(1500);
+            // Millisecond 1500 -> next second, millisecond 500
+            expect(result.toISO()).toBe("2024-01-15T10:30:46.500Z");
          });
       });
    });
