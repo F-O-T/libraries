@@ -27,10 +27,13 @@
     }
   },
   "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format"
+    "build": "bunup",
+    "dev": "bunup --watch",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc",
+    "check": "biome check --write ."
   },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",

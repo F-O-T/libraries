@@ -7,11 +7,10 @@ export default defineConfig({
       "src/parsing/index.ts",
       "src/signing/index.ts",
    ],
-   outdir: "dist",
-   clean: true,
-   dts: true,
+   dts: {
+      inferTypes: true,
+   },
    format: "esm",
-   target: "es2023",
-   minify: false,
+   target: "node",
    sourcemap: true,
 });
