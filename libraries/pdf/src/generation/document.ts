@@ -10,11 +10,14 @@ import type {
    PDFRef,
    PDFVersion,
 } from "../types.ts";
+import { PDFPage } from "./page.ts";
 
 export type PDFDocumentOptions = {
    version?: PDFVersion;
    metadata?: PDFMetadata;
 };
+
+export type { PDFPageOptions } from "./page.ts";
 
 /**
  * Main PDF Document class for generation
@@ -32,6 +35,7 @@ export class PDFDocument {
 
    catalog: PDFRef;
    pages: PDFRef;
+   private pagesArray: PDFPage[] = [];
 
    constructor(options: PDFDocumentOptions = {}) {
       this.version = PDFVersionSchema.parse(options.version ?? "1.7");
@@ -71,6 +75,26 @@ export class PDFDocument {
     */
    private allocateRef(): PDFRef {
       return createRef(this.nextObjectNumber++, 0);
+   }
+
+   /**
+    * Add a page to the document
+    */
+   addPage(options?: import("./page.ts").PDFPageOptions): PDFPage {
+      const pageRef = this.allocateRef();
+      const page = new PDFPage(pageRef, { ...options, parent: this.pages });
+      this.pagesArray.push(page);
+
+      // Update pages dictionary
+      const pagesDict = this.objects.get(this.pages.objectNumber) as import("../types.ts").PDFDictionary;
+      const kids = pagesDict.Kids as PDFRef[];
+      kids.push(pageRef);
+      pagesDict.Count = (pagesDict.Count as number) + 1;
+
+      // Store page dictionary
+      this.objects.set(pageRef.objectNumber, page.toDictionary());
+
+      return page;
    }
 
    /**

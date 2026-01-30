@@ -29,4 +29,21 @@ describe("PDFDocument", () => {
       const doc = new PDFDocument();
       expect(doc.pages).toBeDefined();
    });
+
+   test("can add page to document", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      expect(page).toBeDefined();
+      expect(page.ref.objectNumber).toBe(3); // After catalog and pages
+   });
+
+   test("can add multiple pages", () => {
+      const doc = new PDFDocument();
+      doc.addPage();
+      doc.addPage({ size: "Letter" });
+      doc.addPage({ size: { width: 500, height: 700 } });
+      // Should have 3 pages
+      const pagesDict = (doc as any).objects.get(doc.pages.objectNumber);
+      expect(pagesDict.Count).toBe(3);
+   });
 });
