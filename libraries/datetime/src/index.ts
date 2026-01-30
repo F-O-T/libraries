@@ -2,6 +2,9 @@
 export { DateTime } from "./core/datetime.ts";
 export { datetime } from "./core/factory.ts";
 
+// Plugin utilities
+export { createPlugin, isPlugin, isValidPluginName } from "./plugins/index.ts";
+
 // Type exports
 export type {
    TimeUnit,
