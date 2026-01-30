@@ -1,5 +1,5 @@
-import type { FotConfig, ResolvedFotConfig } from "./types";
 import { fotConfigSchema } from "./schemas";
+import type { FotConfig, ResolvedFotConfig } from "./types";
 
 /**
  * Factory function to define a FOT library configuration
@@ -10,15 +10,15 @@ import { fotConfigSchema } from "./schemas";
  * @throws {Error} If the configuration is invalid
  */
 export function defineFotConfig(config: FotConfig = {}): ResolvedFotConfig {
-  // Validate against schema (schema handles defaults and normalization)
-  const result = fotConfigSchema.safeParse(config);
+   // Validate against schema (schema handles defaults and normalization)
+   const result = fotConfigSchema.safeParse(config);
 
-  if (!result.success) {
-    const errors = result.error.errors
-      .map((err) => `${err.path.join(".")}: ${err.message}`)
-      .join(", ");
-    throw new Error(`Invalid FOT configuration: ${errors}`);
-  }
+   if (!result.success) {
+      const errors = result.error.issues
+         .map((err) => `${err.path.join(".")}: ${err.message}`)
+         .join(", ");
+      throw new Error(`Invalid FOT configuration: ${errors}`);
+   }
 
-  return result.data;
+   return result.data;
 }
