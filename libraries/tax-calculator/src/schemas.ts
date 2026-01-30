@@ -99,7 +99,7 @@ export const TaxCalculationParamsSchema = z.object({
    municipalityCode: z.string().optional(),
 
    /** Custom data for specific business rules */
-   customData: z.record(z.unknown()).optional(),
+   customData: z.record(z.string(), z.any()).optional(),
 });
 
 /**
