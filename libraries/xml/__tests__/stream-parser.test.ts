@@ -65,13 +65,9 @@ describe("streamParseXml", () => {
    it("fires processing instruction events", () => {
       const pis: Array<{ target: string; data: string }> = [];
 
-      streamParseXml(
-         '<?xml version="1.0"?><?style href="style.xsl"?><root/>',
-         {
-            onProcessingInstruction: (target, data) =>
-               pis.push({ target, data }),
-         },
-      );
+      streamParseXml('<?xml version="1.0"?><?style href="style.xsl"?><root/>', {
+         onProcessingInstruction: (target, data) => pis.push({ target, data }),
+      });
 
       expect(pis).toHaveLength(1);
       expect(pis[0]!.target).toBe("style");
@@ -81,15 +77,12 @@ describe("streamParseXml", () => {
       let version: string | null = null;
       let encoding: string | null = null;
 
-      streamParseXml(
-         '<?xml version="1.0" encoding="UTF-8"?><root/>',
-         {
-            onXmlDeclaration: (v, e) => {
-               version = v;
-               encoding = e;
-            },
+      streamParseXml('<?xml version="1.0" encoding="UTF-8"?><root/>', {
+         onXmlDeclaration: (v, e) => {
+            version = v;
+            encoding = e;
          },
-      );
+      });
 
       expect(version).toBe("1.0");
       expect(encoding).toBe("UTF-8");
@@ -98,14 +91,18 @@ describe("streamParseXml", () => {
    it("provides namespace info on elements", () => {
       let nsUri: string | null = null;
 
-      streamParseXml(
-         '<ns:root xmlns:ns="http://example.com"/>',
-         {
-            onElementStart: (_name, _attrs, _ns, _prefix, _localName, namespaceUri) => {
-               nsUri = namespaceUri;
-            },
+      streamParseXml('<ns:root xmlns:ns="http://example.com"/>', {
+         onElementStart: (
+            _name,
+            _attrs,
+            _ns,
+            _prefix,
+            _localName,
+            namespaceUri,
+         ) => {
+            nsUri = namespaceUri;
          },
-      );
+      });
 
       expect(nsUri).toBe("http://example.com");
    });
@@ -113,19 +110,16 @@ describe("streamParseXml", () => {
    it("provides attributes with resolved namespaces", () => {
       const attrs: Array<{ name: string; namespaceUri: string | null }> = [];
 
-      streamParseXml(
-         '<root xmlns:ns="http://example.com" ns:attr="val"/>',
-         {
-            onElementStart: (_name, attributes) => {
-               for (const a of attributes) {
-                  attrs.push({
-                     name: a.name,
-                     namespaceUri: a.namespaceUri,
-                  });
-               }
-            },
+      streamParseXml('<root xmlns:ns="http://example.com" ns:attr="val"/>', {
+         onElementStart: (_name, attributes) => {
+            for (const a of attributes) {
+               attrs.push({
+                  name: a.name,
+                  namespaceUri: a.namespaceUri,
+               });
+            }
          },
-      );
+      });
 
       expect(attrs).toHaveLength(1);
       expect(attrs[0]!.name).toBe("ns:attr");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import https from "node:https";
 import { readFileSync } from "node:fs";
+import https from "node:https";
 import { join } from "node:path";
 import { parseCertificate } from "../src/certificate.ts";
 import {

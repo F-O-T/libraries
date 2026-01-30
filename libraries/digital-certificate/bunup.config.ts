@@ -4,9 +4,5 @@ export default defineConfig({
    dts: {
       inferTypes: true,
    },
-   entry: [
-      "src/index.ts",
-      "src/xml-signer.ts",
-      "src/mtls.ts",
-   ],
+   entry: ["src/index.ts", "src/xml-signer.ts", "src/mtls.ts"],
 });

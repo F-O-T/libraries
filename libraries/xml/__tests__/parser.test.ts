@@ -22,9 +22,7 @@ describe("parseXml", () => {
       });
 
       it("parses nested elements", () => {
-         const doc = parseXml(
-            "<root><child><grandchild/></child></root>",
-         );
+         const doc = parseXml("<root><child><grandchild/></child></root>");
          expect(doc.root!.children).toHaveLength(1);
          const child = doc.root!.children[0]!;
          expect(child.type).toBe(XML_NODE_TYPES.ELEMENT);
@@ -63,9 +61,7 @@ describe("parseXml", () => {
       });
 
       it("parses XML declaration with encoding", () => {
-         const doc = parseXml(
-            '<?xml version="1.0" encoding="UTF-8"?><root/>',
-         );
+         const doc = parseXml('<?xml version="1.0" encoding="UTF-8"?><root/>');
          expect(doc.xmlVersion).toBe("1.0");
          expect(doc.encoding).toBe("UTF-8");
       });
@@ -101,9 +97,7 @@ describe("parseXml", () => {
 
    describe("namespaces", () => {
       it("parses default namespace declaration", () => {
-         const doc = parseXml(
-            '<root xmlns="http://example.com"/>',
-         );
+         const doc = parseXml('<root xmlns="http://example.com"/>');
          expect(doc.root!.namespaces).toHaveLength(1);
          expect(doc.root!.namespaces[0]!.prefix).toBeNull();
          expect(doc.root!.namespaces[0]!.uri).toBe("http://example.com");
@@ -111,9 +105,7 @@ describe("parseXml", () => {
       });
 
       it("parses prefixed namespace declaration", () => {
-         const doc = parseXml(
-            '<ns:root xmlns:ns="http://example.com"/>',
-         );
+         const doc = parseXml('<ns:root xmlns:ns="http://example.com"/>');
          expect(doc.root!.namespaces).toHaveLength(1);
          expect(doc.root!.namespaces[0]!.prefix).toBe("ns");
          expect(doc.root!.name).toBe("ns:root");
@@ -144,9 +136,7 @@ describe("parseXml", () => {
 
    describe("CDATA", () => {
       it("parses CDATA sections", () => {
-         const doc = parseXml(
-            "<root><![CDATA[<not xml>]]></root>",
-         );
+         const doc = parseXml("<root><![CDATA[<not xml>]]></root>");
          expect(doc.root!.children).toHaveLength(1);
          const cdata = doc.root!.children[0]!;
          expect(cdata.type).toBe(XML_NODE_TYPES.CDATA);
@@ -156,19 +146,16 @@ describe("parseXml", () => {
       });
 
       it("converts CDATA to text when preserveCData is false", () => {
-         const doc = parseXml(
-            "<root><![CDATA[content]]></root>",
-            { preserveCData: false },
-         );
+         const doc = parseXml("<root><![CDATA[content]]></root>", {
+            preserveCData: false,
+         });
          expect(doc.root!.children[0]!.type).toBe(XML_NODE_TYPES.TEXT);
       });
    });
 
    describe("comments", () => {
       it("preserves comments by default", () => {
-         const doc = parseXml(
-            "<root><!-- a comment --></root>",
-         );
+         const doc = parseXml("<root><!-- a comment --></root>");
          expect(doc.root!.children).toHaveLength(1);
          const comment = doc.root!.children[0]!;
          expect(comment.type).toBe(XML_NODE_TYPES.COMMENT);
@@ -178,10 +165,9 @@ describe("parseXml", () => {
       });
 
       it("strips comments when preserveComments is false", () => {
-         const doc = parseXml(
-            "<root><!-- comment --><child/></root>",
-            { preserveComments: false },
-         );
+         const doc = parseXml("<root><!-- comment --><child/></root>", {
+            preserveComments: false,
+         });
          expect(doc.root!.children).toHaveLength(1);
          expect(doc.root!.children[0]!.type).toBe(XML_NODE_TYPES.ELEMENT);
       });
@@ -204,12 +190,10 @@ describe("parseXml", () => {
 
    describe("entity handling", () => {
       it("decodes predefined entities in text", () => {
-         const doc = parseXml(
-            "<root>&amp; &lt; &gt; &quot; &apos;</root>",
-         );
+         const doc = parseXml("<root>&amp; &lt; &gt; &quot; &apos;</root>");
          const text = doc.root!.children[0]!;
          if (text.type === XML_NODE_TYPES.TEXT) {
-            expect(text.value).toBe('& < > " \'');
+            expect(text.value).toBe("& < > \" '");
          }
       });
 
@@ -224,9 +208,7 @@ describe("parseXml", () => {
 
    describe("whitespace handling", () => {
       it("strips whitespace-only text nodes by default", () => {
-         const doc = parseXml(
-            "<root>\n  <child/>\n</root>",
-         );
+         const doc = parseXml("<root>\n  <child/>\n</root>");
          // Only the element child should remain
          const elements = doc.root!.children.filter(
             (c) => c.type === XML_NODE_TYPES.ELEMENT,
@@ -235,10 +217,9 @@ describe("parseXml", () => {
       });
 
       it("preserves whitespace when option is set", () => {
-         const doc = parseXml(
-            "<root>\n  <child/>\n</root>",
-            { preserveWhitespace: true },
-         );
+         const doc = parseXml("<root>\n  <child/>\n</root>", {
+            preserveWhitespace: true,
+         });
          expect(doc.root!.children.length).toBeGreaterThan(1);
       });
    });

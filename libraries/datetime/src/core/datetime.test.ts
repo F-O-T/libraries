@@ -897,4 +897,102 @@ describe("DateTime", () => {
          });
       });
    });
+
+   describe("Getter Methods", () => {
+      describe("year()", () => {
+         it("should return the UTC year", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.year()).toBe(2024);
+         });
+
+         it("should return correct year for different dates", () => {
+            expect(new DateTime("2025-12-31T23:59:59.999Z").year()).toBe(2025);
+            expect(new DateTime("2000-01-01T00:00:00.000Z").year()).toBe(2000);
+         });
+      });
+
+      describe("month()", () => {
+         it("should return the UTC month (0-indexed)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.month()).toBe(0); // January
+         });
+
+         it("should return correct month for different dates", () => {
+            expect(new DateTime("2024-02-15T10:30:00.000Z").month()).toBe(1); // February
+            expect(new DateTime("2024-12-15T10:30:00.000Z").month()).toBe(11); // December
+         });
+      });
+
+      describe("date()", () => {
+         it("should return the UTC day of month", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.date()).toBe(15);
+         });
+
+         it("should return correct date for different days", () => {
+            expect(new DateTime("2024-01-01T10:30:00.000Z").date()).toBe(1);
+            expect(new DateTime("2024-01-31T10:30:00.000Z").date()).toBe(31);
+         });
+      });
+
+      describe("day()", () => {
+         it("should return the UTC day of week (0-indexed, 0=Sunday)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z"); // Monday
+            expect(dt.day()).toBe(1);
+         });
+
+         it("should return correct day for different days of week", () => {
+            expect(new DateTime("2024-01-14T10:30:00.000Z").day()).toBe(0); // Sunday
+            expect(new DateTime("2024-01-20T10:30:00.000Z").day()).toBe(6); // Saturday
+         });
+      });
+
+      describe("hour()", () => {
+         it("should return the UTC hour", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.hour()).toBe(10);
+         });
+
+         it("should return correct hour for different times", () => {
+            expect(new DateTime("2024-01-15T00:30:00.000Z").hour()).toBe(0);
+            expect(new DateTime("2024-01-15T23:30:00.000Z").hour()).toBe(23);
+         });
+      });
+
+      describe("minute()", () => {
+         it("should return the UTC minute", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.minute()).toBe(30);
+         });
+
+         it("should return correct minute for different times", () => {
+            expect(new DateTime("2024-01-15T10:00:00.000Z").minute()).toBe(0);
+            expect(new DateTime("2024-01-15T10:59:00.000Z").minute()).toBe(59);
+         });
+      });
+
+      describe("second()", () => {
+         it("should return the UTC second", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.second()).toBe(45);
+         });
+
+         it("should return correct second for different times", () => {
+            expect(new DateTime("2024-01-15T10:30:00.000Z").second()).toBe(0);
+            expect(new DateTime("2024-01-15T10:30:59.000Z").second()).toBe(59);
+         });
+      });
+
+      describe("millisecond()", () => {
+         it("should return the UTC millisecond", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            expect(dt.millisecond()).toBe(123);
+         });
+
+         it("should return correct millisecond for different times", () => {
+            expect(new DateTime("2024-01-15T10:30:45.000Z").millisecond()).toBe(0);
+            expect(new DateTime("2024-01-15T10:30:45.999Z").millisecond()).toBe(999);
+         });
+      });
+   });
 });

@@ -63,9 +63,7 @@ describe("queryXPath", () => {
          expect(results).toHaveLength(1);
          if (results[0]!.type === XML_NODE_TYPES.ELEMENT) {
             const title = results[0]!.children.find(
-               (c) =>
-                  c.type === XML_NODE_TYPES.ELEMENT &&
-                  c.name === "title",
+               (c) => c.type === XML_NODE_TYPES.ELEMENT && c.name === "title",
             );
             if (title && title.type === XML_NODE_TYPES.ELEMENT) {
                const text = title.children[0];

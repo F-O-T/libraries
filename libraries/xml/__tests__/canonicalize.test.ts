@@ -23,26 +23,20 @@ describe("canonicalize", () => {
       });
 
       it("replaces CDATA with text", () => {
-         const doc = parseXml(
-            "<root><![CDATA[some content]]></root>",
-         );
+         const doc = parseXml("<root><![CDATA[some content]]></root>");
          const result = canonicalize(doc.root!);
          expect(result).not.toContain("CDATA");
          expect(result).toContain("some content");
       });
 
       it("excludes comments by default", () => {
-         const doc = parseXml(
-            "<root><!-- comment --><child/></root>",
-         );
+         const doc = parseXml("<root><!-- comment --><child/></root>");
          const result = canonicalize(doc.root!);
          expect(result).not.toContain("comment");
       });
 
       it("includes comments when withComments is true", () => {
-         const doc = parseXml(
-            "<root><!-- comment --><child/></root>",
-         );
+         const doc = parseXml("<root><!-- comment --><child/></root>");
          const result = canonicalize(doc.root!, { withComments: true });
          expect(result).toContain("<!-- comment -->");
       });
@@ -112,9 +106,7 @@ describe("canonicalize", () => {
          // No self-closing elements
          expect(result).not.toContain("/>");
          // Namespace should be declared
-         expect(result).toContain(
-            'xmlns="http://www.w3.org/2000/09/xmldsig#"',
-         );
+         expect(result).toContain('xmlns="http://www.w3.org/2000/09/xmldsig#"');
       });
    });
 });

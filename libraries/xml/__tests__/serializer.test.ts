@@ -78,9 +78,7 @@ describe("serializeXml", () => {
       });
 
       it("serializes prefixed namespaces", () => {
-         const doc = parseXml(
-            '<ns:root xmlns:ns="http://example.com"/>',
-         );
+         const doc = parseXml('<ns:root xmlns:ns="http://example.com"/>');
          const xml = serializeXml(doc, {
             declaration: false,
             indent: "",
@@ -143,7 +141,8 @@ describe("serializeXml", () => {
 
    describe("round-trip", () => {
       it("round-trips a complex document", () => {
-         const original = '<?xml version="1.0" encoding="UTF-8"?><root xmlns="http://example.com" xmlns:ns="http://ns.com"><ns:child attr="val">text</ns:child><![CDATA[raw]]><!-- comment --></root>';
+         const original =
+            '<?xml version="1.0" encoding="UTF-8"?><root xmlns="http://example.com" xmlns:ns="http://ns.com"><ns:child attr="val">text</ns:child><![CDATA[raw]]><!-- comment --></root>';
          const doc = parseXml(original);
          const xml = serializeXml(doc, { indent: "" });
          const doc2 = parseXml(xml);

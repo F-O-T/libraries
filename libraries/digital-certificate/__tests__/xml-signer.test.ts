@@ -71,9 +71,7 @@ describe("signXml", () => {
          referenceUri: "#nfse_123",
       });
 
-      expect(signed).toContain(
-         "xmldsig#enveloped-signature",
-      );
+      expect(signed).toContain("xmldsig#enveloped-signature");
    });
 
    it("includes exclusive C14N transform", () => {
@@ -151,12 +149,8 @@ describe("signXml", () => {
       });
 
       // Extract DigestValue from both
-      const digest1 = signed1.match(
-         /<DigestValue>([^<]+)<\/DigestValue>/,
-      )?.[1];
-      const digest2 = signed2.match(
-         /<DigestValue>([^<]+)<\/DigestValue>/,
-      )?.[1];
+      const digest1 = signed1.match(/<DigestValue>([^<]+)<\/DigestValue>/)?.[1];
+      const digest2 = signed2.match(/<DigestValue>([^<]+)<\/DigestValue>/)?.[1];
 
       expect(digest1).not.toBe(digest2);
    });

@@ -1,4 +1,23 @@
 // Export types
+
+// Export errors
+export {
+   CategoryMismatchError,
+   ConversionError,
+   InvalidMeasurementError,
+   UnitMismatchError,
+   UnknownUnitError,
+   UOMError,
+} from "./errors";
+
+// Export schemas
+export {
+   MeasurementInputSchema,
+   MeasurementJSONSchema,
+   MeasurementSchema,
+   UnitCategorySchema,
+   UnitDefinitionSchema,
+} from "./schemas";
 export type {
    Measurement,
    MeasurementInput,
@@ -6,22 +25,3 @@ export type {
    UnitCategory,
    UnitDefinition,
 } from "./types";
-
-// Export schemas
-export {
-   MeasurementSchema,
-   MeasurementInputSchema,
-   MeasurementJSONSchema,
-   UnitCategorySchema,
-   UnitDefinitionSchema,
-} from "./schemas";
-
-// Export errors
-export {
-   UOMError,
-   UnitMismatchError,
-   CategoryMismatchError,
-   UnknownUnitError,
-   InvalidMeasurementError,
-   ConversionError,
-} from "./errors";

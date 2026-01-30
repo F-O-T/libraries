@@ -327,7 +327,11 @@ export class DateTime {
     * @param inclusive - Whether to include the start and end dates in the comparison (default: false)
     * @returns true if this date is between start and end, false otherwise
     */
-   public isBetween(start: DateTime, end: DateTime, inclusive = false): boolean {
+   public isBetween(
+      start: DateTime,
+      end: DateTime,
+      inclusive = false,
+   ): boolean {
       const thisTime = this.valueOf();
       const startTime = start.valueOf();
       const endTime = end.valueOf();
@@ -336,6 +340,74 @@ export class DateTime {
          return thisTime >= startTime && thisTime <= endTime;
       }
       return thisTime > startTime && thisTime < endTime;
+   }
+
+   // ============================================
+   // Getter Methods
+   // ============================================
+
+   /**
+    * Gets the UTC year
+    * @returns The year (e.g., 2024)
+    */
+   public year(): number {
+      return this._date.getUTCFullYear();
+   }
+
+   /**
+    * Gets the UTC month (0-indexed)
+    * @returns The month (0-11, where 0=January)
+    */
+   public month(): number {
+      return this._date.getUTCMonth();
+   }
+
+   /**
+    * Gets the UTC day of the month
+    * @returns The day of month (1-31)
+    */
+   public date(): number {
+      return this._date.getUTCDate();
+   }
+
+   /**
+    * Gets the UTC day of the week (0-indexed)
+    * @returns The day of week (0-6, where 0=Sunday)
+    */
+   public day(): number {
+      return this._date.getUTCDay();
+   }
+
+   /**
+    * Gets the UTC hour
+    * @returns The hour (0-23)
+    */
+   public hour(): number {
+      return this._date.getUTCHours();
+   }
+
+   /**
+    * Gets the UTC minute
+    * @returns The minute (0-59)
+    */
+   public minute(): number {
+      return this._date.getUTCMinutes();
+   }
+
+   /**
+    * Gets the UTC second
+    * @returns The second (0-59)
+    */
+   public second(): number {
+      return this._date.getUTCSeconds();
+   }
+
+   /**
+    * Gets the UTC millisecond
+    * @returns The millisecond (0-999)
+    */
+   public millisecond(): number {
+      return this._date.getUTCMilliseconds();
    }
 
    /**
