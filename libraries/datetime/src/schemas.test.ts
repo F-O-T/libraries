@@ -51,7 +51,7 @@ describe("DateInputSchema", () => {
    it("should accept DateTime-like objects", () => {
       const dateTimeLike = {
          toDate: () => new Date(),
-      };
+      } as any;
       expect(DateInputSchema.parse(dateTimeLike)).toBe(dateTimeLike);
    });
 

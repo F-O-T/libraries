@@ -1,6 +1,6 @@
-import { createPlugin } from "../plugin-base";
-import type { DateTimeClass } from "../../types";
 import type { DateTime } from "../../core/datetime";
+import type { DateTimeClass } from "../../types";
+import { createPlugin } from "../plugin-base";
 
 /**
  * Checks if a given day of week is a weekday (Monday-Friday)
@@ -95,11 +95,15 @@ export const businessDaysPlugin = createPlugin(
          return current;
       };
 
-      DateTimeClass.prototype.subtractBusinessDays = function (n: number): DateTime {
+      DateTimeClass.prototype.subtractBusinessDays = function (
+         n: number,
+      ): DateTime {
          return (this as any).addBusinessDays(-n);
       };
 
-      DateTimeClass.prototype.diffBusinessDays = function (other: DateTime): number {
+      DateTimeClass.prototype.diffBusinessDays = function (
+         other: DateTime,
+      ): number {
          // Get start and end dates (normalized to start of day for consistency)
          const start = this.valueOf() < other.valueOf() ? this : other;
          const end = this.valueOf() < other.valueOf() ? other : this;

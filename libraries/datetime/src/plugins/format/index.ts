@@ -1,6 +1,6 @@
-import { createPlugin } from "../plugin-base";
-import type { DateTimeClass } from "../../types";
 import type { DateTime } from "../../core/datetime";
+import type { DateTimeClass } from "../../types";
+import { createPlugin } from "../plugin-base";
 import { parseFormat } from "./tokens";
 
 /**
@@ -61,15 +61,18 @@ declare module "../../core/datetime" {
  * Format plugin for DateTime
  * Adds format() method for custom date formatting
  */
-export const formatPlugin = createPlugin("format", (DateTimeClass: DateTimeClass) => {
-   // Add instance method
-   DateTimeClass.prototype.format = function (formatStr?: string): string {
-      // If no format string provided, return ISO string
-      if (!formatStr) {
-         return this.toISO();
-      }
+export const formatPlugin = createPlugin(
+   "format",
+   (DateTimeClass: DateTimeClass) => {
+      // Add instance method
+      DateTimeClass.prototype.format = function (formatStr?: string): string {
+         // If no format string provided, return ISO string
+         if (!formatStr) {
+            return this.toISO();
+         }
 
-      // Parse the format string and replace tokens
-      return parseFormat(this, formatStr);
-   };
-});
+         // Parse the format string and replace tokens
+         return parseFormat(this, formatStr);
+      };
+   },
+);

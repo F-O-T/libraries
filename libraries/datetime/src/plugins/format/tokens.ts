@@ -76,8 +76,8 @@ export const FORMAT_TOKENS: Record<string, (dt: DateTime) => string> = {
    YY: (dt) => pad(dt.year() % 100, 2),
 
    // Month
-   MMMM: (dt) => MONTH_NAMES[dt.month()],
-   MMM: (dt) => MONTH_NAMES_SHORT[dt.month()],
+   MMMM: (dt) => MONTH_NAMES[dt.month()]!,
+   MMM: (dt) => MONTH_NAMES_SHORT[dt.month()]!,
    MM: (dt) => pad(dt.month() + 1, 2),
    M: (dt) => (dt.month() + 1).toString(),
 
@@ -86,9 +86,9 @@ export const FORMAT_TOKENS: Record<string, (dt: DateTime) => string> = {
    D: (dt) => dt.date().toString(),
 
    // Day of Week
-   dddd: (dt) => DAY_NAMES[dt.day()],
-   ddd: (dt) => DAY_NAMES_SHORT[dt.day()],
-   dd: (dt) => DAY_NAMES_MIN[dt.day()],
+   dddd: (dt) => DAY_NAMES[dt.day()]!,
+   ddd: (dt) => DAY_NAMES_SHORT[dt.day()]!,
+   dd: (dt) => DAY_NAMES_MIN[dt.day()]!,
 
    // Hour (24-hour)
    HH: (dt) => pad(dt.hour(), 2),

@@ -3,10 +3,10 @@
  */
 import { DateTime } from "../src/core/datetime";
 import {
-   timezonePlugin,
    businessDaysPlugin,
    formatPlugin,
    relativeTimePlugin,
+   timezonePlugin,
 } from "../src/plugins/index";
 
 // Install all plugins
@@ -38,7 +38,10 @@ console.log("  Is Monday a weekday?", (monday as any).isWeekday());
 const saturday = new DateTime("2024-01-20T12:00:00.000Z"); // Saturday
 console.log("  Is Saturday a weekday?", (saturday as any).isWeekday());
 const plusThreeDays = (monday as any).addBusinessDays(3);
-console.log("  Monday + 3 business days:", (plusThreeDays as any).format("dddd, MMMM D"));
+console.log(
+   "  Monday + 3 business days:",
+   (plusThreeDays as any).format("dddd, MMMM D"),
+);
 console.log();
 
 // 3. Format Plugin
@@ -46,10 +49,15 @@ console.log("🎨 Format Plugin:");
 console.log("  ISO format:", dt.toISO());
 console.log("  Custom format (YYYY-MM-DD):", (dt as any).format("YYYY-MM-DD"));
 console.log("  Custom format (MM/DD/YYYY):", (dt as any).format("MM/DD/YYYY"));
-console.log("  Custom format (MMMM D, YYYY):", (dt as any).format("MMMM D, YYYY"));
+console.log(
+   "  Custom format (MMMM D, YYYY):",
+   (dt as any).format("MMMM D, YYYY"),
+);
 console.log("  Custom format (h:mm A):", (dt as any).format("h:mm A"));
-console.log("  Custom format (dddd, MMMM D, YYYY [at] h:mm A):",
-   (dt as any).format("dddd, MMMM D, YYYY [at] h:mm A"));
+console.log(
+   "  Custom format (dddd, MMMM D, YYYY [at] h:mm A):",
+   (dt as any).format("dddd, MMMM D, YYYY [at] h:mm A"),
+);
 console.log();
 
 // 4. Relative Time Plugin

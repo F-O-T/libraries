@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { DateTime } from "./datetime.ts";
-import { datetime } from "./factory.ts";
-import { InvalidDateError } from "../errors.ts";
+import { InvalidDateError } from "../errors";
+import type { DateInput } from "../types";
+import { DateTime } from "./datetime";
+import { datetime } from "./factory";
 
 describe("datetime factory function", () => {
    describe("basic usage", () => {
@@ -127,9 +128,7 @@ describe("datetime factory function", () => {
 
          for (const input of invalidInputs) {
             expect(() => datetime(input as any)).toThrow(InvalidDateError);
-            expect(() => new DateTime(input as any)).toThrow(
-               InvalidDateError,
-            );
+            expect(() => new DateTime(input as any)).toThrow(InvalidDateError);
          }
       });
    });

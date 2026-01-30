@@ -1,3 +1,4 @@
+import type { DateTime as DateTimeInstance } from "./core/datetime";
 import type { z } from "zod";
 
 /**
@@ -14,9 +15,26 @@ export type TimeUnit =
    | "year";
 
 /**
+ * DateTime instance type - re-exported from the class
+ */
+export type DateTime = DateTimeInstance;
+
+/**
  * Input types that can be converted to DateTime
  */
 export type DateInput = Date | string | number | DateTime;
+
+/**
+ * DateTime class type (used for plugin typing)
+ * Must be defined before DateTimePlugin to avoid forward reference
+ */
+export interface DateTimeClass {
+   new (input?: DateInput): DateTime;
+   prototype: DateTime;
+   extend: (plugin: DateTimePlugin, options?: Record<string, unknown>) => void;
+   hasPlugin: (name: string) => boolean;
+   getPlugin: (name: string) => DateTimePlugin | undefined;
+}
 
 /**
  * Plugin definition
@@ -101,106 +119,4 @@ export interface ParseOptions {
     * Timezone to parse in (IANA timezone string)
     */
    timezone?: string;
-}
-
-/**
- * DateTime class type (used for plugin typing)
- */
-export interface DateTimeClass {
-   new (input?: DateInput, config?: DateTimeConfig): DateTime;
-   prototype: DateTime;
-   extend: (plugin: DateTimePlugin, options?: Record<string, unknown>) => void;
-   utc: (input?: DateInput) => DateTime;
-   tz: (input: DateInput | undefined, timezone: string) => DateTime;
-}
-
-/**
- * Main DateTime instance interface
- * This will be implemented by the DateTime class
- */
-export interface DateTime {
-   /**
-    * Returns the native JavaScript Date object
-    */
-   toDate(): Date;
-
-   /**
-    * Returns the Unix timestamp in milliseconds
-    */
-   valueOf(): number;
-
-   /**
-    * Returns ISO 8601 string representation
-    */
-   toISOString(): string;
-
-   /**
-    * Returns JSON representation (ISO string)
-    */
-   toJSON(): string;
-
-   /**
-    * Formats the date using a format string
-    */
-   format(formatStr?: string): string;
-
-   /**
-    * Checks if the date is valid
-    */
-   isValid(): boolean;
-
-   /**
-    * Checks if this date is before another date
-    */
-   isBefore(date: DateInput, unit?: TimeUnit): boolean;
-
-   /**
-    * Checks if this date is after another date
-    */
-   isAfter(date: DateInput, unit?: TimeUnit): boolean;
-
-   /**
-    * Checks if this date is the same as another date
-    */
-   isSame(date: DateInput, unit?: TimeUnit): boolean;
-
-   /**
-    * Gets a specific time unit value
-    */
-   get(unit: TimeUnit): number;
-
-   /**
-    * Sets a specific time unit value and returns a new instance
-    */
-   set(unit: TimeUnit, value: number): DateTime;
-
-   /**
-    * Adds time to the current date and returns a new instance
-    */
-   add(value: number, unit: TimeUnit): DateTime;
-
-   /**
-    * Subtracts time from the current date and returns a new instance
-    */
-   subtract(value: number, unit: TimeUnit): DateTime;
-
-   /**
-    * Returns the start of a time unit
-    */
-   startOf(unit: TimeUnit): DateTime;
-
-   /**
-    * Returns the end of a time unit
-    */
-   endOf(unit: TimeUnit): DateTime;
-
-   /**
-    * Clones the current instance
-    */
-   clone(): DateTime;
-
-   /**
-    * Returns the difference between two dates
-    */
-   diff(date: DateInput, unit?: TimeUnit, precise?: boolean): number;
 }

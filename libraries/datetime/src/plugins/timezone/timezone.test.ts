@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { DateTime } from "../../core/datetime";
 import { timezonePlugin } from "./index";
 
@@ -116,7 +116,10 @@ describe("Timezone Plugin", () => {
 
    describe("Static tz() method", () => {
       it("should create DateTime in specified timezone", () => {
-         const dt = (DateTime as any).tz("2024-01-15T12:00:00", "America/New_York");
+         const dt = (DateTime as any).tz(
+            "2024-01-15T12:00:00",
+            "America/New_York",
+         );
 
          expect(dt).toBeInstanceOf(DateTime);
          expect((dt as any)._timezone).toBe("America/New_York");

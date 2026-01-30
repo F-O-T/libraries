@@ -1,11 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { DateTime } from "../core/datetime.ts";
 import type { DateTimeClass } from "../types.ts";
-import {
-   createPlugin,
-   isPlugin,
-   isValidPluginName,
-} from "./plugin-base.ts";
+import { createPlugin, isPlugin, isValidPluginName } from "./plugin-base.ts";
 
 describe("createPlugin", () => {
    test("creates a valid plugin object", () => {
@@ -155,9 +151,7 @@ describe("plugin integration", () => {
    test("createPlugin works with DateTime.extend", () => {
       const plugin = createPlugin("test-integration", (DateTimeClass) => {
          // Add a test method to the prototype
-         (DateTimeClass.prototype as any).testMethod = function () {
-            return "test-result";
-         };
+         (DateTimeClass.prototype as any).testMethod = () => "test-result";
       });
 
       // Register the plugin
@@ -174,12 +168,9 @@ describe("plugin integration", () => {
    test("plugin install function receives options", () => {
       let receivedOptions: Record<string, unknown> | undefined;
 
-      const plugin = createPlugin(
-         "test-options",
-         (DateTimeClass, options) => {
-            receivedOptions = options;
-         },
-      );
+      const plugin = createPlugin("test-options", (DateTimeClass, options) => {
+         receivedOptions = options;
+      });
 
       const options = { foo: "bar", baz: 123 };
       DateTime.extend(plugin, options);
@@ -189,9 +180,7 @@ describe("plugin integration", () => {
 
    test("plugin can add static methods", () => {
       const plugin = createPlugin("test-static", (DateTimeClass) => {
-         (DateTimeClass as any).staticMethod = function () {
-            return new DateTimeClass();
-         };
+         (DateTimeClass as any).staticMethod = () => new DateTimeClass();
       });
 
       DateTime.extend(plugin);

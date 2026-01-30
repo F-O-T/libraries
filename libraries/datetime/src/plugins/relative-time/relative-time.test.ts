@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { DateTime } from "../../core/datetime";
 import { relativeTimePlugin } from "./index";
 
@@ -148,7 +148,9 @@ describe("Relative Time Plugin", () => {
          // One should contain "ago" and the other "in", or both could be "a few seconds"
          const hasAgo = fromResult.includes("ago");
          const hasIn = toResult.includes("in");
-         expect(hasAgo || hasIn || fromResult.includes("few seconds")).toBe(true);
+         expect(hasAgo || hasIn || fromResult.includes("few seconds")).toBe(
+            true,
+         );
       });
    });
 

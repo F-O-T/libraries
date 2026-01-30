@@ -1,6 +1,6 @@
-import { createPlugin } from "../plugin-base";
-import type { DateTimeClass } from "../../types";
 import type { DateTime } from "../../core/datetime";
+import type { DateTimeClass } from "../../types";
+import { createPlugin } from "../plugin-base";
 
 /**
  * Validates a timezone string using Intl.DateTimeFormat
@@ -93,55 +93,60 @@ declare module "../../types" {
  * Timezone plugin for DateTime
  * Adds timezone support using IANA timezone strings
  */
-export const timezonePlugin = createPlugin("timezone", (DateTimeClass: DateTimeClass) => {
-   // Add instance methods
-   DateTimeClass.prototype.tz = function (timezone: string): DateTime {
-      if (!isValidTimezone(timezone)) {
-         throw new Error(`Invalid timezone: ${timezone}`);
-      }
+export const timezonePlugin = createPlugin(
+   "timezone",
+   (DateTimeClass: DateTimeClass) => {
+      // Add instance methods
+      DateTimeClass.prototype.tz = function (timezone: string): DateTime {
+         if (!isValidTimezone(timezone)) {
+            throw new Error(`Invalid timezone: ${timezone}`);
+         }
 
-      // Create new instance with same timestamp but different timezone
-      const newInstance = new DateTimeClass(this.valueOf());
-      (newInstance as any)._timezone = timezone;
-      return newInstance;
-   };
+         // Create new instance with same timestamp but different timezone
+         const newInstance = new DateTimeClass(this.valueOf());
+         (newInstance as any)._timezone = timezone;
+         return newInstance;
+      };
 
-   DateTimeClass.prototype.toTimezone = function (timezone: string): DateTime {
-      if (!isValidTimezone(timezone)) {
-         throw new Error(`Invalid timezone: ${timezone}`);
-      }
+      DateTimeClass.prototype.toTimezone = function (
+         timezone: string,
+      ): DateTime {
+         if (!isValidTimezone(timezone)) {
+            throw new Error(`Invalid timezone: ${timezone}`);
+         }
 
-      // Convert to the new timezone (same as tz for now, as we preserve moment in time)
-      const newInstance = new DateTimeClass(this.valueOf());
-      (newInstance as any)._timezone = timezone;
-      return newInstance;
-   };
+         // Convert to the new timezone (same as tz for now, as we preserve moment in time)
+         const newInstance = new DateTimeClass(this.valueOf());
+         (newInstance as any)._timezone = timezone;
+         return newInstance;
+      };
 
-   DateTimeClass.prototype.utc = function (): DateTime {
-      const newInstance = new DateTimeClass(this.valueOf());
-      (newInstance as any)._timezone = "UTC";
-      return newInstance;
-   };
+      DateTimeClass.prototype.utc = function (): DateTime {
+         const newInstance = new DateTimeClass(this.valueOf());
+         (newInstance as any)._timezone = "UTC";
+         return newInstance;
+      };
 
-   DateTimeClass.prototype.local = function (): DateTime {
-      const localTz = getLocalTimezone();
-      const newInstance = new DateTimeClass(this.valueOf());
-      (newInstance as any)._timezone = localTz;
-      return newInstance;
-   };
+      DateTimeClass.prototype.local = function (): DateTime {
+         const localTz = getLocalTimezone();
+         const newInstance = new DateTimeClass(this.valueOf());
+         (newInstance as any)._timezone = localTz;
+         return newInstance;
+      };
 
-   DateTimeClass.prototype.getTimezone = function (): string {
-      return (this as any)._timezone || "UTC";
-   };
+      DateTimeClass.prototype.getTimezone = function (): string {
+         return (this as any)._timezone || "UTC";
+      };
 
-   // Add static method
-   (DateTimeClass as any).tz = function (input: any, timezone: string): DateTime {
-      if (!isValidTimezone(timezone)) {
-         throw new Error(`Invalid timezone: ${timezone}`);
-      }
+      // Add static method
+      (DateTimeClass as any).tz = (input: any, timezone: string): DateTime => {
+         if (!isValidTimezone(timezone)) {
+            throw new Error(`Invalid timezone: ${timezone}`);
+         }
 
-      const instance = new DateTimeClass(input);
-      (instance as any)._timezone = timezone;
-      return instance;
-   };
-});
+         const instance = new DateTimeClass(input);
+         (instance as any)._timezone = timezone;
+         return instance;
+      };
+   },
+);

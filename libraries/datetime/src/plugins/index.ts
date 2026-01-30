@@ -7,10 +7,9 @@
  * @module plugins
  */
 
-export { createPlugin, isPlugin, isValidPluginName } from "./plugin-base.ts";
-
-// Core plugins
-export { timezonePlugin } from "./timezone/index.ts";
 export { businessDaysPlugin } from "./business-days/index.ts";
 export { formatPlugin } from "./format/index.ts";
+export { createPlugin, isPlugin, isValidPluginName } from "./plugin-base.ts";
 export { relativeTimePlugin } from "./relative-time/index.ts";
+// Core plugins
+export { timezonePlugin } from "./timezone/index.ts";

@@ -1,6 +1,6 @@
-import { createPlugin } from "../plugin-base";
-import type { DateTimeClass } from "../../types";
 import type { DateTime } from "../../core/datetime";
+import type { DateTimeClass } from "../../types";
+import { createPlugin } from "../plugin-base";
 
 /**
  * Time thresholds for relative time formatting (in seconds)

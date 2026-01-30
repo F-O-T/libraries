@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { DateTime } from "../../core/datetime";
 import { formatPlugin } from "./index";
 
