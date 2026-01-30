@@ -53,4 +53,12 @@ describe("PDFDocument", () => {
       page.drawText("Hello PDF!", { x: 100, y: 700 });
       expect(page.contentStream.length).toBeGreaterThan(0);
    });
+
+   test("can draw graphics on page", () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage();
+      page.drawRectangle({ x: 50, y: 50, width: 100, height: 100 });
+      page.drawLine({ x1: 0, y1: 0, x2: 100, y2: 100 });
+      expect(page.contentStream.length).toBeGreaterThan(0);
+   });
 });

@@ -72,4 +72,74 @@ describe("PDFPage", () => {
       const content = page.contentStream.join("\n");
       expect(content).toContain("1 0 0 rg"); // RGB color
    });
+
+   test("can draw rectangle", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawRectangle({
+         x: 100,
+         y: 100,
+         width: 200,
+         height: 150,
+      });
+      expect(page.contentStream.length).toBeGreaterThan(0);
+   });
+
+   test("draws filled rectangle", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawRectangle({
+         x: 50,
+         y: 50,
+         width: 100,
+         height: 100,
+         fill: { type: "rgb", r: 0, g: 0, b: 1 },
+      });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("0 0 1 rg"); // Fill color
+      expect(content).toContain("f"); // Fill operator
+   });
+
+   test("draws stroked rectangle", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawRectangle({
+         x: 50,
+         y: 50,
+         width: 100,
+         height: 100,
+         stroke: { type: "rgb", r: 1, g: 0, b: 0 },
+         lineWidth: 2,
+      });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("1 0 0 RG"); // Stroke color
+      expect(content).toContain("2 w"); // Line width
+      expect(content).toContain("S"); // Stroke operator
+   });
+
+   test("can draw line", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawLine({
+         x1: 50,
+         y1: 50,
+         x2: 200,
+         y2: 200,
+      });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("50 50 m"); // Move to
+      expect(content).toContain("200 200 l"); // Line to
+      expect(content).toContain("S"); // Stroke
+   });
+
+   test("draws line with color and width", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawLine({
+         x1: 0,
+         y1: 0,
+         x2: 100,
+         y2: 100,
+         color: { type: "gray", gray: 0.5 },
+         lineWidth: 3,
+      });
+      const content = page.contentStream.join("\n");
+      expect(content).toContain("0.5 G"); // Gray stroke color
+      expect(content).toContain("3 w"); // Line width
+   });
 });

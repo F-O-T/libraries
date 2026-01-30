@@ -1,11 +1,11 @@
-import type { PDFRef, PDFDictionary, PageSize, TextOptions } from "../types.ts";
+import type { PDFRef, PDFDictionary, PageSize, TextOptions, RectOptions, LineOptions, PDFColor } from "../types.ts";
 import {
    createDictionary,
    createName,
    createArray,
    createRef,
 } from "../core/objects.ts";
-import { PageSizeSchema, TextOptionsSchema } from "../schemas.ts";
+import { PageSizeSchema, TextOptionsSchema, RectOptionsSchema, LineOptionsSchema } from "../schemas.ts";
 
 export type PDFPageOptions = {
    size?: PageSize;
@@ -52,6 +52,32 @@ export class PDFPage {
    }
 
    /**
+    * Set fill color
+    */
+   private setFillColor(color: PDFColor): void {
+      if (color.type === "rgb") {
+         this.contentStream.push(`${color.r} ${color.g} ${color.b} rg`);
+      } else if (color.type === "cmyk") {
+         this.contentStream.push(`${color.c} ${color.m} ${color.y} ${color.k} k`);
+      } else if (color.type === "gray") {
+         this.contentStream.push(`${color.gray} g`);
+      }
+   }
+
+   /**
+    * Set stroke color
+    */
+   private setStrokeColor(color: PDFColor): void {
+      if (color.type === "rgb") {
+         this.contentStream.push(`${color.r} ${color.g} ${color.b} RG`);
+      } else if (color.type === "cmyk") {
+         this.contentStream.push(`${color.c} ${color.m} ${color.y} ${color.k} K`);
+      } else if (color.type === "gray") {
+         this.contentStream.push(`${color.gray} G`);
+      }
+   }
+
+   /**
     * Draw text on the page
     */
    drawText(text: string, options: TextOptions): void {
@@ -75,15 +101,7 @@ export class PDFPage {
 
       // Set color if provided
       if (color) {
-         if (color.type === "rgb") {
-            this.contentStream.push(`${color.r} ${color.g} ${color.b} rg`);
-         } else if (color.type === "cmyk") {
-            this.contentStream.push(
-               `${color.c} ${color.m} ${color.y} ${color.k} k`,
-            );
-         } else if (color.type === "gray") {
-            this.contentStream.push(`${color.gray} g`);
-         }
+         this.setFillColor(color);
       }
 
       // Draw text
@@ -95,6 +113,63 @@ export class PDFPage {
       const escapedText = text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
       this.contentStream.push(`(${escapedText}) Tj`); // Show text
       this.contentStream.push("ET"); // End text
+   }
+
+   /**
+    * Draw a rectangle
+    */
+   drawRectangle(options: RectOptions): void {
+      const validOptions = RectOptionsSchema.parse(options);
+      const { x, y, width, height, fill, stroke, lineWidth = 1 } = validOptions;
+
+      // Set graphics state
+      if (lineWidth && stroke) {
+         this.contentStream.push(`${lineWidth} w`);
+      }
+
+      if (fill) {
+         this.setFillColor(fill);
+      }
+
+      if (stroke) {
+         this.setStrokeColor(stroke);
+      }
+
+      // Draw rectangle
+      this.contentStream.push(`${x} ${y} ${width} ${height} re`);
+
+      // Fill, stroke, or both
+      if (fill && stroke) {
+         this.contentStream.push("B"); // Fill and stroke
+      } else if (fill) {
+         this.contentStream.push("f"); // Fill only
+      } else if (stroke) {
+         this.contentStream.push("S"); // Stroke only
+      } else {
+         this.contentStream.push("S"); // Default to stroke
+      }
+   }
+
+   /**
+    * Draw a line
+    */
+   drawLine(options: LineOptions): void {
+      const validOptions = LineOptionsSchema.parse(options);
+      const { x1, y1, x2, y2, color, lineWidth = 1 } = validOptions;
+
+      // Set graphics state
+      if (lineWidth) {
+         this.contentStream.push(`${lineWidth} w`);
+      }
+
+      if (color) {
+         this.setStrokeColor(color);
+      }
+
+      // Draw line
+      this.contentStream.push(`${x1} ${y1} m`); // Move to start
+      this.contentStream.push(`${x2} ${y2} l`); // Line to end
+      this.contentStream.push("S"); // Stroke
    }
 
    /**
