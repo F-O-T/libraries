@@ -2,6 +2,24 @@
 // @f-o-t/tax-calculator - Brazilian tax calculation library
 // =============================================================================
 
+// Tax rate configuration
+export type {
+   ICMSStateConfig,
+   ISSMunicipalityConfig,
+   TaxRateConfig,
+} from "./config/rates";
+export {
+   clearTaxRates,
+   configureTaxRates,
+   getCOFINSRate,
+   getICMSRate,
+   getIPIRate,
+   getISSRate,
+   getPISRate,
+   getTaxRateConfig,
+   hasIPIRate,
+   hasISSRate,
+} from "./config/rates";
 export {
    BrazilianStateSchema,
    CFOPCodeSchema,
