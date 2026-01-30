@@ -491,6 +491,119 @@ export class DateTime {
       return new DateTime(newDate);
    }
 
+   // ============================================
+   // Start/End Methods
+   // ============================================
+
+   /**
+    * Returns a new DateTime at the start of the day (00:00:00.000)
+    * @returns New DateTime instance at start of day
+    */
+   public startOfDay(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCHours(0, 0, 0, 0);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the end of the day (23:59:59.999)
+    * @returns New DateTime instance at end of day
+    */
+   public endOfDay(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCHours(23, 59, 59, 999);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the start of the hour (XX:00:00.000)
+    * @returns New DateTime instance at start of hour
+    */
+   public startOfHour(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMinutes(0, 0, 0);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the end of the hour (XX:59:59.999)
+    * @returns New DateTime instance at end of hour
+    */
+   public endOfHour(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMinutes(59, 59, 999);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the start of the week (Sunday 00:00:00.000)
+    * @returns New DateTime instance at start of week
+    */
+   public startOfWeek(): DateTime {
+      const newDate = this.toDate();
+      const day = newDate.getUTCDay();
+      newDate.setUTCDate(newDate.getUTCDate() - day);
+      newDate.setUTCHours(0, 0, 0, 0);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the end of the week (Saturday 23:59:59.999)
+    * @returns New DateTime instance at end of week
+    */
+   public endOfWeek(): DateTime {
+      const newDate = this.toDate();
+      const day = newDate.getUTCDay();
+      newDate.setUTCDate(newDate.getUTCDate() + (6 - day));
+      newDate.setUTCHours(23, 59, 59, 999);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the start of the month (day 1, 00:00:00.000)
+    * @returns New DateTime instance at start of month
+    */
+   public startOfMonth(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCDate(1);
+      newDate.setUTCHours(0, 0, 0, 0);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the end of the month (last day, 23:59:59.999)
+    * @returns New DateTime instance at end of month
+    */
+   public endOfMonth(): DateTime {
+      const newDate = this.toDate();
+      // Set to next month, day 0 (last day of current month)
+      newDate.setUTCMonth(newDate.getUTCMonth() + 1, 0);
+      newDate.setUTCHours(23, 59, 59, 999);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the start of the year (Jan 1, 00:00:00.000)
+    * @returns New DateTime instance at start of year
+    */
+   public startOfYear(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMonth(0, 1);
+      newDate.setUTCHours(0, 0, 0, 0);
+      return new DateTime(newDate);
+   }
+
+   /**
+    * Returns a new DateTime at the end of the year (Dec 31, 23:59:59.999)
+    * @returns New DateTime instance at end of year
+    */
+   public endOfYear(): DateTime {
+      const newDate = this.toDate();
+      newDate.setUTCMonth(11, 31);
+      newDate.setUTCHours(23, 59, 59, 999);
+      return new DateTime(newDate);
+   }
+
    /**
     * Registers a plugin to extend DateTime functionality
     * @param plugin - The plugin to register

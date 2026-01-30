@@ -1162,4 +1162,220 @@ describe("DateTime", () => {
          });
       });
    });
+
+   describe("Start/End Methods", () => {
+      describe("startOfDay()", () => {
+         it("should return new DateTime at start of day (00:00:00.000)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.startOfDay();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T00:00:00.000Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.startOfDay();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("endOfDay()", () => {
+         it("should return new DateTime at end of day (23:59:59.999)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.endOfDay();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T23:59:59.999Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.endOfDay();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("startOfHour()", () => {
+         it("should return new DateTime at start of hour (XX:00:00.000)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.startOfHour();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T10:00:00.000Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.startOfHour();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("endOfHour()", () => {
+         it("should return new DateTime at end of hour (XX:59:59.999)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.endOfHour();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-15T10:59:59.999Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.endOfHour();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("startOfWeek()", () => {
+         it("should return new DateTime at start of week (Sunday 00:00:00.000)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z"); // Monday
+            const result = dt.startOfWeek();
+            expect(result).toBeInstanceOf(DateTime);
+            // Previous Sunday is Jan 14
+            expect(result.toISO()).toBe("2024-01-14T00:00:00.000Z");
+            expect(result.day()).toBe(0); // Sunday
+         });
+
+         it("should handle when day is already Sunday", () => {
+            const dt = new DateTime("2024-01-14T10:30:45.123Z"); // Sunday
+            const result = dt.startOfWeek();
+            expect(result.toISO()).toBe("2024-01-14T00:00:00.000Z");
+            expect(result.day()).toBe(0); // Sunday
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.startOfWeek();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("endOfWeek()", () => {
+         it("should return new DateTime at end of week (Saturday 23:59:59.999)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z"); // Monday
+            const result = dt.endOfWeek();
+            expect(result).toBeInstanceOf(DateTime);
+            // Next Saturday is Jan 20
+            expect(result.toISO()).toBe("2024-01-20T23:59:59.999Z");
+            expect(result.day()).toBe(6); // Saturday
+         });
+
+         it("should handle when day is already Saturday", () => {
+            const dt = new DateTime("2024-01-20T10:30:45.123Z"); // Saturday
+            const result = dt.endOfWeek();
+            expect(result.toISO()).toBe("2024-01-20T23:59:59.999Z");
+            expect(result.day()).toBe(6); // Saturday
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.endOfWeek();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("startOfMonth()", () => {
+         it("should return new DateTime at start of month (day 1, 00:00:00.000)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.startOfMonth();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-01T00:00:00.000Z");
+         });
+
+         it("should handle when day is already 1st", () => {
+            const dt = new DateTime("2024-01-01T10:30:45.123Z");
+            const result = dt.startOfMonth();
+            expect(result.toISO()).toBe("2024-01-01T00:00:00.000Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.startOfMonth();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("endOfMonth()", () => {
+         it("should return new DateTime at end of month (last day, 23:59:59.999)", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const result = dt.endOfMonth();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-31T23:59:59.999Z");
+         });
+
+         it("should handle February in leap year", () => {
+            const dt = new DateTime("2024-02-15T10:30:45.123Z");
+            const result = dt.endOfMonth();
+            expect(result.toISO()).toBe("2024-02-29T23:59:59.999Z");
+         });
+
+         it("should handle February in non-leap year", () => {
+            const dt = new DateTime("2025-02-15T10:30:45.123Z");
+            const result = dt.endOfMonth();
+            expect(result.toISO()).toBe("2025-02-28T23:59:59.999Z");
+         });
+
+         it("should handle 30-day months", () => {
+            const dt = new DateTime("2024-04-15T10:30:45.123Z");
+            const result = dt.endOfMonth();
+            expect(result.toISO()).toBe("2024-04-30T23:59:59.999Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-01-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.endOfMonth();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("startOfYear()", () => {
+         it("should return new DateTime at start of year (Jan 1, 00:00:00.000)", () => {
+            const dt = new DateTime("2024-06-15T10:30:45.123Z");
+            const result = dt.startOfYear();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-01-01T00:00:00.000Z");
+         });
+
+         it("should handle when already at start of year", () => {
+            const dt = new DateTime("2024-01-01T10:30:45.123Z");
+            const result = dt.startOfYear();
+            expect(result.toISO()).toBe("2024-01-01T00:00:00.000Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-06-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.startOfYear();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+
+      describe("endOfYear()", () => {
+         it("should return new DateTime at end of year (Dec 31, 23:59:59.999)", () => {
+            const dt = new DateTime("2024-06-15T10:30:45.123Z");
+            const result = dt.endOfYear();
+            expect(result).toBeInstanceOf(DateTime);
+            expect(result.toISO()).toBe("2024-12-31T23:59:59.999Z");
+         });
+
+         it("should handle when already at end of year", () => {
+            const dt = new DateTime("2024-12-31T10:30:45.123Z");
+            const result = dt.endOfYear();
+            expect(result.toISO()).toBe("2024-12-31T23:59:59.999Z");
+         });
+
+         it("should not modify original DateTime", () => {
+            const dt = new DateTime("2024-06-15T10:30:45.123Z");
+            const original = dt.toISO();
+            dt.endOfYear();
+            expect(dt.toISO()).toBe(original);
+         });
+      });
+   });
 });
