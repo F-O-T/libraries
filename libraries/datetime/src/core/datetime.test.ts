@@ -630,4 +630,271 @@ describe("DateTime", () => {
          });
       });
    });
+
+   describe("Comparison Methods", () => {
+      describe("isBefore()", () => {
+         it("should return true when date is before other", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.isBefore(dt2)).toBe(true);
+         });
+
+         it("should return false when date is after other", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isBefore(dt2)).toBe(false);
+         });
+
+         it("should return false when dates are equal", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isBefore(dt2)).toBe(false);
+         });
+
+         it("should work with millisecond precision", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.001Z");
+            expect(dt1.isBefore(dt2)).toBe(true);
+            expect(dt2.isBefore(dt1)).toBe(false);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.isBefore(dt2)).toBe(true);
+         });
+      });
+
+      describe("isAfter()", () => {
+         it("should return true when date is after other", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isAfter(dt2)).toBe(true);
+         });
+
+         it("should return false when date is before other", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.isAfter(dt2)).toBe(false);
+         });
+
+         it("should return false when dates are equal", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isAfter(dt2)).toBe(false);
+         });
+
+         it("should work with millisecond precision", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.001Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isAfter(dt2)).toBe(true);
+            expect(dt2.isAfter(dt1)).toBe(false);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isAfter(dt2)).toBe(true);
+         });
+      });
+
+      describe("isSame()", () => {
+         it("should return true when dates are equal", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSame(dt2)).toBe(true);
+         });
+
+         it("should return false when dates are different", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.001Z");
+            expect(dt1.isSame(dt2)).toBe(false);
+         });
+
+         it("should work with millisecond precision", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.123Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.123Z");
+            expect(dt1.isSame(dt2)).toBe(true);
+         });
+
+         it("should return true for same timestamp from different inputs", () => {
+            const timestamp = 1705314600000;
+            const dt1 = new DateTime(timestamp);
+            const dt2 = new DateTime("2024-01-15T10:30:00.000Z");
+            expect(dt1.isSame(dt2)).toBe(true);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSame(dt2)).toBe(true);
+         });
+      });
+
+      describe("isSameOrBefore()", () => {
+         it("should return true when date is before other", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.isSameOrBefore(dt2)).toBe(true);
+         });
+
+         it("should return true when dates are equal", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrBefore(dt2)).toBe(true);
+         });
+
+         it("should return false when date is after other", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrBefore(dt2)).toBe(false);
+         });
+
+         it("should work with millisecond precision", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.001Z");
+            expect(dt1.isSameOrBefore(dt2)).toBe(true);
+            expect(dt1.isSameOrBefore(dt1)).toBe(true);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrBefore(dt2)).toBe(true);
+         });
+      });
+
+      describe("isSameOrAfter()", () => {
+         it("should return true when date is after other", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrAfter(dt2)).toBe(true);
+         });
+
+         it("should return true when dates are equal", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrAfter(dt2)).toBe(true);
+         });
+
+         it("should return false when date is before other", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T11:00:00.000Z");
+            expect(dt1.isSameOrAfter(dt2)).toBe(false);
+         });
+
+         it("should work with millisecond precision", () => {
+            const dt1 = new DateTime("2024-01-15T10:00:00.001Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrAfter(dt2)).toBe(true);
+            expect(dt1.isSameOrAfter(dt1)).toBe(true);
+         });
+
+         it("should accept DateTime instance", () => {
+            const dt1 = new DateTime("2024-01-15T11:00:00.000Z");
+            const dt2 = new DateTime("2024-01-15T10:00:00.000Z");
+            expect(dt1.isSameOrAfter(dt2)).toBe(true);
+         });
+      });
+
+      describe("isBetween()", () => {
+         it("should return true when date is between start and end (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T11:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(true);
+         });
+
+         it("should return false when date equals start (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T10:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(false);
+         });
+
+         it("should return false when date equals end (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T12:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(false);
+         });
+
+         it("should return false when date is before start (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T09:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(false);
+         });
+
+         it("should return false when date is after end (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T13:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(false);
+         });
+
+         it("should return true when date is between start and end (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T11:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end, true)).toBe(true);
+         });
+
+         it("should return true when date equals start (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T10:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end, true)).toBe(true);
+         });
+
+         it("should return true when date equals end (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T12:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end, true)).toBe(true);
+         });
+
+         it("should return false when date is before start (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T09:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end, true)).toBe(false);
+         });
+
+         it("should return false when date is after end (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T13:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end, true)).toBe(false);
+         });
+
+         it("should work with millisecond precision (exclusive)", () => {
+            const dt = new DateTime("2024-01-15T10:00:00.001Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T10:00:00.002Z");
+            expect(dt.isBetween(start, end)).toBe(true);
+         });
+
+         it("should work with millisecond precision (inclusive)", () => {
+            const dt = new DateTime("2024-01-15T10:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T10:00:00.002Z");
+            expect(dt.isBetween(start, end, true)).toBe(true);
+         });
+
+         it("should accept DateTime instances", () => {
+            const dt = new DateTime("2024-01-15T11:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(true);
+         });
+
+         it("should default to exclusive when inclusive parameter is not provided", () => {
+            const dt = new DateTime("2024-01-15T10:00:00.000Z");
+            const start = new DateTime("2024-01-15T10:00:00.000Z");
+            const end = new DateTime("2024-01-15T12:00:00.000Z");
+            expect(dt.isBetween(start, end)).toBe(false);
+         });
+      });
+   });
 });

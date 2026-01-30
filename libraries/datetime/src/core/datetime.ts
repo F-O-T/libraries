@@ -271,6 +271,73 @@ export class DateTime {
       return this.addYears(-amount);
    }
 
+   // ============================================
+   // Comparison Methods
+   // ============================================
+
+   /**
+    * Checks if this date is before another date
+    * @param other - DateTime instance to compare against
+    * @returns true if this date is before the other date, false otherwise
+    */
+   public isBefore(other: DateTime): boolean {
+      return this.valueOf() < other.valueOf();
+   }
+
+   /**
+    * Checks if this date is after another date
+    * @param other - DateTime instance to compare against
+    * @returns true if this date is after the other date, false otherwise
+    */
+   public isAfter(other: DateTime): boolean {
+      return this.valueOf() > other.valueOf();
+   }
+
+   /**
+    * Checks if this date is the same as another date
+    * @param other - DateTime instance to compare against
+    * @returns true if this date is the same as the other date, false otherwise
+    */
+   public isSame(other: DateTime): boolean {
+      return this.valueOf() === other.valueOf();
+   }
+
+   /**
+    * Checks if this date is the same as or before another date
+    * @param other - DateTime instance to compare against
+    * @returns true if this date is the same as or before the other date, false otherwise
+    */
+   public isSameOrBefore(other: DateTime): boolean {
+      return this.valueOf() <= other.valueOf();
+   }
+
+   /**
+    * Checks if this date is the same as or after another date
+    * @param other - DateTime instance to compare against
+    * @returns true if this date is the same as or after the other date, false otherwise
+    */
+   public isSameOrAfter(other: DateTime): boolean {
+      return this.valueOf() >= other.valueOf();
+   }
+
+   /**
+    * Checks if this date is between two dates
+    * @param start - Start date of the range
+    * @param end - End date of the range
+    * @param inclusive - Whether to include the start and end dates in the comparison (default: false)
+    * @returns true if this date is between start and end, false otherwise
+    */
+   public isBetween(start: DateTime, end: DateTime, inclusive = false): boolean {
+      const thisTime = this.valueOf();
+      const startTime = start.valueOf();
+      const endTime = end.valueOf();
+
+      if (inclusive) {
+         return thisTime >= startTime && thisTime <= endTime;
+      }
+      return thisTime > startTime && thisTime < endTime;
+   }
+
    /**
     * Registers a plugin to extend DateTime functionality
     * @param plugin - The plugin to register
