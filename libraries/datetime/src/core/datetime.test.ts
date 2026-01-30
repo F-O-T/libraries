@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, test as it } from "bun:test";
 import { InvalidDateError } from "../errors";
 import { DateTime } from "./datetime";
 
