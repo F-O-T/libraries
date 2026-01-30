@@ -6,6 +6,7 @@ import {
    createRef,
 } from "../core/objects.ts";
 import { PageSizeSchema, TextOptionsSchema, RectOptionsSchema, LineOptionsSchema } from "../schemas.ts";
+import { STANDARD_FONTS, isStandardFont, getFontRefName, type StandardFont } from "./fonts.ts";
 
 export type PDFPageOptions = {
    size?: PageSize;
@@ -58,7 +59,9 @@ export class PDFPage {
       if (color.type === "rgb") {
          this.contentStream.push(`${color.r} ${color.g} ${color.b} rg`);
       } else if (color.type === "cmyk") {
-         this.contentStream.push(`${color.c} ${color.m} ${color.y} ${color.k} k`);
+         this.contentStream.push(
+            `${color.c} ${color.m} ${color.y} ${color.k} k`,
+         );
       } else if (color.type === "gray") {
          this.contentStream.push(`${color.gray} g`);
       }
@@ -71,7 +74,9 @@ export class PDFPage {
       if (color.type === "rgb") {
          this.contentStream.push(`${color.r} ${color.g} ${color.b} RG`);
       } else if (color.type === "cmyk") {
-         this.contentStream.push(`${color.c} ${color.m} ${color.y} ${color.k} K`);
+         this.contentStream.push(
+            `${color.c} ${color.m} ${color.y} ${color.k} K`,
+         );
       } else if (color.type === "gray") {
          this.contentStream.push(`${color.gray} G`);
       }
@@ -85,18 +90,32 @@ export class PDFPage {
       const { x, y, size = 12, font = "Helvetica", color, align = "left" } = validOptions;
 
       // Register font in resources
+      const fontName = font || "Helvetica";
+      if (!isStandardFont(fontName)) {
+         throw new Error(
+            `Font "${fontName}" is not a standard PDF font. Use one of: ${Object.keys(STANDARD_FONTS).join(", ")}`,
+         );
+      }
+
+      const fontRefName = getFontRefName(fontName);
       const fontDict = this.resources.Font as PDFDictionary;
-      if (!fontDict[font]) {
-         fontDict[font] = createName(font);
+      if (!fontDict[fontRefName]) {
+         // Create font object
+         const fontObj = createDictionary({
+            Type: createName("Font"),
+            Subtype: createName("Type1"),
+            BaseFont: createName(fontName),
+         });
+         fontDict[fontRefName] = fontObj;
       }
 
       // Calculate text position based on alignment
       let xPos = x;
       if (align === "center") {
          // Approximate centering (proper calculation needs font metrics)
-         xPos = x - (text.length * size * 0.3);
+         xPos = x - text.length * size * 0.3;
       } else if (align === "right") {
-         xPos = x - (text.length * size * 0.6);
+         xPos = x - text.length * size * 0.6;
       }
 
       // Set color if provided
@@ -106,11 +125,14 @@ export class PDFPage {
 
       // Draw text
       this.contentStream.push("BT"); // Begin text
-      this.contentStream.push(`/${font} ${size} Tf`); // Set font and size
+      this.contentStream.push(`/${fontRefName} ${size} Tf`); // Set font and size
       this.contentStream.push(`${xPos} ${y} Td`); // Position
-      
+
       // Escape special characters in text
-      const escapedText = text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+      const escapedText = text
+         .replace(/\\/g, "\\\\")
+         .replace(/\(/g, "\\(")
+         .replace(/\)/g, "\\)");
       this.contentStream.push(`(${escapedText}) Tj`); // Show text
       this.contentStream.push("ET"); // End text
    }

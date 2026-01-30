@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { PDFPage } from "./page.ts";
 import { createRef } from "../core/objects.ts";
+import { PDFPage } from "./page.ts";
 
 describe("PDFPage", () => {
    test("creates page with default A4 size", () => {
@@ -58,8 +58,7 @@ describe("PDFPage", () => {
       const page = new PDFPage(createRef(1, 0));
       page.drawText("Test", { x: 50, y: 50, font: "Helvetica-Bold", size: 24 });
       const content = page.contentStream.join("\n");
-      expect(content).toContain("/Helvetica-Bold");
-      expect(content).toContain("24 Tf"); // Font size
+      expect(content).toMatch(/\/F\d+ 24 Tf/); // Font reference with size
    });
 
    test("draws text with color", () => {
@@ -141,5 +140,19 @@ describe("PDFPage", () => {
       const content = page.contentStream.join("\n");
       expect(content).toContain("0.5 G"); // Gray stroke color
       expect(content).toContain("3 w"); // Line width
+   });
+
+   test("rejects invalid fonts", () => {
+      const page = new PDFPage(createRef(1, 0));
+      expect(() =>
+         page.drawText("Test", { x: 0, y: 0, font: "InvalidFont" as any }),
+      ).toThrow("not a standard PDF font");
+   });
+
+   test("uses correct font reference names", () => {
+      const page = new PDFPage(createRef(1, 0));
+      page.drawText("Test", { x: 0, y: 0, font: "Times-Bold" });
+      const content = page.contentStream.join("\n");
+      expect(content).toMatch(/\/F\d+ 12 Tf/); // Font reference with number
    });
 });
