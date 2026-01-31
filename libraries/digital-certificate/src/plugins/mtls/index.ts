@@ -7,8 +7,8 @@
 
 import https from "node:https";
 import tls from "node:tls";
-import { mtlsOptionsSchema } from "./schemas.ts";
-import type { CertificateInfo, MtlsOptions, PemPair } from "./types.ts";
+import { mtlsOptionsSchema } from "../../schemas.ts";
+import type { CertificateInfo, MtlsOptions, PemPair } from "../../types.ts";
 
 // =============================================================================
 // Public API

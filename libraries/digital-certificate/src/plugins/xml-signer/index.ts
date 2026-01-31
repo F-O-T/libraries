@@ -16,8 +16,8 @@ import {
    XML_NODE_TYPES,
 } from "@f-o-t/xml";
 import { canonicalize } from "@f-o-t/xml/plugins/canonicalize";
-import { signOptionsSchema } from "./schemas.ts";
-import type { SignatureAlgorithm, SignOptions } from "./types.ts";
+import { signOptionsSchema } from "../../schemas.ts";
+import type { SignatureAlgorithm, SignOptions } from "../../types.ts";
 import {
    DIGEST_ALGORITHMS,
    EXC_C14N_NS,
@@ -25,7 +25,7 @@ import {
    SIGNATURE_ALGORITHMS,
    TRANSFORM_ALGORITHMS,
    XMLDSIG_NS,
-} from "./utils.ts";
+} from "../../utils.ts";
 
 // =============================================================================
 // Public API

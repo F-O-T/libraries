@@ -7,7 +7,7 @@ import {
    createHttpsAgent,
    createTlsContext,
    getMtlsPemPair,
-} from "../src/mtls.ts";
+} from "../src/plugins/mtls/index.ts";
 
 const fixturesDir = join(import.meta.dir, "fixtures");
 const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));

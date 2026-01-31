@@ -3,8 +3,8 @@
  *
  * Certificate management (parse, validate, extract info).
  * Sub-exports available:
- * - `@f-o-t/digital-certificate/xml-signer` — XML digital signature
- * - `@f-o-t/digital-certificate/mtls` — Mutual TLS configuration
+ * - `@f-o-t/digital-certificate/plugins/xml-signer` — XML digital signature
+ * - `@f-o-t/digital-certificate/plugins/mtls` — Mutual TLS configuration
  *
  * @packageDocumentation
  */

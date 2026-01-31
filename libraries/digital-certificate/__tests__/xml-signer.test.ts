@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseCertificate } from "../src/certificate.ts";
-import { signXml } from "../src/xml-signer.ts";
+import { signXml } from "../src/plugins/xml-signer/index.ts";
 
 const fixturesDir = join(import.meta.dir, "fixtures");
 const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
