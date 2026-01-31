@@ -99,9 +99,10 @@
       },
       "devDependencies": {
         "@biomejs/biome": "2.3.12",
+        "@f-o-t/cli": "workspace:*",
+        "@f-o-t/config": "workspace:*",
         "@types/bun": "1.3.6",
         "bumpp": "10.4.0",
-        "bunup": "0.16.20",
         "typescript": "5.9.3",
       },
       "peerDependencies": {
@@ -186,9 +187,10 @@
       },
       "devDependencies": {
         "@biomejs/biome": "2.3.10",
+        "@f-o-t/cli": "workspace:*",
+        "@f-o-t/config": "workspace:*",
         "@types/bun": "1.3.5",
         "bumpp": "10.3.2",
-        "bunup": "0.16.11",
         "typescript": "5.9.3",
       },
       "peerDependencies": {
@@ -224,9 +226,10 @@
       },
       "devDependencies": {
         "@biomejs/biome": "2.3.12",
+        "@f-o-t/cli": "workspace:*",
+        "@f-o-t/config": "workspace:*",
         "@types/bun": "1.3.6",
         "bumpp": "10.4.0",
-        "bunup": "0.16.20",
         "typescript": "5.9.3",
       },
       "peerDependencies": {
@@ -1390,8 +1393,6 @@
 
     "@f-o-t/money/bumpp": ["bumpp@10.3.2", "", { "dependencies": { "ansis": "^4.2.0", "args-tokenizer": "^0.3.0", "c12": "^3.3.2", "cac": "^6.7.14", "escalade": "^3.2.0", "jsonc-parser": "^3.3.1", "package-manager-detector": "^1.5.0", "semver": "^7.7.3", "tinyexec": "^1.0.2", "tinyglobby": "^0.2.15", "yaml": "^2.8.1" }, "bin": { "bumpp": "bin/bumpp.mjs" } }, "sha512-yUUkVx5zpTywLNX97MlrqtpanI7eMMwFwLntWR2EBVDw3/Pm3aRIzCoDEGHATLIiHK9PuJC7xWI4XNWqXItSPg=="],
 
-    "@f-o-t/money/bunup": ["bunup@0.16.11", "", { "dependencies": { "@bunup/dts": "^0.14.37", "@bunup/shared": "0.16.10", "chokidar": "^5.0.0", "coffi": "^0.1.37", "lightningcss": "^1.30.2", "picocolors": "^1.1.1", "tinyexec": "^1.0.1", "tree-kill": "^1.2.2", "zlye": "^0.4.4" }, "peerDependencies": { "typescript": "latest" }, "optionalPeers": ["typescript"], "bin": { "bunup": "dist/cli/index.js" } }, "sha512-hy8DeA4HAkG+exZJ92UYQoUd6g1ZCwFtZQKguedomMvnrv/k+5OhkSMetQTrUOb/qSlJFwqG0QyRXLeILU9hlg=="],
-
     "@f-o-t/money/zod": ["zod@4.3.4", "", {}, "sha512-Zw/uYiiyF6pUT1qmKbZziChgNPRu+ZRneAsMUDU6IwmXdWt5JwcUfy2bvLOCUtz5UniaN/Zx5aFttZYbYc7O/A=="],
 
     "@f-o-t/ofx/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
@@ -1477,8 +1478,6 @@
     "@f-o-t/money/@types/bun/bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
 
     "@f-o-t/money/bumpp/jsonc-parser": ["jsonc-parser@3.3.1", "", {}, "sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ=="],
-
-    "@f-o-t/money/bunup/@bunup/shared": ["@bunup/shared@0.16.10", "", { "peerDependencies": { "typescript": "latest" }, "optionalPeers": ["typescript"] }, "sha512-XDrhTdLS9OnXguHDGDTqrdcce17zlndBF3vOuuyQ5Vy6+T3b8waqMq9cAeYYlvhSTSkNTtDsDGiyWVji0KNPKQ=="],
 
     "@f-o-t/pdf/@types/bun/bun-types": ["bun-types@1.3.6", "", { "dependencies": { "@types/node": "*" } }, "sha512-OlFwHcnNV99r//9v5IIOgQ9Uk37gZqrNMCcqEaExdkVq3Avwqok1bJFmvGMCkCE0FqzdY8VMOZpfpR3lwI+CsQ=="],
 
