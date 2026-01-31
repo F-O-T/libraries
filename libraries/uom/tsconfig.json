@@ -18,6 +18,6 @@
       "target": "ES2023",
       "verbatimModuleSyntax": true
    },
-   "exclude": ["node_modules", "dist", "bunup.config.ts"],
+   "exclude": ["node_modules", "dist"],
    "include": ["src/**/*"]
 }
