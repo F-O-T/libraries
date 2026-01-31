@@ -16,9 +16,9 @@ import type {
    XmlElement,
    XmlNode,
    XPathContext,
-} from "./types.ts";
-import { XML_NODE_TYPES } from "./types.ts";
-import { getTextContent } from "./utils.ts";
+} from "../../types.ts";
+import { XML_NODE_TYPES } from "../../types.ts";
+import { getTextContent } from "../../utils.ts";
 
 // =============================================================================
 // Public API

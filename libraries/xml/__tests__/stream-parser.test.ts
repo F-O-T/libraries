@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { streamParseXml } from "../src/stream-parser.ts";
+import { streamParseXml } from "../src/plugins/stream/index.ts";
 
 describe("streamParseXml", () => {
    it("fires document start and end events", () => {

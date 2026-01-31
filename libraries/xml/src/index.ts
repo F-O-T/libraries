@@ -3,9 +3,9 @@
  *
  * DOM parser, serializer, types, and utilities.
  * Sub-exports available:
- * - `@f-o-t/xml/stream` — SAX-like streaming parser
- * - `@f-o-t/xml/xpath` — XPath query engine
- * - `@f-o-t/xml/canonicalize` — W3C Exclusive C14N
+ * - `@f-o-t/xml/plugins/stream` — SAX-like streaming parser
+ * - `@f-o-t/xml/plugins/xpath` — XPath query engine
+ * - `@f-o-t/xml/plugins/canonicalize` — W3C Exclusive C14N
  *
  * @packageDocumentation
  */

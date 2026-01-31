@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { canonicalize } from "../src/canonicalize.ts";
+import { canonicalize } from "../src/plugins/canonicalize/index.ts";
 import { parseXml } from "../src/parser.ts";
 
 describe("canonicalize", () => {

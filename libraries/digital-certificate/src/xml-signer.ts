@@ -15,7 +15,7 @@ import {
    serializeXml,
    XML_NODE_TYPES,
 } from "@f-o-t/xml";
-import { canonicalize } from "@f-o-t/xml/canonicalize";
+import { canonicalize } from "@f-o-t/xml/plugins/canonicalize";
 import { signOptionsSchema } from "./schemas.ts";
 import type { SignatureAlgorithm, SignOptions } from "./types.ts";
 import {

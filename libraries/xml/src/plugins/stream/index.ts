@@ -10,9 +10,9 @@ import type {
    StreamParserCallbacks,
    XmlAttribute,
    XmlNamespace,
-} from "./types.ts";
-import { XmlError } from "./types.ts";
-import { decodeEntities, extractNamespaces, splitQName } from "./utils.ts";
+} from "../../types.ts";
+import { XmlError } from "../../types.ts";
+import { decodeEntities, extractNamespaces, splitQName } from "../../utils.ts";
 
 // =============================================================================
 // Public API

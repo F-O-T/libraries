@@ -16,14 +16,14 @@
  * - Line endings normalized to #xA (\n)
  */
 
-import { c14nOptionsSchema } from "./schemas.ts";
+import { c14nOptionsSchema } from "../../schemas.ts";
 import type {
    C14NOptions,
    XmlElement,
    XmlNamespace,
    XmlNode,
-} from "./types.ts";
-import { XML_NODE_TYPES } from "./types.ts";
+} from "../../types.ts";
+import { XML_NODE_TYPES } from "../../types.ts";
 
 // =============================================================================
 // Public API
