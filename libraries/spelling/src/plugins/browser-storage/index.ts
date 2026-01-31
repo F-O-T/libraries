@@ -1,5 +1,5 @@
-import { parseAffFile, parseDicFile } from "./hunspell-parser.ts";
-import type { ParsedAffData, ParsedDicData } from "./schemas.ts";
+import { parseAffFile, parseDicFile } from "../../hunspell-parser.ts";
+import type { ParsedAffData, ParsedDicData } from "../../schemas.ts";
 
 // ============================================================================
 // Types

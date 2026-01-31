@@ -1,6 +1,6 @@
 import { PDFParser } from "./parser.ts";
-import type { PDFDictionary, PDFRef, PDFArray } from "../types.ts";
-import { PDFParseError } from "../errors.ts";
+import type { PDFDictionary, PDFRef, PDFArray } from "../../types.ts";
+import { PDFParseError } from "../../errors.ts";
 
 /**
  * Parsed PDF Document
@@ -8,14 +8,14 @@ import { PDFParseError } from "../errors.ts";
 export interface ParsedPDF {
    version: string;
    catalog: PDFRef;
-   pages: PDFPage[];
+   pages: ParsedPDFPage[];
    objects: Map<number, any>;
 }
 
 /**
  * Parsed PDF Page
  */
-export interface PDFPage {
+export interface ParsedPDFPage {
    ref: PDFRef;
    size: { width: number; height: number };
    content: string;
@@ -158,7 +158,7 @@ export class PDFReader {
    /**
     * Parse pages from catalog
     */
-   private parsePages(catalogRef: PDFRef): PDFPage[] {
+   private parsePages(catalogRef: PDFRef): ParsedPDFPage[] {
       const catalog = this.objects.get(catalogRef.objectNumber) as PDFDictionary;
       if (!catalog) {
          throw new PDFParseError("Catalog not found");
@@ -171,7 +171,7 @@ export class PDFReader {
       }
 
       const kids = pagesTree.Kids as PDFArray;
-      const pages: PDFPage[] = [];
+      const pages: ParsedPDFPage[] = [];
 
       for (const kidRef of kids) {
          if (typeof kidRef === "object" && "objectNumber" in kidRef) {
@@ -186,7 +186,7 @@ export class PDFReader {
    /**
     * Parse a single page
     */
-   private parsePage(ref: PDFRef): PDFPage | null {
+   private parsePage(ref: PDFRef): ParsedPDFPage | null {
       const pageDict = this.objects.get(ref.objectNumber) as PDFDictionary;
       if (!pageDict) return null;
 

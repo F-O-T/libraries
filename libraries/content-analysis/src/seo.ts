@@ -4,7 +4,7 @@
  */
 
 import { extractFromMarkdown } from "./markdown";
-import type { SeoInput, SeoIssue, SeoMetrics, SeoResult } from "./types";
+import type { SeoInput, SeoIssue, SeoMetrics, SeoResult } from "./plugins/types/index";
 import {
    clampScore,
    extractWords,

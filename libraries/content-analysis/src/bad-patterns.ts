@@ -3,7 +3,7 @@
  * Detects problematic content patterns that hurt quality and SEO
  */
 
-import type { BadPattern, BadPatternResult } from "./types";
+import type { BadPattern, BadPatternResult } from "./plugins/types/index";
 import { extractParagraphs, extractWords, findOccurrences } from "./utils";
 
 /**

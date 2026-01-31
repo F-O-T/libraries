@@ -8,7 +8,7 @@ import type {
    ReadabilityResult,
    TargetAudience,
    TargetScore,
-} from "./types";
+} from "./plugins/types/index";
 import {
    calculateFleschKincaid,
    countSyllables,

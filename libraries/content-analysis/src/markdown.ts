@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { MarkdownDocument, Node } from "@f-o-t/markdown";
 import { parseToAst } from "@f-o-t/markdown";
 

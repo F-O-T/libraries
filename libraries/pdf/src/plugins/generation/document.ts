@@ -3,9 +3,9 @@ import {
    createDictionary,
    createName,
    createRef,
-} from "../core/objects.ts";
-import { PDFMetadataSchema, PDFVersionSchema } from "../schemas.ts";
-import type { PDFMetadata, PDFRef, PDFVersion } from "../types.ts";
+} from "../../core/objects.ts";
+import { PDFMetadataSchema, PDFVersionSchema } from "../../schemas.ts";
+import type { PDFMetadata, PDFRef, PDFVersion, PDFDictionary, PDFStream } from "../../types.ts";
 import { PDFPage } from "./page.ts";
 import { serializeValue, serializeObject } from "./writer.ts";
 
@@ -27,7 +27,7 @@ export type { PDFPageOptions } from "./page.ts";
 export class PDFDocument {
    version: PDFVersion;
    metadata: PDFMetadata;
-   private objects: Map<number, PDFDictionary> = new Map();
+   private objects: Map<number, PDFDictionary | PDFStream> = new Map();
    private nextObjectNumber = 1;
 
    catalog: PDFRef;
@@ -62,7 +62,13 @@ export class PDFDocument {
       // Store metadata if provided (will be serialized in future tasks)
       if (Object.keys(this.metadata).length > 0) {
          const infoRef = this.allocateRef();
-         const infoDict = createDictionary({ ...this.metadata });
+         const metadataDict: Record<string, string | number> = {};
+         if (this.metadata.title) metadataDict.Title = this.metadata.title;
+         if (this.metadata.author) metadataDict.Author = this.metadata.author;
+         if (this.metadata.subject) metadataDict.Subject = this.metadata.subject;
+         if (this.metadata.creator) metadataDict.Creator = this.metadata.creator;
+         if (this.metadata.producer) metadataDict.Producer = this.metadata.producer;
+         const infoDict = createDictionary(metadataDict);
          this.objects.set(infoRef.objectNumber, infoDict);
       }
    }
@@ -87,7 +93,7 @@ export class PDFDocument {
       // Update pages dictionary
       const pagesDict = this.objects.get(
          this.pages.objectNumber,
-      ) as import("../types.ts").PDFDictionary;
+      ) as PDFDictionary;
       const kids = pagesDict.Kids as PDFRef[];
       kids.push(pageRef);
       pagesDict.Count = (pagesDict.Count as number) + 1;

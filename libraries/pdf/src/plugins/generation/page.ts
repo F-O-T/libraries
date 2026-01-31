@@ -1,12 +1,12 @@
-import type { PDFRef, PDFDictionary, PageSize, TextOptions, RectOptions, LineOptions, PDFColor, PDFStream } from "../types.ts";
+import type { PDFRef, PDFDictionary, PageSize, TextOptions, RectOptions, LineOptions, PDFColor, PDFStream } from "../../types.ts";
 import {
    createDictionary,
    createName,
    createArray,
    createRef,
    createStream,
-} from "../core/objects.ts";
-import { PageSizeSchema, TextOptionsSchema, RectOptionsSchema, LineOptionsSchema } from "../schemas.ts";
+} from "../../core/objects.ts";
+import { PageSizeSchema, TextOptionsSchema, RectOptionsSchema, LineOptionsSchema } from "../../schemas.ts";
 import { STANDARD_FONTS, isStandardFont, getFontRefName, type StandardFont } from "./fonts.ts";
 
 export type PDFPageOptions = {

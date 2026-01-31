@@ -1,7 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { parseXml } from "../src/parser.ts";
+import {
+   queryXPath,
+   queryXPathFirst,
+   queryXPathText,
+} from "../src/plugins/xpath/index.ts";
 import { XML_NODE_TYPES } from "../src/types.ts";
-import { queryXPath, queryXPathFirst, queryXPathText } from "../src/plugins/xpath/index.ts";
 
 const sampleXml = `<?xml version="1.0"?>
 <bookstore>

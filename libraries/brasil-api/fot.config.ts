@@ -2,5 +2,4 @@ import { defineFotConfig } from '@f-o-t/config';
 
 export default defineFotConfig({
   external: ['zod'],
-  plugins: ['timezone', 'business-days', 'format', 'relative-time'],
 });

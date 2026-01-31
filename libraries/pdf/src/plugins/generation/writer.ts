@@ -1,4 +1,4 @@
-import type { PDFValue, PDFDictionary, PDFRef, PDFStream, PDFArray, PDFName } from "../types.ts";
+import type { PDFValue, PDFDictionary, PDFRef, PDFStream, PDFArray, PDFName } from "../../types.ts";
 
 /**
  * Serialize a PDF value to string

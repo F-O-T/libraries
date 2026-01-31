@@ -53,12 +53,12 @@ export type PDFName = {
 /**
  * PDF Array
  */
-export type PDFArray = PDFValue[];
+export interface PDFArray extends Array<PDFValue> {}
 
 /**
  * PDF Dictionary
  */
-export type PDFDictionary = Record<string, PDFValue>;
+export interface PDFDictionary extends Record<string, PDFValue> {}
 
 /**
  * PDF Stream

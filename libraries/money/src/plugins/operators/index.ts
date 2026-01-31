@@ -30,7 +30,7 @@ import {
    moneyNotEqualsOperator,
    moneyPositiveOperator,
    moneyZeroOperator,
-} from "../operations/comparison";
+} from "../../operations/comparison";
 
 /**
  * All money operators as a map for condition-evaluator

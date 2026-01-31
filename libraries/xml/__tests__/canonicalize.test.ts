@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { canonicalize } from "../src/plugins/canonicalize/index.ts";
 import { parseXml } from "../src/parser.ts";
+import { canonicalize } from "../src/plugins/canonicalize/index.ts";
 
 describe("canonicalize", () => {
    describe("basic C14N rules", () => {

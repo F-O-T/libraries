@@ -12,7 +12,7 @@ import type {
    TopKeyword,
    TopPhrase,
    TopTerm,
-} from "./types";
+} from "./plugins/types/index";
 import { extractWords, tokenize } from "./utils";
 
 /**

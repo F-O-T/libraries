@@ -8,7 +8,7 @@ import type {
    ContentType,
    StructureIssue,
    StructureResult,
-} from "./types";
+} from "./plugins/types/index";
 import {
    clampScore,
    extractHeadings,

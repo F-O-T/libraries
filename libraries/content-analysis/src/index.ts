@@ -15,7 +15,7 @@ export { analyzeSeo } from "./seo";
 export { analyzeStructure } from "./structure";
 
 // Types
-export * from "./types";
+export * from "./plugins/types/index";
 
 // Utilities (exported for advanced usage)
 export {
@@ -37,7 +37,7 @@ import { analyzeReadability } from "./readability";
 import { analyzeSeo } from "./seo";
 import { analyzeStructure } from "./structure";
 // Import for combined analysis
-import type { AnalysisInput, ContentAnalysisResult } from "./types";
+import type { AnalysisInput, ContentAnalysisResult } from "./plugins/types/index";
 
 /**
  * Perform a comprehensive content analysis

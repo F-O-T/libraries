@@ -27,17 +27,17 @@
     }
   },
   "scripts": {
-    "build": "bunup",
-    "dev": "bunup --watch",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage",
-    "test:watch": "bun test --watch",
-    "typecheck": "tsc",
-    "check": "biome check --write ."
+    "build": "fot build",
+    "test": "fot test",
+    "lint": "fot lint",
+    "format": "fot format"
   },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",
     "@f-o-t/config": "workspace:*"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   },
   "repository": {
     "type": "git",

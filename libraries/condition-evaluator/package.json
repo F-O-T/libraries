@@ -1,50 +1,52 @@
 {
-  "name": "@f-o-t/condition-evaluator",
-  "version": "2.0.1",
-  "description": "A flexible, typesafe condition evaluator for building rule engines",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format"
-  },
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "workspace:*",
-    "@f-o-t/config": "workspace:*"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/condition-evaluator"
-  },
-  "bugs": {
-    "url": "https://github.com/F-O-T/libraries/issues"
-  },
-  "files": ["dist"],
-  "homepage": "https://github.com/F-O-T/libraries/blob/master/libraries/condition-evaluator",
-  "license": "MIT",
-  "peerDependencies": {
-    "typescript": ">=4.5.0"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  }
+   "name": "@f-o-t/condition-evaluator",
+   "version": "2.0.1",
+   "description": "A flexible, typesafe condition evaluator for building rule engines",
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      }
+   },
+   "scripts": {
+      "build": "fot build",
+      "test": "fot test",
+      "lint": "fot lint",
+      "format": "fot format"
+   },
+   "dependencies": {
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "workspace:*",
+      "@f-o-t/config": "workspace:*"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/condition-evaluator"
+   },
+   "bugs": {
+      "url": "https://github.com/F-O-T/libraries/issues"
+   },
+   "files": [
+      "dist"
+   ],
+   "homepage": "https://github.com/F-O-T/libraries/blob/master/libraries/condition-evaluator",
+   "license": "MIT",
+   "peerDependencies": {
+      "typescript": ">=4.5.0"
+   },
+   "peerDependenciesMeta": {
+      "typescript": {
+         "optional": true
+      }
+   },
+   "private": false,
+   "publishConfig": {
+      "access": "public"
+   }
 }

@@ -1,7 +1,9 @@
 import { join } from "node:path";
+import { writeFileSync } from "node:fs";
 import { build as bunBuild } from "bun";
 import { $ } from "bun";
 import type { BuildFormat } from "@f-o-t/config";
+import { generateTSConfig } from "@f-o-t/config";
 import { loadFotConfig } from "./config-loader";
 
 /**
@@ -32,6 +34,13 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
 
   console.log("Loading fot.config.ts...");
   const config = await loadFotConfig(cwd);
+
+  // Generate tsconfig.json from config to keep it in sync
+  const tsconfig = generateTSConfig(config);
+  writeFileSync(
+    join(cwd, "tsconfig.json"),
+    JSON.stringify(tsconfig, null, 2) + "\n"
+  );
 
   // Collect all entry points (main + plugins)
   const entryPoints: string[] = [];

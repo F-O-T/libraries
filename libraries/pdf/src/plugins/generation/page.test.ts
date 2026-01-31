@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createRef } from "../core/objects.ts";
+import { createRef } from "../../core/objects.ts";
 import { PDFPage } from "./page.ts";
 
 describe("PDFPage", () => {
