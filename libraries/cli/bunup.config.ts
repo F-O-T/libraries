@@ -1,7 +1,7 @@
 import { defineConfig } from "bunup";
 
 export default defineConfig({
-  entries: ["src/index.ts"],
+  entry: "src/index.ts",
   outdir: "dist",
   target: "bun",
   format: "esm",
@@ -9,4 +9,5 @@ export default defineConfig({
   clean: true,
   minify: false,
   sourcemap: true,
+  external: ["@f-o-t/config"], // Keep as external - needed by user config files
 });

@@ -13,11 +13,12 @@
   ],
   "scripts": {
     "build": "bunup",
+    "postbuild": "chmod +x dist/index.js",
     "dev": "bunup --watch",
     "test": "bun test"
   },
   "dependencies": {
-    "@f-o-t/config": "workspace:*",
+    "@f-o-t/config": "^0.1.0",
     "commander": "^12.1.0"
   },
   "devDependencies": {

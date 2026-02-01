@@ -482,6 +482,153 @@ const result = evaluator.evaluate(
 // - money_positive, money_negative, money_zero
 ```
 
+### Rules Engine Integration
+
+Use money operators with `@f-o-t/rules-engine` to build complex financial business rules:
+
+```typescript
+import { createEngine } from "@f-o-t/rules-engine";
+import { moneyOperators } from "@f-o-t/money/plugins/operators";
+import { z } from "zod";
+
+// Define consequence types for your rules
+const TransactionConsequences = {
+  approve: z.object({ approved: z.boolean() }),
+  require_review: z.object({ reason: z.string() }),
+  reject: z.object({ reason: z.string() }),
+  apply_fee: z.object({ amount: z.string(), currency: z.string() }),
+};
+
+// Create engine with money operators
+const engine = createEngine({
+  operators: moneyOperators,
+  consequences: TransactionConsequences,
+});
+
+// Add rules for high-value transactions
+engine.addRule({
+  name: "high-value-transaction-review",
+  priority: 100,
+  conditions: {
+    id: "g1",
+    operator: "AND",
+    conditions: [
+      {
+        id: "c1",
+        type: "custom",
+        field: "amount",
+        operator: "money_gt",
+        value: { amount: "10000.00", currency: "BRL" },
+      },
+    ],
+  },
+  consequences: [
+    {
+      type: "require_review",
+      payload: { reason: "High value transaction requires approval" },
+    },
+  ],
+});
+
+// Add rules for transaction fees
+engine.addRule({
+  name: "pix-fee-waiver",
+  priority: 50,
+  conditions: {
+    id: "g2",
+    operator: "AND",
+    conditions: [
+      {
+        id: "c1",
+        type: "string",
+        field: "paymentMethod",
+        operator: "eq",
+        value: "pix",
+      },
+      {
+        id: "c2",
+        type: "custom",
+        field: "amount",
+        operator: "money_lt",
+        value: { amount: "100.00", currency: "BRL" },
+      },
+    ],
+  },
+  consequences: [
+    {
+      type: "apply_fee",
+      payload: { amount: "0.00", currency: "BRL" },
+    },
+  ],
+});
+
+// Evaluate rules
+const result = await engine.evaluate({
+  amount: { amount: "15000.00", currency: "BRL" },
+  paymentMethod: "pix",
+});
+
+console.log(result.matchedRules);    // Rules that matched
+console.log(result.consequences);    // Actions to take
+```
+
+**Complex multi-condition rules:**
+
+```typescript
+// Discount eligibility with money conditions
+engine.addRule({
+  name: "volume-discount",
+  conditions: {
+    id: "g1",
+    operator: "AND",
+    conditions: [
+      {
+        id: "c1",
+        type: "custom",
+        field: "cartTotal",
+        operator: "money_between",
+        value: [
+          { amount: "500.00", currency: "BRL" },
+          { amount: "2000.00", currency: "BRL" },
+        ],
+      },
+      {
+        id: "c2",
+        type: "custom",
+        field: "customerLifetimeValue",
+        operator: "money_gt",
+        value: { amount: "5000.00", currency: "BRL" },
+      },
+      {
+        id: "c3",
+        type: "boolean",
+        field: "isPremiumMember",
+        operator: "eq",
+        value: true,
+      },
+    ],
+  },
+  consequences: [
+    {
+      type: "apply_discount",
+      payload: { percentage: 15 },
+    },
+  ],
+});
+```
+
+**Available money operators for rules:**
+- `money_eq` - Equal to
+- `money_neq` - Not equal to  
+- `money_gt` - Greater than
+- `money_gte` - Greater than or equal
+- `money_lt` - Less than
+- `money_lte` - Less than or equal
+- `money_between` - Between two values (inclusive)
+- `money_positive` - Is positive (> 0)
+- `money_negative` - Is negative (< 0)
+- `money_zero` - Is zero
+
 ### Custom Currencies
 
 Register currencies not in ISO 4217:

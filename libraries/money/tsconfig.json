@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "declaration": true,
     "isolatedDeclarations": false,
     "module": "Preserve",
