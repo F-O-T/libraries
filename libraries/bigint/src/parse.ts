@@ -15,39 +15,51 @@ export function parseToBigInt(input: ParseInput): bigint {
   // Convert to string for uniform processing
   const stringValue = typeof value === "number" ? value.toString() : value;
 
+  // Normalize the string
+  const normalized = stringValue.trim();
+
+  // Check for negative
+  const isNegative = normalized.startsWith("-");
+  const absStr = isNegative ? normalized.slice(1) : normalized;
+
   // Split into integer and decimal parts
-  const [integerPart = "0", decimalPart = ""] = stringValue.split(".");
+  const [integerPart = "0", decimalPart = ""] = absStr.split(".");
 
   // Remove leading zeros from integer part (except single zero)
-  const cleanInteger = integerPart.replace(/^(-?)0+(\d)/, "$1$2") || "0";
+  const cleanInteger = integerPart.replace(/^0+(\d)/, "$1") || "0";
 
   // Determine actual decimal digits
   const actualDecimals = decimalPart.length;
 
+  let amount: bigint;
+
   if (actualDecimals <= scale) {
     // Pad with zeros to reach target scale
     const paddedDecimals = decimalPart.padEnd(scale, "0");
-    return BigInt(cleanInteger + paddedDecimals);
+    amount = BigInt(cleanInteger + paddedDecimals);
   } else {
     // Need to round - too many decimal places
-    const keptDecimals = decimalPart.slice(0, scale);
-    const excessDecimals = decimalPart.slice(scale);
+    const mode = roundingMode;
 
-    // Base value (before rounding)
-    const baseValue = BigInt(cleanInteger + keptDecimals);
-
-    // Determine if we need to adjust based on excess
-    const isNegative = stringValue.startsWith("-");
-
-    if (roundingMode === "truncate") {
-      return baseValue;
-    } else if (roundingMode === "round") {
-      return bankersRound(baseValue, excessDecimals, isNegative);
-    } else if (roundingMode === "ceil") {
-      return roundUp(baseValue, excessDecimals, isNegative, "ceil");
+    if (mode === "truncate") {
+      const keptDecimals = decimalPart.slice(0, scale);
+      amount = BigInt(cleanInteger + keptDecimals);
     } else {
-      // floor
-      return roundDown(baseValue, excessDecimals, isNegative, "floor");
+      // Parse with full precision, then round
+      const fullAmount = BigInt(cleanInteger + decimalPart);
+      const extraDigits = decimalPart.length - scale;
+      const divisor = 10n ** BigInt(extraDigits);
+
+      if (mode === "round") {
+        amount = bankersRound(fullAmount, divisor);
+      } else if (mode === "ceil") {
+        amount = roundUp(fullAmount, divisor);
+      } else {
+        // floor
+        amount = roundDown(fullAmount, divisor);
+      }
     }
   }
+
+  return isNegative ? -amount : amount;
 }
