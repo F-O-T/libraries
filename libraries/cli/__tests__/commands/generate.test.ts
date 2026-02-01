@@ -1,10 +1,10 @@
 import { describe, test, expect, afterEach } from "bun:test";
 import { rmSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { generateConfigFiles } from "./generate";
+import { generateConfigFiles } from "../../src/commands/generate";
 
 describe("generate command", () => {
-  const fixtureDir = join(__dirname, "..", "__fixtures__", "basic-config");
+  const fixtureDir = join(__dirname, "..", "..", "src", "__fixtures__", "basic-config");
   const packageJsonPath = join(fixtureDir, "package.json");
   const tsconfigPath = join(fixtureDir, "tsconfig.json");
   const biomeConfigPath = join(fixtureDir, "biome.json");
