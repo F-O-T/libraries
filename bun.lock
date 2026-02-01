@@ -241,7 +241,7 @@
     },
     "libraries/rules-engine": {
       "name": "@f-o-t/rules-engine",
-      "version": "2.0.2",
+      "version": "3.0.0",
       "dependencies": {
         "@f-o-t/condition-evaluator": "workspace:*",
         "zod": "^4.3.6",
@@ -1407,6 +1407,8 @@
 
     "@f-o-t/spelling/@types/bun": ["@types/bun@1.3.5", "", { "dependencies": { "bun-types": "1.3.5" } }, "sha512-RnygCqNrd3srIPEWBd5LFeUYG7plCoH2Yw9WaZGyNmdTEei+gWaHqydbaIRkIkcbXwhBT94q78QljxN0Sk838w=="],
 
+    "@f-o-t/tax-calculator/@f-o-t/rules-engine": ["@f-o-t/rules-engine@2.0.2", "", { "dependencies": { "@f-o-t/condition-evaluator": "2.0.0", "zod": "4.3.4" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-hrdSDeujKcrOS/OYti+3etRPXoTEX2po7MJIYAul71IGnQJzOV15I2eZPo9xxy8r4sAik1wxuKrXg36pqytNTg=="],
+
     "@f-o-t/tax-calculator/bumpp": ["bumpp@10.3.2", "", { "dependencies": { "ansis": "^4.2.0", "args-tokenizer": "^0.3.0", "c12": "^3.3.2", "cac": "^6.7.14", "escalade": "^3.2.0", "jsonc-parser": "^3.3.1", "package-manager-detector": "^1.5.0", "semver": "^7.7.3", "tinyexec": "^1.0.2", "tinyglobby": "^0.2.15", "yaml": "^2.8.1" }, "bin": { "bumpp": "bin/bumpp.mjs" } }, "sha512-yUUkVx5zpTywLNX97MlrqtpanI7eMMwFwLntWR2EBVDw3/Pm3aRIzCoDEGHATLIiHK9PuJC7xWI4XNWqXItSPg=="],
 
     "@f-o-t/tax-calculator/zod": ["zod@4.3.4", "", {}, "sha512-Zw/uYiiyF6pUT1qmKbZziChgNPRu+ZRneAsMUDU6IwmXdWt5JwcUfy2bvLOCUtz5UniaN/Zx5aFttZYbYc7O/A=="],
@@ -1499,6 +1501,8 @@
 
     "@f-o-t/spelling/@types/bun/bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
 
+    "@f-o-t/tax-calculator/@f-o-t/rules-engine/@f-o-t/condition-evaluator": ["@f-o-t/condition-evaluator@2.0.0", "", { "dependencies": { "zod": "4.2.1" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-b9QFYL4d/ASqZTiSRekVTiCik8ohuoMbE26f5kGbHQJfeeDVv2ar38QtqxWS3phLRra1Ckt2m7JuCmgRmxEoJw=="],
+
     "@f-o-t/tax-calculator/bumpp/jsonc-parser": ["jsonc-parser@3.3.1", "", {}, "sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ=="],
 
     "@f-o-t/uom/bumpp/jsonc-parser": ["jsonc-parser@3.3.1", "", {}, "sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ=="],
@@ -1512,5 +1516,7 @@
     "@oxc-transform/binding-wasm32-wasi/@napi-rs/wasm-runtime/@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
     "babel-plugin-macros/cosmiconfig/yaml": ["yaml@1.10.2", "", {}, "sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg=="],
+
+    "@f-o-t/tax-calculator/@f-o-t/rules-engine/@f-o-t/condition-evaluator/zod": ["zod@4.2.1", "", {}, "sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw=="],
   }
 }
