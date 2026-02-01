@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-01-31
+
+### ⚠️ BREAKING CHANGES
+
+- Engine now requires `evaluator` or `operators` configuration
+- `evaluateRule()` function signature changed to accept evaluator parameter
+- `evaluateRules()` function signature changed to accept evaluator parameter
+
+### 🎉 Features
+
+- **Custom operators support**: Use custom operators from any library (e.g., `@f-o-t/money/operators`)
+- **Plugin system integration**: Full integration with `@f-o-t/condition-evaluator` plugin system
+- **Better extensibility**: Easily compose multiple operator sets
+- **Type-safe operators**: Better TypeScript support for custom operator types
+
+### 📚 Documentation
+
+- Added migration guide for v2 → v3
+- Updated README with custom operator examples
+- Added examples for money operators integration
+
+### 🔧 Migration
+
+See [MIGRATION-v3.md](./docs/MIGRATION-v3.md) for detailed migration instructions.
+
+**Quick migration:**
+```typescript
+// Before (v2.x)
+const engine = createEngine({ consequences: MyConsequences });
+
+// After (v3.x)
+const engine = createEngine({
+  consequences: MyConsequences,
+  evaluator: createEvaluator() // Add this
+});
+```
+
+---
+
 ## [2.0.2] - 2026-01-25
 
 ### Changed
