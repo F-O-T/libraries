@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { ConditionGroup } from "@f-o-t/condition-evaluator";
+import { createEvaluator, createOperator } from "@f-o-t/condition-evaluator";
 import { evaluateRule, evaluateRules } from "../src/core/evaluate";
 import type { DefaultConsequences } from "../src/types/consequence";
 import type { Rule } from "../src/types/rule";
@@ -47,7 +48,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator);
 
       expect(result.matched).toBe(true);
       expect(result.ruleId).toBe("rule-1");
@@ -64,7 +66,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator);
 
       expect(result.matched).toBe(false);
       expect(result.consequences).toHaveLength(0);
@@ -77,7 +80,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context, { skipDisabled: true });
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator, { skipDisabled: true });
 
       expect(result.skipped).toBe(true);
       expect(result.skipReason).toBe("Rule is disabled");
@@ -91,7 +95,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context, { skipDisabled: false });
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator, { skipDisabled: false });
 
       expect(result.skipped).toBe(false);
       expect(result.matched).toBe(true);
@@ -104,7 +109,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator);
 
       expect(result.evaluationTimeMs).toBeGreaterThanOrEqual(0);
    });
@@ -137,7 +143,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator);
 
       expect(result.matched).toBe(true);
    });
@@ -170,7 +177,8 @@ describe("evaluateRule", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRule(rule, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRule(rule, context, evaluator);
 
       expect(result.matched).toBe(true);
    });
@@ -187,7 +195,8 @@ describe("evaluateRules", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRules(rules, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRules(rules, context, evaluator);
 
       expect(result.results).toHaveLength(2);
       expect(result.matchedRules).toHaveLength(2);
@@ -204,7 +213,8 @@ describe("evaluateRules", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRules(rules, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRules(rules, context, evaluator);
 
       expect(result.results).toHaveLength(1);
       expect(result.matchedRules).toHaveLength(1);
@@ -222,7 +232,8 @@ describe("evaluateRules", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRules(rules, context, {
+      const evaluator = createEvaluator();
+      const result = evaluateRules(rules, context, evaluator, {
          config: { conflictResolution: "first-match" },
       });
 
@@ -246,7 +257,8 @@ describe("evaluateRules", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRules(rules, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRules(rules, context, evaluator);
 
       expect(result.consequences).toHaveLength(2);
    });
@@ -261,7 +273,8 @@ describe("evaluateRules", () => {
          timestamp: new Date(),
       };
 
-      const result = evaluateRules(rules, context);
+      const evaluator = createEvaluator();
+      const result = evaluateRules(rules, context, evaluator);
 
       expect(result.matchedRules).toHaveLength(1);
       expect(result.results[1]?.skipped).toBe(true);
@@ -276,7 +289,8 @@ describe("evaluateRules", () => {
 
       const evaluatedRules: string[] = [];
 
-      evaluateRules(rules, context, {
+      const evaluator = createEvaluator();
+      evaluateRules(rules, context, evaluator, {
          onRuleEvaluated: (result) => {
             evaluatedRules.push(result.ruleId);
          },
@@ -284,4 +298,42 @@ describe("evaluateRules", () => {
 
       expect(evaluatedRules).toContain("rule-1");
    });
+});
+
+describe("evaluateRule with custom evaluator", () => {
+  test("should use provided evaluator for custom operators", () => {
+    const customOp = createOperator({
+      name: "always_true",
+      type: "custom",
+      evaluate: () => true,
+    });
+
+    const evaluator = createEvaluator({
+      operators: { always_true: customOp }
+    });
+
+    const rule = createTestRule({
+      conditions: {
+        id: "group-1",
+        operator: "AND",
+        conditions: [
+          {
+            id: "cond-1",
+            type: "custom",
+            field: "anything",
+            operator: "always_true",
+          },
+        ],
+      },
+    });
+
+    const context = {
+      data: { anything: "value" },
+      timestamp: new Date(),
+    };
+
+    const result = evaluateRule(rule, context, evaluator);
+
+    expect(result.matched).toBe(true);
+  });
 });

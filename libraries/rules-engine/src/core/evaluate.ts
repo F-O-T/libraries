@@ -1,6 +1,6 @@
 import {
-   evaluateConditionGroup,
-   type GroupEvaluationResult,
+  createEvaluator,
+  type GroupEvaluationResult,
 } from "@f-o-t/condition-evaluator";
 import type {
    AggregatedConsequence,
@@ -25,6 +25,7 @@ export const evaluateRule = <
 >(
    rule: Rule<TContext, TConsequences>,
    context: EvaluationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator>,
    options: EvaluateRuleOptions = {},
 ): RuleEvaluationResult<TContext, TConsequences> => {
    if (options.skipDisabled && !rule.enabled) {
@@ -46,7 +47,8 @@ export const evaluateRule = <
             data: context.data as Record<string, unknown>,
             metadata: context.metadata as Record<string, unknown> | undefined,
          };
-         return evaluateConditionGroup(rule.conditions, evalContext);
+         // Use the provided evaluator instead of hardcoded evaluateConditionGroup
+         return evaluator.evaluateConditionGroup(rule.conditions, evalContext);
       } catch (error) {
          return {
             error,
@@ -130,6 +132,7 @@ export const evaluateRules = <
 >(
    rules: ReadonlyArray<Rule<TContext, TConsequences>>,
    context: EvaluationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator>,
    options: EvaluateRulesOptions<TContext, TConsequences> = {},
 ): EvaluateRulesResult<TContext, TConsequences> => {
    const config: EvaluateConfig = {
@@ -145,7 +148,7 @@ export const evaluateRules = <
    let stoppedByRuleId: string | undefined;
 
    for (const rule of rules) {
-      const result = evaluateRule(rule, context, { skipDisabled: true });
+      const result = evaluateRule(rule, context, evaluator, { skipDisabled: true });
       results.push(result);
 
       options.onRuleEvaluated?.(result);
