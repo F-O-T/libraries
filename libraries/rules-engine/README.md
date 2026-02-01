@@ -23,35 +23,65 @@ bun add @f-o-t/rules-engine
 ## Quick Start
 
 ```typescript
-import { createEngine, rule, all, num, str } from "@f-o-t/rules-engine";
+import { createEngine, createEvaluator } from "@f-o-t/rules-engine";
+import { z } from "zod";
 
-// Create an engine
-const engine = createEngine();
+// Define your consequence types
+const MyConsequences = {
+  send_email: z.object({
+    to: z.string().email(),
+    subject: z.string(),
+  }),
+  apply_discount: z.object({
+    percentage: z.number(),
+  }),
+};
 
-// Add rules using the fluent builder
-engine.addRule(
-   rule()
-      .named("Premium Discount")
-      .when(
-         all(
-            num("orderTotal", "gt", 100),
-            str("customerType", "eq", "premium")
-         )
-      )
-      .then("apply_discount", { percentage: 15 })
-      .withPriority(100)
-      .tagged("pricing", "discount")
-      .build()
-);
-
-// Evaluate against context
-const result = await engine.evaluate({
-   orderTotal: 150,
-   customerType: "premium",
+// Create engine with built-in operators
+const engine = createEngine({
+  consequences: MyConsequences,
+  evaluator: createEvaluator(), // Required!
 });
 
-console.log(result.matchedRules);    // Rules that matched
-console.log(result.consequences);    // Actions to execute
+// Or with custom operators
+import { moneyOperators } from "@f-o-t/money/operators";
+
+const engine = createEngine({
+  consequences: MyConsequences,
+  operators: moneyOperators, // Convenience: engine creates evaluator
+});
+
+// Add rules
+engine.addRule({
+  name: "high-value-customer",
+  conditions: {
+    id: "g1",
+    operator: "AND",
+    conditions: [
+      {
+        id: "c1",
+        type: "number",
+        field: "totalPurchases",
+        operator: "gt",
+        value: 1000,
+      },
+    ],
+  },
+  consequences: [
+    {
+      type: "apply_discount",
+      payload: { percentage: 10 },
+    },
+  ],
+});
+
+// Evaluate
+const result = await engine.evaluate({
+  totalPurchases: 1500,
+});
+
+console.log(result.matchedRules); // Rules that matched
+console.log(result.consequences); // Actions to take
 ```
 
 ## Building Conditions
@@ -123,6 +153,59 @@ const myRule = rule()
    .inCategory("pricing")                       // Single category
    .withMetadata({ custom: "data" })            // Custom metadata
    .build();
+```
+
+## Custom Operators
+
+Use custom operators from libraries like `@f-o-t/money`:
+
+```typescript
+import { createEngine } from "@f-o-t/rules-engine";
+import { moneyOperators } from "@f-o-t/money/operators";
+
+const engine = createEngine({
+  operators: moneyOperators,
+});
+
+engine.addRule({
+  name: "large-transaction",
+  conditions: {
+    id: "g1",
+    operator: "AND",
+    conditions: [
+      {
+        id: "c1",
+        type: "custom",
+        field: "amount",
+        operator: "money_gt",
+        value: { amount: "5000.00", currency: "BRL" },
+      },
+    ],
+  },
+  consequences: [
+    { type: "flag_for_review", payload: {} },
+  ],
+});
+```
+
+Create your own custom operators:
+
+```typescript
+import { createEngine, createOperator } from "@f-o-t/rules-engine";
+
+const customOperator = createOperator({
+  name: "is_valid_cpf",
+  type: "custom",
+  description: "Validate Brazilian CPF",
+  evaluate: (actual, expected) => {
+    // Your validation logic
+    return validateCPF(actual as string);
+  },
+});
+
+const engine = createEngine({
+  operators: { is_valid_cpf: customOperator },
+});
 ```
 
 ## Engine API
