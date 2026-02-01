@@ -19,6 +19,8 @@ export type {
 export {
    ConditionGroup as ConditionGroupSchema,
    isConditionGroup,
+   createEvaluator,
+   createOperator,
 } from "@f-o-t/condition-evaluator";
 export {
    analyzeConsequenceUsage,
