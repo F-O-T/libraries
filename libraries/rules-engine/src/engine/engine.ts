@@ -116,6 +116,20 @@ const resolveConfig = <
 >(
    config: EngineConfig<TContext, TConsequences>,
 ): ResolvedEngineConfig<TContext, TConsequences> => {
+   // Validate evaluator config
+   if (!config.evaluator && !config.operators) {
+      throw new Error(
+         "Engine requires either 'evaluator' or 'operators' config. " +
+         "Pass { evaluator: createEvaluator() } for built-in operators only, " +
+         "or { operators: customOperators } to use custom operators."
+      );
+   }
+
+   // Create evaluator from config
+   const evaluator = config.evaluator
+      ? config.evaluator
+      : createEvaluator({ operators: config.operators });
+
    return {
       consequences: config.consequences,
       conflictResolution:
@@ -138,8 +152,7 @@ const resolveConfig = <
       continueOnError: config.continueOnError ?? true,
       slowRuleThresholdMs: config.slowRuleThresholdMs ?? 10,
       hookTimeoutMs: config.hookTimeoutMs,
-      // TODO: Task 3 will properly handle evaluator creation and validation
-      evaluator: config.evaluator ?? createEvaluator(config.operators ? { operators: config.operators } : undefined),
+      evaluator, // Add to resolved config
    };
 };
 
@@ -237,7 +250,7 @@ export const createEngine = <
          }> = [];
 
          for (const rule of rulesToEvaluate) {
-            const result = evaluateRule(rule, context, { skipDisabled: true });
+            const result = evaluateRule(rule, context, resolvedConfig.evaluator, { skipDisabled: true });
             results.push({ rule, result });
          }
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { Condition, ConditionGroup } from "@f-o-t/condition-evaluator";
+import { createEvaluator, createOperator } from "@f-o-t/condition-evaluator";
 import { z } from "zod";
 import { createEngine, type Engine } from "../src/engine/engine";
 import type { ConsequenceDefinitions } from "../src/types/consequence";
@@ -78,6 +79,7 @@ describe("createEngine", () => {
    beforeEach(() => {
       engine = createEngine<TestContext, TestConsequences>({
          consequences: TestConsequences,
+         evaluator: createEvaluator(),
       });
    });
 
@@ -535,6 +537,7 @@ describe("createEngine", () => {
          const engineFirstMatch = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
             conflictResolution: "first-match",
+            evaluator: createEvaluator(),
          });
 
          engineFirstMatch.addRule({
@@ -811,6 +814,7 @@ describe("createEngine", () => {
          const noCacheEngine = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
             cache: { enabled: false },
+            evaluator: createEvaluator(),
          });
 
          noCacheEngine.addRule({
@@ -908,6 +912,7 @@ describe("createEngine", () => {
 
          const hookEngine = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
+            evaluator: createEvaluator(),
             hooks: {
                beforeEvaluation: (context) => {
                   hookCalled = true;
@@ -942,6 +947,7 @@ describe("createEngine", () => {
 
          const hookEngine = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
+            evaluator: createEvaluator(),
             hooks: {
                afterEvaluation: (result) => {
                   hookCalled = true;
@@ -976,6 +982,7 @@ describe("createEngine", () => {
 
          const hookEngine = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
+            evaluator: createEvaluator(),
             hooks: {
                onRuleMatch: (rule) => {
                   matchedRuleNames.push(rule.name);
@@ -1009,6 +1016,7 @@ describe("createEngine", () => {
 
          const hookEngine = createEngine<TestContext, TestConsequences>({
             consequences: TestConsequences,
+            evaluator: createEvaluator(),
             hooks: {
                onConsequenceCollected: (_rule, consequence) => {
                   collectedConsequences.push(consequence.type as string);
@@ -1074,6 +1082,7 @@ describe("complex conditions", () => {
    it("should handle nested AND/OR conditions", async () => {
       const engine = createEngine<TestContext, TestConsequences>({
          consequences: TestConsequences,
+         evaluator: createEvaluator(),
       });
 
       engine.addRule({
@@ -1120,4 +1129,85 @@ describe("complex conditions", () => {
       expect(adult_low_score.totalRulesMatched).toBe(0);
       expect(minor_premium.totalRulesMatched).toBe(0);
    });
+});
+
+describe("Engine with custom operators", () => {
+  it("should throw error when neither evaluator nor operators provided", () => {
+    expect(() => {
+      createEngine<TestContext, TestConsequences>({
+        consequences: TestConsequences,
+      });
+    }).toThrow("Engine requires either 'evaluator' or 'operators' config");
+  });
+
+  it("should accept evaluator in config", () => {
+    const evaluator = createEvaluator();
+
+    const engine = createEngine<TestContext, TestConsequences>({
+      consequences: TestConsequences,
+      evaluator,
+    });
+
+    expect(engine).toBeDefined();
+  });
+
+  it("should create evaluator from operators config", () => {
+    const customOp = createOperator({
+      name: "always_match",
+      type: "custom",
+      evaluate: () => true,
+    });
+
+    const engine = createEngine<TestContext, TestConsequences>({
+      consequences: TestConsequences,
+      operators: { always_match: customOp },
+    });
+
+    expect(engine).toBeDefined();
+  });
+
+  it("should use custom operator in rule evaluation", async () => {
+    const customOp = createOperator({
+      name: "always_match",
+      type: "custom",
+      evaluate: () => true,
+    });
+
+    const engine = createEngine<TestContext, TestConsequences>({
+      consequences: TestConsequences,
+      operators: { always_match: customOp },
+    });
+
+    engine.addRule({
+      name: "custom-op-rule",
+      conditions: {
+        id: "g1",
+        operator: "AND",
+        conditions: [
+          {
+            id: "c1",
+            type: "custom",
+            field: "anything",
+            operator: "always_match",
+          },
+        ],
+      },
+      consequences: [
+        {
+          type: "setFlag",
+          payload: { name: "matched", value: true },
+        },
+      ],
+    });
+
+    const result = await engine.evaluate({
+      age: 25,
+      country: "BR",
+      premium: false,
+      score: 100
+    });
+
+    expect(result.matchedRules).toHaveLength(1);
+    expect(result.matchedRules[0]?.name).toBe("custom-op-rule");
+  });
 });
