@@ -6,7 +6,7 @@ import type {
    PluginConfig,
    ResolvedFotConfig,
    TypeScriptOptions,
-} from "./types.ts";
+} from "../src/types.ts";
 
 describe("BuildFormat", () => {
    it("should accept valid build formats", () => {

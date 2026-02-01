@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { defineFotConfig } from "./factory";
+import { defineFotConfig } from "../src/factory";
 
 describe("defineFotConfig", () => {
    test("applies defaults for formats", () => {

@@ -5,7 +5,7 @@ import {
    fotConfigSchema,
    pluginConfigSchema,
    typeScriptOptionsSchema,
-} from "./schemas.ts";
+} from "../src/schemas.ts";
 
 describe("buildFormatSchema", () => {
    it("should accept valid formats", () => {
