@@ -1,3 +1,4 @@
+import { createEvaluator } from "@f-o-t/condition-evaluator";
 import { evaluateRule, evaluateRules } from "../core/evaluate";
 import type {
    ConsequenceDefinitions,
@@ -81,12 +82,13 @@ export const simulate = <
 >(
    rules: ReadonlyArray<Rule<TContext, TConsequences>>,
    context: SimulationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator> = createEvaluator(),
 ): SimulationResult<TContext, TConsequences> => {
    const startTime = performance.now();
 
    const enabledRules = rules.filter((r) => r.enabled);
    const evalContext = toEvaluationContext(context);
-   const results = evaluateRules(enabledRules, evalContext);
+   const results = evaluateRules(enabledRules, evalContext, evaluator);
 
    const matchedRules = results.results.filter((r) => r.matched);
    const unmatchedRules: Array<{
@@ -145,13 +147,14 @@ export const simulateSingleRule = <
 >(
    rule: Rule<TContext, TConsequences>,
    context: SimulationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator> = createEvaluator(),
 ): {
    matched: boolean;
    conditionResult: unknown;
    consequences: ReadonlyArray<{ type: keyof TConsequences; payload: unknown }>;
 } => {
    const evalContext = toEvaluationContext(context);
-   const result = evaluateRule(rule, evalContext);
+   const result = evaluateRule(rule, evalContext, evaluator);
 
    return {
       matched: result.matched,
@@ -169,9 +172,10 @@ export const whatIf = <
    originalRules: ReadonlyArray<Rule<TContext, TConsequences>>,
    modifiedRules: ReadonlyArray<Rule<TContext, TConsequences>>,
    context: SimulationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator> = createEvaluator(),
 ): WhatIfResult<TContext, TConsequences> => {
-   const original = simulate(originalRules, context);
-   const modified = simulate(modifiedRules, context);
+   const original = simulate(originalRules, context, evaluator);
+   const modified = simulate(modifiedRules, context, evaluator);
 
    const originalMatchIds = new Set(original.matchedRules.map((r) => r.ruleId));
    const modifiedMatchIds = new Set(modified.matchedRules.map((r) => r.ruleId));
@@ -235,8 +239,9 @@ export const batchSimulate = <
 >(
    rules: ReadonlyArray<Rule<TContext, TConsequences>>,
    contexts: ReadonlyArray<SimulationContext<TContext>>,
+   evaluator: ReturnType<typeof createEvaluator> = createEvaluator(),
 ): BatchSimulationResult<TContext, TConsequences> => {
-   const results = contexts.map((context) => simulate(rules, context));
+   const results = contexts.map((context) => simulate(rules, context, evaluator));
 
    const ruleMatchFrequency = new Map<string, number>();
    const consequenceFrequency = new Map<string, number>();
@@ -280,13 +285,14 @@ export const findRulesAffectedByContextChange = <
    rules: ReadonlyArray<Rule<TContext, TConsequences>>,
    originalContext: SimulationContext<TContext>,
    modifiedContext: SimulationContext<TContext>,
+   evaluator: ReturnType<typeof createEvaluator> = createEvaluator(),
 ): {
    becameTrue: ReadonlyArray<Rule<TContext, TConsequences>>;
    becameFalse: ReadonlyArray<Rule<TContext, TConsequences>>;
    unchanged: ReadonlyArray<Rule<TContext, TConsequences>>;
 } => {
-   const originalResult = simulate(rules, originalContext);
-   const modifiedResult = simulate(rules, modifiedContext);
+   const originalResult = simulate(rules, originalContext, evaluator);
+   const modifiedResult = simulate(rules, modifiedContext, evaluator);
 
    const originalMatchIds = new Set(
       originalResult.matchedRules.map((r) => r.ruleId),

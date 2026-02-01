@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { ConditionGroup } from "@f-o-t/condition-evaluator";
+import { createEvaluator } from "@f-o-t/condition-evaluator";
 import {
    addVersion,
    all,
@@ -89,7 +90,7 @@ describe("Integration Tests", () => {
 
    describe("Engine Operations", () => {
       test("creates engine and manages rules", () => {
-         const engine = createEngine();
+         const engine = createEngine({ evaluator: createEvaluator() });
 
          const ruleInput = rule()
             .named("Rule 1")
@@ -111,7 +112,7 @@ describe("Integration Tests", () => {
       });
 
       test("evaluates rules against context", async () => {
-         const engine = createEngine();
+         const engine = createEngine({ evaluator: createEvaluator() });
 
          engine.addRule(
             rule()
