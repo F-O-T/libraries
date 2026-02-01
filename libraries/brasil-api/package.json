@@ -1,52 +1,29 @@
 {
-   "name": "@f-o-t/brasil-api",
-   "version": "0.1.0",
-   "description": "Type-safe Brasil API wrapper with Zod validation",
-   "type": "module",
-   "license": "MIT",
-   "main": "./dist/index.js",
-   "types": "./dist/index.d.ts",
-   "exports": {
-      ".": {
-         "types": "./dist/index.d.ts",
-         "default": "./dist/index.js"
-      }
-   },
-   "files": [
-      "dist"
-   ],
-   "scripts": {
-      "build": "fot build",
-      "test": "fot test",
-      "lint": "fot lint",
-      "format": "fot format"
-   },
-   "dependencies": {
-      "zod": "^3.23.8"
-   },
-   "devDependencies": {
-      "@f-o-t/cli": "workspace:*",
-      "@f-o-t/config": "workspace:*"
-   },
-   "peerDependencies": {
-      "typescript": ">=4.5.0"
-   },
-   "peerDependenciesMeta": {
-      "typescript": {
-         "optional": true
-      }
-   },
-   "private": false,
-   "publishConfig": {
-      "access": "public"
-   },
-   "repository": {
-      "type": "git",
-      "url": "https://github.com/F-O-T/libraries.git",
-      "directory": "libraries/brasil-api"
-   },
-   "bugs": {
-      "url": "https://github.com/F-O-T/libraries/issues"
-   },
-   "homepage": "https://github.com/F-O-T/libraries/blob/master/libraries/brasil-api"
+  "name": "@f-o-t/brasil-api",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "fot build",
+    "test": "fot test",
+    "lint": "fot lint",
+    "format": "fot format",
+    "typecheck": "fot typecheck"
+  },
+  "devDependencies": {
+    "@f-o-t/cli": "workspace:*",
+    "@f-o-t/config": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/F-O-T/libraries.git",
+    "directory": "libraries/brasil-api"
+  }
 }

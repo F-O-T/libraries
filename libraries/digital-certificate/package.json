@@ -1,82 +1,37 @@
 {
-   "name": "@f-o-t/digital-certificate",
-   "version": "1.0.0",
-   "description": "Brazilian A1 digital certificate handling with .pfx/.p12 parsing, XML-DSig signing, certificate management, and mTLS support",
-   "type": "module",
-   "private": false,
-   "module": "./dist/index.js",
-   "types": "./dist/index.d.ts",
-   "exports": {
-      ".": {
-         "bun": "./src/index.ts",
-         "import": {
-            "default": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-         },
-         "types": "./src/index.ts"
-      },
-      "./plugins/xml-signer": {
-         "bun": "./src/plugins/xml-signer/index.ts",
-         "import": {
-            "default": "./dist/plugins/xml-signer/index.js",
-            "types": "./dist/plugins/xml-signer/index.d.ts"
-         },
-         "types": "./src/plugins/xml-signer/index.ts"
-      },
-      "./plugins/mtls": {
-         "bun": "./src/plugins/mtls/index.ts",
-         "import": {
-            "default": "./dist/plugins/mtls/index.js",
-            "types": "./dist/plugins/mtls/index.d.ts"
-         },
-         "types": "./src/plugins/mtls/index.ts"
-      },
-      "./package.json": "./package.json"
-   },
-   "files": [
-      "dist"
-   ],
-   "scripts": {
-      "build": "fot build",
-      "check": "fot check",
-      "dev": "fot build --watch",
-      "format": "fot format",
-      "lint": "fot lint",
-      "release": "bumpp --commit --push --tag",
-      "test": "fot test",
-      "test:coverage": "fot test --coverage",
-      "test:watch": "fot test --watch",
-      "typecheck": "tsc"
-   },
-   "dependencies": {
-      "@f-o-t/xml": "1.0.0",
-      "zod": "4.3.6"
-   },
-   "devDependencies": {
-      "@f-o-t/cli": "workspace:*",
-      "@f-o-t/config": "workspace:*",
-      "@types/bun": "1.3.6",
-      "bumpp": "10.4.0",
-      "typescript": "5.9.3"
-   },
-   "peerDependencies": {
-      "typescript": ">=4.5.0"
-   },
-   "peerDependenciesMeta": {
-      "typescript": {
-         "optional": true
-      }
-   },
-   "license": "MIT",
-   "repository": {
-      "type": "git",
-      "url": "https://github.com/F-O-T/contentta-nx.git"
-   },
-   "homepage": "https://github.com/F-O-T/contentta-nx/blob/master/libraries/digital-certificate",
-   "bugs": {
-      "url": "https://github.com/F-O-T/contentta-nx/issues"
-   },
-   "publishConfig": {
-      "access": "public"
-   }
+  "name": "@f-o-t/digital-certificate",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./plugins/xml-signer": {
+      "types": "./dist/plugins/xml-signer/index.d.ts",
+      "default": "./dist/plugins/xml-signer/index.js"
+    },
+    "./plugins/mtls": {
+      "types": "./dist/plugins/mtls/index.d.ts",
+      "default": "./dist/plugins/mtls/index.js"
+    }
+  },
+  "scripts": {
+    "build": "fot build",
+    "test": "fot test",
+    "lint": "fot lint",
+    "format": "fot format",
+    "typecheck": "fot typecheck"
+  },
+  "devDependencies": {
+    "@f-o-t/cli": "workspace:*",
+    "@f-o-t/config": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/F-O-T/libraries.git",
+    "directory": "libraries/digital-certificate"
+  }
 }

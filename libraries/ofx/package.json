@@ -1,7 +1,6 @@
 {
   "name": "@f-o-t/ofx",
-  "version": "2.4.1",
-  "description": "Typesafe ofx handling",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,10 +14,8 @@
     "build": "fot build",
     "test": "fot test",
     "lint": "fot lint",
-    "format": "fot format"
-  },
-  "dependencies": {
-    "zod": "^4.3.6"
+    "format": "fot format",
+    "typecheck": "fot typecheck"
   },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",
@@ -28,23 +25,5 @@
     "type": "git",
     "url": "https://github.com/F-O-T/libraries.git",
     "directory": "libraries/ofx"
-  },
-  "bugs": {
-    "url": "https://github.com/F-O-T/libraries/issues"
-  },
-  "files": ["dist"],
-  "homepage": "https://github.com/F-O-T/libraries/blob/master/libraries/ofx",
-  "license": "MIT",
-  "peerDependencies": {
-    "typescript": ">=4.5.0"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

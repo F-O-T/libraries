@@ -86,6 +86,11 @@ async function main() {
 
       case "create": {
         const name = args[1];
+        if (!name) {
+          console.error("Error: Library name is required");
+          console.log('Usage: fot create <name> [description]');
+          process.exit(1);
+        }
         const description = args[2] || `A new FOT library: ${name}`;
         const options: CreateOptions = {
           name,

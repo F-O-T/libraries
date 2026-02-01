@@ -1,68 +1,29 @@
 {
-   "name": "@f-o-t/tax-calculator",
-   "version": "0.1.0",
-   "description": "Brazilian tax calculation library with support for ICMS, IPI, PIS, COFINS, ISS, and more",
-   "keywords": [
-      "tax",
-      "calculator",
-      "brazil",
-      "icms",
-      "ipi",
-      "pis",
-      "cofins",
-      "iss",
-      "taxation"
-   ],
-   "license": "MIT",
-   "author": "F-O-T",
-   "type": "module",
-   "exports": {
-      ".": {
-         "bun": "./src/index.ts",
-         "import": {
-            "default": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-         },
-         "types": "./src/index.ts"
-      },
-      "./package.json": "./package.json"
-   },
-   "files": [
-      "dist"
-   ],
-   "scripts": {
-      "build": "fot build",
-      "dev": "fot build --watch",
-      "test": "fot test",
-      "test:coverage": "fot test --coverage",
-      "test:watch": "fot test --watch",
-      "typecheck": "fot check",
-      "check": "fot check",
-      "lint": "fot lint",
-      "format": "fot format",
-      "release": "bumpp --commit --push --tag"
-   },
-   "dependencies": {
-      "@f-o-t/condition-evaluator": "^2.0.0",
-      "@f-o-t/money": "^1.0.0",
-      "@f-o-t/rules-engine": "^2.0.0",
-      "zod": "4.3.4"
-   },
-   "devDependencies": {
-      "@f-o-t/cli": "workspace:*",
-      "@f-o-t/config": "workspace:*",
-      "bumpp": "10.3.2"
-   },
-   "publishConfig": {
-      "access": "public"
-   },
-   "repository": {
-      "type": "git",
-      "url": "https://github.com/F-O-T/montte-nx.git",
-      "directory": "libraries/tax-calculator"
-   },
-   "bugs": {
-      "url": "https://github.com/F-O-T/montte-nx/issues"
-   },
-   "homepage": "https://github.com/F-O-T/montte-nx/tree/master/libraries/tax-calculator#readme"
+  "name": "@f-o-t/tax-calculator",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "fot build",
+    "test": "fot test",
+    "lint": "fot lint",
+    "format": "fot format",
+    "typecheck": "fot typecheck"
+  },
+  "devDependencies": {
+    "@f-o-t/cli": "workspace:*",
+    "@f-o-t/config": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/F-O-T/libraries.git",
+    "directory": "libraries/tax-calculator"
+  }
 }

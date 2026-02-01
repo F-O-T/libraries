@@ -8,7 +8,7 @@ export async function typecheckCommand(): Promise<void> {
   console.log("Running TypeScript type checking...");
 
   const proc = spawn({
-    cmd: ["bunx", "tsc"],
+    cmd: ["bunx", "tsc", "--noEmit"],
     stdio: ["inherit", "inherit", "inherit"],
   });
 

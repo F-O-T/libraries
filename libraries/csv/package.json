@@ -1,42 +1,21 @@
 {
   "name": "@f-o-t/csv",
-  "version": "1.2.1",
-  "description": "RFC 4180 compliant CSV parser with streaming support",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bugs": {
-    "url": "https://github.com/F-O-T/libraries/issues"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
-  "homepage": "https://github.com/F-O-T/libraries/blob/master/libraries/csv",
-  "license": "MIT",
-  "peerDependencies": {
-    "typescript": ">=4.5.0"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "fot build",
     "test": "fot test",
     "lint": "fot lint",
-    "format": "fot format"
-  },
-  "dependencies": {
-    "zod": "^4.3.6"
+    "format": "fot format",
+    "typecheck": "fot typecheck"
   },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",

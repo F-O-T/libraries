@@ -15,7 +15,8 @@
     "build": "bunup",
     "postbuild": "chmod +x dist/index.js",
     "dev": "bunup --watch",
-    "test": "bun test"
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@f-o-t/config": "^0.1.0",
