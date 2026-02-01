@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test as it } from "bun:test";
-import { InvalidDateError } from "../errors";
-import { DateTime } from "./datetime";
+import { InvalidDateError } from "../../src/errors";
+import { DateTime } from "../../src/core/datetime";
 
 describe("DateTime", () => {
    describe("Constructor", () => {

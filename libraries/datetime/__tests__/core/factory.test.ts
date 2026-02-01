@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { InvalidDateError } from "../errors";
-import type { DateInput } from "../types";
-import { DateTime } from "./datetime";
-import { datetime } from "./factory";
+import { InvalidDateError } from "../../src/errors";
+import type { DateInput } from "../../src/types";
+import { DateTime } from "../../src/core/datetime";
+import { datetime } from "../../src/core/factory";
 
 describe("datetime factory function", () => {
    describe("basic usage", () => {

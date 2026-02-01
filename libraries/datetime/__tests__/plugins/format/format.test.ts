@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { DateTime } from "../../core/datetime";
-import { formatPlugin } from "./index";
+import { DateTime } from "../../../src/core/datetime";
+import { formatPlugin } from "../../../src/plugins/format/index";
 
 describe("Format Plugin", () => {
    // Install plugin before running tests

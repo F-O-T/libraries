@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { DateTime } from "../core/datetime.ts";
-import type { DateTimeClass } from "../types.ts";
-import { createPlugin, isPlugin, isValidPluginName } from "./plugin-base.ts";
+import { DateTime } from "../../src/core/datetime.ts";
+import type { DateTimeClass } from "../../src/types.ts";
+import { createPlugin, isPlugin, isValidPluginName } from "../../src/plugins/plugin-base.ts";
 
 describe("createPlugin", () => {
    test("creates a valid plugin object", () => {

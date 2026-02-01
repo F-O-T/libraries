@@ -9,7 +9,7 @@ import {
    ISOTimeOnlySchema,
    ParseOptionsSchema,
    TimeUnitSchema,
-} from "./schemas";
+} from "../src/schemas";
 
 describe("TimeUnitSchema", () => {
    it("should accept valid time units", () => {

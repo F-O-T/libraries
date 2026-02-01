@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { DateTime } from "../../core/datetime";
-import { businessDaysPlugin } from "./index";
+import { DateTime } from "../../../src/core/datetime";
+import { businessDaysPlugin } from "../../../src/plugins/business-days/index";
 
 describe("Business Days Plugin", () => {
    // Install plugin before running tests

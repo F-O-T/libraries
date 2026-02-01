@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { DateTime } from "../../core/datetime";
-import { timezonePlugin } from "./index";
+import { DateTime } from "../../../src/core/datetime";
+import { timezonePlugin } from "../../../src/plugins/timezone/index";
 
 describe("Timezone Plugin", () => {
    // Install plugin before running tests

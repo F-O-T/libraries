@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { DateTime } from "../../core/datetime";
-import { relativeTimePlugin } from "./index";
+import { DateTime } from "../../../src/core/datetime";
+import { relativeTimePlugin } from "../../../src/plugins/relative-time/index";
 
 describe("Relative Time Plugin", () => {
    // Install plugin before running tests
