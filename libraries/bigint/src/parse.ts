@@ -53,10 +53,14 @@ export function parseToBigInt(input: ParseInput): bigint {
       if (mode === "round") {
         amount = bankersRound(fullAmount, divisor);
       } else if (mode === "ceil") {
-        amount = roundUp(fullAmount, divisor);
+        // For negative numbers, ceiling means rounding toward zero (smaller magnitude)
+        // So we use roundDown on the absolute value
+        amount = isNegative ? roundDown(fullAmount, divisor) : roundUp(fullAmount, divisor);
       } else {
         // floor
-        amount = roundDown(fullAmount, divisor);
+        // For negative numbers, floor means rounding away from zero (larger magnitude)
+        // So we use roundUp on the absolute value
+        amount = isNegative ? roundUp(fullAmount, divisor) : roundDown(fullAmount, divisor);
       }
     }
   }
