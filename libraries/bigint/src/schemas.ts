@@ -34,13 +34,11 @@ export const ParseInputSchema = z.object({
 /**
  * Arithmetic operation input schema
  */
-export const ArithmeticInputSchema = z
-  .object({
-    a: z.bigint(),
-    b: z.bigint(),
-    scale: ScaleSchema,
-  })
-  .refine((data) => data.scale >= 0, "Scale must be non-negative");
+export const ArithmeticInputSchema = z.object({
+  a: z.bigint(),
+  b: z.bigint(),
+  scale: ScaleSchema,
+});
 
 /**
  * Division input schema with zero-check
