@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRef } from "../../core/objects.ts";
-import { PDFPage } from "./page.ts";
+import { createRef } from "../../../src/core/objects.ts";
+import { PDFPage } from "../../../src/plugins/generation/page.ts";
 
 describe("PDFPage", () => {
    test("creates page with default A4 size", () => {

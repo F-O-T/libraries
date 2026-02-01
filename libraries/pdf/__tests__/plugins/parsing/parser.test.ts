@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PDFParser } from "./parser.ts";
+import { PDFParser } from "../../../src/plugins/parsing/parser.ts";
 
 describe("PDFParser", () => {
    test("parses numbers", () => {

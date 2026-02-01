@@ -10,7 +10,7 @@ import {
    isName,
    isRef,
    isStream,
-} from "./objects.ts";
+} from "../../src/core/objects.ts";
 
 describe("PDF Objects", () => {
    test("createName creates PDF name", () => {

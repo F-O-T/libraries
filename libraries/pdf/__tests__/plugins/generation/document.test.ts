@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PDFDocument } from "./document.ts";
+import { PDFDocument } from "../../../src/plugins/generation/document.ts";
 
 describe("PDFDocument", () => {
    test("creates document with default version", () => {

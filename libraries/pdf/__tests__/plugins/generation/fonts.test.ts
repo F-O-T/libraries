@@ -4,7 +4,7 @@ import {
    FONT_FAMILIES,
    isStandardFont,
    getFontRefName,
-} from "./fonts.ts";
+} from "../../../src/plugins/generation/fonts.ts";
 
 describe("Standard Fonts", () => {
    test("has 14 standard fonts", () => {

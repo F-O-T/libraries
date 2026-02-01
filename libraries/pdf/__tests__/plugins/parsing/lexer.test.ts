@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PDFLexer, TokenType } from "./lexer.ts";
+import { PDFLexer, TokenType } from "../../../src/plugins/parsing/lexer.ts";
 
 describe("PDFLexer", () => {
    test("tokenizes numbers", () => {

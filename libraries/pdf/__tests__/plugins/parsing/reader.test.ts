@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { PDFReader } from "./reader.ts";
-import { PDFDocument } from "../generation/document.ts";
+import { PDFReader } from "../../../src/plugins/parsing/reader.ts";
+import { PDFDocument } from "../../../src/plugins/generation/document.ts";
 
 describe("PDFReader", () => {
    test("reads generated PDF", () => {
