@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { OperatorMap } from "@f-o-t/condition-evaluator";
 import type {
    AggregatedConsequence,
    ConsequenceDefinitions,
@@ -129,6 +130,9 @@ export type EngineConfig<
    readonly continueOnError?: boolean;
    readonly slowRuleThresholdMs?: number;
    readonly hookTimeoutMs?: number;
+   // NEW: Evaluator configuration (mutually exclusive)
+   readonly evaluator?: ReturnType<typeof import("@f-o-t/condition-evaluator").createEvaluator>;
+   readonly operators?: OperatorMap;
 };
 
 export type ResolvedEngineConfig<
@@ -146,6 +150,8 @@ export type ResolvedEngineConfig<
    readonly continueOnError: boolean;
    readonly slowRuleThresholdMs: number;
    readonly hookTimeoutMs: number | undefined;
+   // NEW: Resolved evaluator instance
+   readonly evaluator: ReturnType<typeof import("@f-o-t/condition-evaluator").createEvaluator>;
 };
 
 // ============================================================================

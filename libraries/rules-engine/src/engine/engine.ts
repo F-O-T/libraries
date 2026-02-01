@@ -1,6 +1,7 @@
 import { type Cache, createCache } from "../cache/cache";
 import { createNoopCache } from "../cache/noop";
 import { evaluateRule } from "../core/evaluate";
+import { createEvaluator } from "@f-o-t/condition-evaluator";
 import {
    type EngineConfig,
    getDefaultCacheConfig,
@@ -137,6 +138,8 @@ const resolveConfig = <
       continueOnError: config.continueOnError ?? true,
       slowRuleThresholdMs: config.slowRuleThresholdMs ?? 10,
       hookTimeoutMs: config.hookTimeoutMs,
+      // TODO: Task 3 will properly handle evaluator creation and validation
+      evaluator: config.evaluator ?? createEvaluator(config.operators ? { operators: config.operators } : undefined),
    };
 };
 
