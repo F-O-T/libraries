@@ -1,6 +1,6 @@
 {
   "name": "@f-o-t/rules-engine",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "Type-safe, functional rules orchestration engine for TypeScript",
   "type": "module",
   "main": "./dist/index.js",
