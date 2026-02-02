@@ -309,7 +309,7 @@ jobs:
 ```
 
 **Pipeline best practices:**
-- Use `fot check` to run both typechecking and tests
+- Use `fot check` to ensure code formatting and linting standards
 - Run `fot test --coverage` to track code coverage
 - Build after tests pass with `fot build`
 - Cache `node_modules` for faster CI runs
