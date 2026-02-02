@@ -113,7 +113,33 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
   }
 
   if (watch) {
-    console.log("Watching for changes...");
-    // TODO: Implement watch mode in future
+    const { watch: fsWatch } = await import("node:fs");
+    const srcDir = join(cwd, "src");
+
+    console.log(`Watching ${srcDir} for changes...`);
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    fsWatch(srcDir, { recursive: true }, (_event, filename) => {
+      if (!filename || !filename.endsWith(".ts")) return;
+
+      if (debounceTimer) clearTimeout(debounceTimer);
+
+      debounceTimer = setTimeout(async () => {
+        console.log(`\nFile changed: ${filename}`);
+        console.log("Rebuilding...");
+        try {
+          await buildLibrary({ cwd, watch: false });
+        } catch (error) {
+          console.error(
+            "Rebuild failed:",
+            error instanceof Error ? error.message : String(error)
+          );
+        }
+      }, 100);
+    });
+
+    // Keep process alive
+    await new Promise(() => {});
   }
 }
