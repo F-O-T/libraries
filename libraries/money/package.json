@@ -29,6 +29,14 @@
     "@f-o-t/cli": "workspace:*",
     "@f-o-t/config": "workspace:*"
   },
+  "peerDependencies": {
+    "@f-o-t/condition-evaluator": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@f-o-t/condition-evaluator": {
+      "optional": true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/F-O-T/libraries.git",
