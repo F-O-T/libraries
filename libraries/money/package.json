@@ -15,7 +15,7 @@
     }
   },
   "scripts": {
-    "build": "fot build",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' fot build",
     "test": "fot test",
     "lint": "fot lint",
     "format": "fot format",
