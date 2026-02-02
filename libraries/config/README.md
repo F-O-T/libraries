@@ -33,6 +33,8 @@ const config = defineFotConfig({
   external: ["react", "react-dom"],
   typescript: {
     declaration: true,
+    isolatedDeclarations: false,
+    maxMemory: 4096,
   },
   biome: {
     enabled: true,
@@ -61,23 +63,31 @@ The library provides generators to create standard configuration files for your 
 
 ```typescript
 import { 
+  defineFotConfig,
   generatePackageJson, 
-  generateTsConfig, 
+  generateTSConfig, 
   generateBiomeConfig 
 } from "@f-o-t/config";
 
-// Generate package.json
-const packageJson = generatePackageJson({
-  name: "@f-o-t/my-library",
-  version: "1.0.0",
-  description: "My FOT library",
+// First, define your configuration
+const config = defineFotConfig({
+  external: ["zod"],
+  plugins: ["operators"],
 });
 
+// Generate package.json
+const packageJson = generatePackageJson(
+  "my-library",  // library name (without @f-o-t/ prefix)
+  "1.0.0",       // version
+  config,        // resolved config
+  { "zod": "^4.3.6" }  // optional custom dependencies
+);
+
 // Generate tsconfig.json
-const tsconfig = generateTsConfig();
+const tsconfig = generateTSConfig(config);
 
 // Generate biome.json
-const biomeConfig = generateBiomeConfig();
+const biomeConfig = generateBiomeConfig(config);
 ```
 
 ## API Reference
@@ -117,7 +127,11 @@ Fully resolved configuration with all defaults applied:
 interface ResolvedFotConfig {
   formats: BuildFormat[];
   external: string[];
-  typescript: Required<TypeScriptOptions>;
+  typescript: {
+    declaration: boolean;
+    isolatedDeclarations: boolean;
+    maxMemory?: number;
+  };
   biome: Required<BiomeOptions>;
   plugins: PluginConfig[];
 }
@@ -133,7 +147,9 @@ type BuildFormat = "esm" | "cjs";
 
 ```typescript
 interface TypeScriptOptions {
-  declaration?: boolean;  // Generate .d.ts files (default: true)
+  declaration?: boolean;          // Generate .d.ts files (default: true)
+  isolatedDeclarations?: boolean; // Use isolated declarations mode for faster, more memory-efficient declaration generation (default: false)
+  maxMemory?: number;             // Maximum memory (in MB) to allocate for TypeScript declaration generation (default: undefined)
 }
 ```
 
@@ -156,23 +172,55 @@ interface PluginConfig {
 
 ## Generators
 
-### `generatePackageJson(options)`
+### `generatePackageJson(libraryName, version, config, customDependencies?)`
 
 Generates a standard package.json configuration for FOT libraries.
 
 **Parameters:**
-- `name`: Package name
+- `libraryName`: Library name (without `@f-o-t/` prefix)
 - `version`: Package version
-- `description`: Package description
-- Additional package.json fields as needed
+- `config`: Resolved FOT configuration (`ResolvedFotConfig`)
+- `customDependencies` (optional): Custom dependencies to include in the package.json
 
-### `generateTsConfig()`
+**Returns:** `PackageJson` object
+
+**Example:**
+```typescript
+const pkg = generatePackageJson(
+  "my-library",
+  "1.0.0",
+  config,
+  { "zod": "^4.3.6" }
+);
+```
+
+### `generateTSConfig(config)`
 
 Generates a standard TypeScript configuration optimized for FOT libraries.
 
-### `generateBiomeConfig()`
+**Parameters:**
+- `config`: Resolved FOT configuration (`ResolvedFotConfig`)
+
+**Returns:** `TSConfig` object
+
+**Example:**
+```typescript
+const tsconfig = generateTSConfig(config);
+```
+
+### `generateBiomeConfig(config)`
 
 Generates a standard Biome configuration for linting and formatting.
+
+**Parameters:**
+- `config`: Resolved FOT configuration (`ResolvedFotConfig`)
+
+**Returns:** `BiomeConfig` object
+
+**Example:**
+```typescript
+const biomeConfig = generateBiomeConfig(config);
+```
 
 ## License
 
