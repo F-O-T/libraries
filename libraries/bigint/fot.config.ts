@@ -1,6 +1,9 @@
 import { defineFotConfig } from '@f-o-t/config';
 
 export default defineFotConfig({
-  external: ['zod'],
+  external: ['zod', '@f-o-t/condition-evaluator'],
   plugins: ['operators'],
+  typescript: {
+    isolatedDeclarations: true,
+  },
 });
