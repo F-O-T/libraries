@@ -38,3 +38,6 @@ export {
    hasUnit,
    registerUnit,
 } from "./units/registry";
+
+// Export operations
+export { convert } from "./operations/convert";
