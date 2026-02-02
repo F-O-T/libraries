@@ -12,6 +12,18 @@ export interface TypeScriptOptions {
     * @default true
     */
    declaration?: boolean;
+   /**
+    * Use isolated declarations mode for faster, more memory-efficient declaration generation
+    * Requires TypeScript 5.5+
+    * @default false
+    */
+   isolatedDeclarations?: boolean;
+   /**
+    * Maximum memory (in MB) to allocate for TypeScript declaration generation
+    * Useful for large libraries with complex types
+    * @default undefined (uses Node.js default ~2GB)
+    */
+   maxMemory?: number;
 }
 
 /**

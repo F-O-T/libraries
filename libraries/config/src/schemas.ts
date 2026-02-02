@@ -40,8 +40,10 @@ export const pluginConfigSchema = z
 export const typeScriptOptionsSchema = z
    .object({
       declaration: z.boolean().default(true),
+      isolatedDeclarations: z.boolean().default(false),
+      maxMemory: z.number().int().positive().optional(),
    })
-   .default({ declaration: true });
+   .default({ declaration: true, isolatedDeclarations: false });
 
 /**
  * Schema for Biome configuration options

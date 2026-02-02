@@ -38,7 +38,7 @@ export function generateTSConfig(config: ResolvedFotConfig): TSConfig {
       compilerOptions: {
          allowImportingTsExtensions: true,
          declaration: config.typescript.declaration,
-         isolatedDeclarations: false,
+         isolatedDeclarations: config.typescript.isolatedDeclarations,
          module: "Preserve",
          moduleDetection: "force",
          moduleResolution: "bundler",
