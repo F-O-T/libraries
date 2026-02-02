@@ -9,4 +9,4 @@ export { toJSON, fromJSON, toDatabase, fromDatabase, serialize, deserialize } fr
 export { toMajorUnits, toMajorUnitsString, toMinorUnits, toMinorUnitsBigInt, toMinorUnitsString } from "../serialization/conversion";
 
 // Serialization types
-export type { MoneyJSON, DatabaseMoney } from "../types";
+export type { MoneyJSON, DatabaseMoney } from "../schemas";

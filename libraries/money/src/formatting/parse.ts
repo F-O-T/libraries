@@ -1,7 +1,7 @@
 import { of } from "../core/money";
 import { getCurrency } from "../currency/registry";
 import { InvalidAmountError } from "../errors";
-import type { Money } from "../types";
+import type { Money } from "../schemas";
 
 /**
  * Parse a formatted currency string into Money

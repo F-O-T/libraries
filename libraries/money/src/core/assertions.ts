@@ -1,5 +1,5 @@
 import { CurrencyMismatchError, ScaleMismatchError } from "../errors";
-import type { Money } from "../types";
+import type { Money } from "../schemas";
 
 /**
  * Assert that two Money values have the same currency and scale

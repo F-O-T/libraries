@@ -1,6 +1,15 @@
 import { z } from "zod";
 
 // =============================================================================
+// Rounding Mode
+// =============================================================================
+
+/**
+ * Rounding mode for amount parsing
+ */
+export type RoundingMode = "truncate" | "round";
+
+// =============================================================================
 // Currency Schemas
 // =============================================================================
 
@@ -15,6 +24,18 @@ export const CurrencyCodeSchema = z
    .length(3, "Currency code must be exactly 3 characters")
    .regex(/^[A-Z]{3}$/, "Currency code must be 3 uppercase letters")
    .describe("ISO 4217 currency code");
+
+/**
+ * Currency type representing a currency definition
+ */
+export type Currency = {
+   code: string;
+   numericCode: number;
+   name: string;
+   decimalPlaces: number;
+   symbol?: string;
+   subunitName?: string;
+};
 
 /**
  * Schema for Currency definition
@@ -39,12 +60,8 @@ export const CurrencySchema = z
       symbol: z.string().optional().describe("Currency symbol"),
       subunitName: z.string().optional().describe("Name of minor unit"),
    })
+   .strict()
    .describe("Currency definition");
-
-/**
- * Currency type inferred from schema
- */
-export type Currency = z.infer<typeof CurrencySchema>;
 
 // =============================================================================
 // Amount Schemas
@@ -68,6 +85,14 @@ export const AmountStringSchema = z
 // =============================================================================
 
 /**
+ * MoneyJSON type - serializable representation of Money
+ */
+export type MoneyJSON = {
+   amount: string;
+   currency: string;
+};
+
+/**
  * Schema for Money JSON representation
  *
  * Used for API requests/responses and JSON serialization.
@@ -80,12 +105,16 @@ export const MoneySchema = z
       amount: AmountStringSchema,
       currency: CurrencyCodeSchema,
    })
+   .strict()
    .describe("Money JSON representation");
 
 /**
- * MoneyJSON type - serializable representation of Money
+ * DatabaseMoney type for database storage
  */
-export type MoneyJSON = z.infer<typeof MoneySchema>;
+export type DatabaseMoney = {
+   amount: string;
+   currency: string;
+};
 
 /**
  * Schema for database Money storage
@@ -97,12 +126,16 @@ export const DatabaseMoneySchema = z
       amount: z.string().describe("Decimal amount as string"),
       currency: CurrencyCodeSchema,
    })
+   .strict()
    .describe("Database Money representation");
 
 /**
- * DatabaseMoney type for database storage
+ * MoneyInput type for flexible user input
  */
-export type DatabaseMoney = z.infer<typeof DatabaseMoneySchema>;
+export type MoneyInput = {
+   amount: string | number;
+   currency: string;
+};
 
 /**
  * Schema for user input of money amounts
@@ -116,16 +149,25 @@ export const MoneyInputSchema = z
          .describe("Amount (string or number)"),
       currency: CurrencyCodeSchema,
    })
+   .strict()
    .describe("Money input from user");
-
-/**
- * MoneyInput type for flexible user input
- */
-export type MoneyInput = z.infer<typeof MoneyInputSchema>;
 
 // =============================================================================
 // Core Money Type (runtime representation with BigInt)
 // =============================================================================
+
+/**
+ * Core Money type representing a monetary value with currency
+ *
+ * @property amount - The amount in minor units (e.g., cents) as a BigInt
+ * @property currency - ISO 4217 currency code (e.g., "USD", "BRL", "JPY")
+ * @property scale - Number of decimal places for this currency
+ */
+export type Money = {
+   amount: bigint;
+   currency: string;
+   scale: number;
+};
 
 /**
  * Schema for the internal Money representation
@@ -139,20 +181,25 @@ export const MoneyInternalSchema = z
       currency: CurrencyCodeSchema,
       scale: z.number().int().min(0).max(18).describe("Decimal places"),
    })
+   .strict()
    .describe("Internal Money representation");
-
-/**
- * Core Money type representing a monetary value with currency
- *
- * @property amount - The amount in minor units (e.g., cents) as a BigInt
- * @property currency - ISO 4217 currency code (e.g., "USD", "BRL", "JPY")
- * @property scale - Number of decimal places for this currency
- */
-export type Money = z.infer<typeof MoneyInternalSchema>;
 
 // =============================================================================
 // Format Options Schema
 // =============================================================================
+
+/**
+ * FormatOptions type for formatting configuration
+ */
+export type FormatOptions = {
+   locale?: string;
+   notation?: "standard" | "compact";
+   signDisplay?: "auto" | "always" | "never" | "exceptZero";
+   currencyDisplay?: "symbol" | "code" | "name" | "narrowSymbol";
+   hideSymbol?: boolean;
+   minimumFractionDigits?: number;
+   maximumFractionDigits?: number;
+};
 
 /**
  * Schema for money formatting options
@@ -176,16 +223,17 @@ export const FormatOptionsSchema = z
       /** Maximum number of fraction digits to display */
       maximumFractionDigits: z.number().int().min(0).optional(),
    })
+   .strict()
    .describe("Money formatting options");
-
-/**
- * FormatOptions type for formatting configuration
- */
-export type FormatOptions = z.infer<typeof FormatOptionsSchema>;
 
 // =============================================================================
 // Allocation Schemas
 // =============================================================================
+
+/**
+ * AllocationRatios type
+ */
+export type AllocationRatios = number[];
 
 /**
  * Schema for allocation ratios
@@ -201,11 +249,6 @@ export const AllocationRatiosSchema = z
       message: "At least one ratio must be greater than zero",
    })
    .describe("Allocation ratios");
-
-/**
- * AllocationRatios type
- */
-export type AllocationRatios = z.infer<typeof AllocationRatiosSchema>;
 
 // =============================================================================
 // Backward compatibility re-exports

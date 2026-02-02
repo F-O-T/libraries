@@ -1,6 +1,7 @@
+import { of } from "../core/money";
 import { minorUnitsToDecimal } from "../core/internal";
 import { OverflowError } from "../errors";
-import type { Money } from "../types";
+import { MoneyInputSchema, MoneySchema, type Money } from "../schemas";
 
 /**
  * Convert Money to minor units as a number

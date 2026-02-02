@@ -1,12 +1,8 @@
 import { assertSameCurrency } from "../core/assertions";
 import { createMoney, parseDecimalToMinorUnits } from "../core/internal";
-import {
-   bankersRound,
-   EXTENDED_PRECISION,
-   PRECISION_FACTOR,
-} from "../core/rounding";
-import { DivisionByZeroError } from "../errors";
-import type { Money } from "../types";
+import { EXTENDED_PRECISION, PRECISION_FACTOR, bankersRound } from "../core/rounding";
+import { DivisionByZeroError, OverflowError } from "../errors";
+import type { Money } from "../schemas";
 
 /**
  * Add two Money values

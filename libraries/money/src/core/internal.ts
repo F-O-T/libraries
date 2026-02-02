@@ -1,4 +1,4 @@
-import type { Money, RoundingMode } from "../types";
+import type { Money, RoundingMode } from "../schemas";
 import { bankersRound } from "./rounding";
 import { parseToBigInt, formatFromBigInt } from "@f-o-t/bigint";
 

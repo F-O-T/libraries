@@ -1,6 +1,6 @@
 import { getCurrency } from "../currency/registry";
 import { InvalidAmountError } from "../errors";
-import type { Money, RoundingMode } from "../types";
+import type { Money, RoundingMode } from "../schemas";
 import { createMoney, parseDecimalToMinorUnits } from "./internal";
 
 /**

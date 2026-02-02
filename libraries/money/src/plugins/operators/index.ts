@@ -22,7 +22,7 @@
  * }, { data: { transactionAmount: { amount: "150.00", currency: "BRL" } } });
  */
 
-// Re-export individual operators
+// Re-export individual operators directly from comparison
 export {
    moneyBetweenOperator,
    moneyEqualsOperator,

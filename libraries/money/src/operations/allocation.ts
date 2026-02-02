@@ -1,6 +1,7 @@
+import { assertSameCurrency } from "../core/assertions";
 import { createMoney, parseDecimalToMinorUnits } from "../core/internal";
 import { InvalidAmountError } from "../errors";
-import type { Money } from "../types";
+import { AllocationRatiosSchema, type Money } from "../schemas";
 
 /**
  * Convert a ratio number to BigInt with high precision using string parsing.

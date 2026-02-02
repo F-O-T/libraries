@@ -1,6 +1,6 @@
 import { minorUnitsToDecimal } from "../core/internal";
 import { getCurrency } from "../currency/registry";
-import type { FormatOptions, Money } from "../types";
+import { FormatOptionsSchema, type FormatOptions, type Money } from "../schemas";
 
 // =============================================================================
 // Formatter Cache for Performance

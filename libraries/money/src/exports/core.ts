@@ -11,4 +11,4 @@ export { assertSameCurrency, assertAllSameCurrency } from "../core/assertions";
 export { bankersRound, EXTENDED_PRECISION, PRECISION_FACTOR } from "../core/rounding";
 
 // Core types
-export type { Money, RoundingMode } from "../types";
+export type { Money, RoundingMode } from "../schemas";

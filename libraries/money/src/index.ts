@@ -40,5 +40,5 @@ export {
    ScaleMismatchError,
 } from "./errors";
 
-// Types
-export type { FormatOptions } from "./types";
+// Additional types from schemas (not re-exported by submodules)
+export type { FormatOptions } from "./schemas";

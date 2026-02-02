@@ -1,8 +1,9 @@
 /**
  * Types re-exported from schemas for backward compatibility
  *
+ * @deprecated Import types directly from "@f-o-t/money/schemas" or from the main package
  * All types are now defined using Zod schema inference in ./schemas.ts
- * This file re-exports them for backward compatibility.
+ * This file is maintained only for backward compatibility.
  */
 export type {
    AllocationRatios,
@@ -11,9 +12,5 @@ export type {
    Money,
    MoneyInput,
    MoneyJSON,
+   RoundingMode,
 } from "./schemas";
-
-/**
- * Rounding mode for amount parsing
- */
-export type RoundingMode = "truncate" | "round";

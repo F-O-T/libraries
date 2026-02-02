@@ -3,7 +3,7 @@ import { createMoney, maxBigInt, minBigInt } from "../core/internal";
 import { zero } from "../core/money";
 import { bankersRound } from "../core/rounding";
 import { InvalidAmountError } from "../errors";
-import type { Money } from "../types";
+import type { Money } from "../schemas";
 
 /**
  * Sum an array of Money values

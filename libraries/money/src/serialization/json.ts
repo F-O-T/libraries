@@ -1,7 +1,7 @@
-import { minorUnitsToDecimal } from "../core/internal";
 import { of } from "../core/money";
+import { minorUnitsToDecimal } from "../core/internal";
 import { InvalidAmountError } from "../errors";
-import type { DatabaseMoney, Money, MoneyJSON } from "../types";
+import { DatabaseMoneySchema, MoneySchema, type DatabaseMoney, type Money, type MoneyJSON } from "../schemas";
 
 /**
  * Convert Money to JSON representation
