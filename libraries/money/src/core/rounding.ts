@@ -1,4 +1,4 @@
-import { bankersRound } from "@f-o-t/bigint";
+import { bankersRound, convertScale } from "@f-o-t/bigint";
 
 export { bankersRound };
 
@@ -15,15 +15,12 @@ export function roundToScale(
    fromScale: number,
    toScale: number,
 ): bigint {
-   if (fromScale <= toScale) {
-      // Need to scale up - no rounding needed
-      const factor = 10n ** BigInt(toScale - fromScale);
-      return value * factor;
-   }
-
-   // Need to scale down with banker's rounding
-   const divisor = 10n ** BigInt(fromScale - toScale);
-   return bankersRound(value, divisor);
+   return convertScale({
+      value,
+      fromScale,
+      toScale,
+      roundingMode: "round", // Use banker's rounding
+   });
 }
 
 /**
