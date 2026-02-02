@@ -65,14 +65,14 @@ describe("generatePackageJson", () => {
 
       expect(pkg.exports["./plugins/auth"]).toBeDefined();
       expect(pkg.exports["./plugins/auth"]).toEqual({
-         types: "./dist/plugins/auth.d.ts",
-         default: "./dist/plugins/auth.js",
+         types: "./dist/plugins/auth/index.d.ts",
+         default: "./dist/plugins/auth/index.js",
       });
 
       expect(pkg.exports["./plugins/validation"]).toBeDefined();
       expect(pkg.exports["./plugins/validation"]).toEqual({
-         types: "./dist/plugins/validation.d.ts",
-         default: "./dist/plugins/validation.js",
+         types: "./dist/plugins/validation/index.d.ts",
+         default: "./dist/plugins/validation/index.js",
       });
    });
 
