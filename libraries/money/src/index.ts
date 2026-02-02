@@ -73,7 +73,7 @@ export {
    subtract,
 } from "./operations/arithmetic";
 // Comparison operations (convenience functions)
-// Comparison operators (for condition-evaluator integration)
+// Comparison operators are exported from @f-o-t/money/plugins/operators
 export {
    compare,
    equals,
@@ -84,16 +84,6 @@ export {
    isZero,
    lessThan,
    lessThanOrEqual,
-   moneyBetweenOperator,
-   moneyEqualsOperator,
-   moneyGreaterThanOperator,
-   moneyGreaterThanOrEqualOperator,
-   moneyLessThanOperator,
-   moneyLessThanOrEqualOperator,
-   moneyNegativeOperator,
-   moneyNotEqualsOperator,
-   moneyPositiveOperator,
-   moneyZeroOperator,
 } from "./operations/comparison";
 // Schemas
 export {
