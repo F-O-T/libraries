@@ -115,29 +115,70 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
   if (watch) {
     const { watch: fsWatch } = await import("node:fs");
     const srcDir = join(cwd, "src");
+    const configFile = join(cwd, "fot.config.ts");
 
-    console.log(`Watching ${srcDir} for changes...`);
+    console.log(`Watching ${srcDir} and fot.config.ts for changes...`);
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let isBuilding = false;
+    const watchers: ReturnType<typeof fsWatch>[] = [];
 
-    fsWatch(srcDir, { recursive: true }, (_event, filename) => {
-      if (!filename || !filename.endsWith(".ts")) return;
+    const handleChange = (filename: string | null) => {
+      if (!filename) return;
+      
+      const isTypeScript = filename.endsWith(".ts") || filename.endsWith(".tsx");
+      const isConfig = filename === "fot.config.ts";
+      
+      if (!isTypeScript && !isConfig) return;
 
       if (debounceTimer) clearTimeout(debounceTimer);
 
       debounceTimer = setTimeout(async () => {
-        console.log(`\nFile changed: ${filename}`);
+        if (isBuilding) {
+          console.log("Build in progress, skipping...");
+          return;
+        }
+        
+        isBuilding = true;
+        const timestamp = new Date().toLocaleTimeString();
+        
+        console.log(`\n[${timestamp}] File changed: ${filename}`);
         console.log("Rebuilding...");
+        
         try {
           await buildLibrary({ cwd, watch: false });
+          console.log("✓ Rebuild successful");
         } catch (error) {
           console.error(
-            "Rebuild failed:",
+            "✗ Rebuild failed:",
             error instanceof Error ? error.message : String(error)
           );
+        } finally {
+          isBuilding = false;
         }
-      }, 100);
-    });
+      }, 300);
+    };
+
+    // Watch src directory
+    watchers.push(fsWatch(srcDir, { recursive: true }, (_event, filename) => {
+      handleChange(filename);
+    }));
+
+    // Watch config file
+    watchers.push(fsWatch(configFile, (_event, filename) => {
+      handleChange(filename);
+    }));
+
+    // Cleanup on exit
+    const cleanup = () => {
+      console.log("\nStopping watch mode...");
+      watchers.forEach(w => w.close());
+      if (debounceTimer) clearTimeout(debounceTimer);
+      process.exit(0);
+    };
+
+    process.on("SIGINT", cleanup);
+    process.on("SIGTERM", cleanup);
 
     // Keep process alive
     await new Promise(() => {});
