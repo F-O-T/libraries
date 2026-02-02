@@ -3,12 +3,13 @@ import type { Category } from "../types/category";
 import type { Measurement } from "../types/measurement";
 import type { UnitSymbol } from "../types/units";
 import { getUnit } from "../units/registry";
-import { PRECISION_SCALE, parseDecimalToBigInt } from "../utils/precision";
+import { parseDecimalToBigInt } from "../utils/precision";
 
 /**
  * Default scale for measurements (12 decimal places)
+ * Provides sufficient precision for most scientific and financial calculations
  */
-export const DEFAULT_SCALE = PRECISION_SCALE;
+export const DEFAULT_SCALE = 12;
 
 /**
  * Internal helper to create a Measurement object

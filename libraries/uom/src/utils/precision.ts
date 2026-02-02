@@ -6,12 +6,6 @@ import { InvalidMeasurementError } from "../errors";
 import { ZodError } from "zod";
 
 /**
- * Default precision scale (12 decimal places)
- * Provides sufficient precision for most scientific and financial calculations
- */
-export const PRECISION_SCALE = 12;
-
-/**
  * Parse a decimal number (string or number) to BigInt with specified scale
  *
  * @param value - The numeric value as string or number
