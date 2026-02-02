@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-02-01
+
+### Added
+
+- **Operations**
+  - `convert()` - Convert measurements between units in the same category
+  - `add()` - Add two measurements with same unit
+  - `subtract()` - Subtract measurements with same unit
+  - `multiply()` - Multiply measurement by scalar value
+  - `divide()` - Divide measurement by scalar value
+  - `equals()`, `greaterThan()`, `greaterThanOrEqual()`, `lessThan()`, `lessThanOrEqual()` - Comparison operations
+  - `format()` - Format measurements as human-readable strings with options
+
+- **Condition-Evaluator Integration**
+  - 6 comparison operators for business rules: `measurement_eq`, `measurement_neq`, `measurement_gt`, `measurement_gte`, `measurement_lt`, `measurement_lte`
+  - Plugin export available at `@f-o-t/uom/operators`
+  - Optional peer dependency on `@f-o-t/condition-evaluator`
+
+- **Documentation**
+  - Comprehensive README with complete API reference
+  - Usage examples for all operations
+  - Built-in units reference table
+  - Custom unit registration guide
+  - Condition-evaluator integration examples
+  - Best practices and comparison with alternatives
+
+### Changed
+
+- **Public API Stabilization**: All exports are now considered stable and will follow semantic versioning
+- **Breaking Change**: None - this release is fully backward compatible with 0.2.0
+
+### Design Decisions
+
+- All arithmetic operations require same unit (use `convert()` first if needed)
+- All comparisons require same unit and scale
+- Format function trims trailing zeros by default
+- Operations return new Measurement instances (immutable)
+- Operators plugin is optional (peer dependency)
+
 ## [0.2.0] - 2026-02-01
 
 ### Changed
@@ -33,5 +72,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Schema validation for measurements and unit definitions
 - Type-safe units of measurement with BigInt precision
 
+[1.0.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/uom@1.0.0
 [0.2.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/uom@0.2.0
 [0.1.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/uom@0.1.0
