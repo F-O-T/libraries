@@ -9,16 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-02-02
 
-### Fixed
-- `ResolvedFotConfig` type now correctly types `maxMemory` as optional
-- Plugin export paths in `generatePackageJson` use correct subdirectory pattern (`plugins/<name>/index.js`)
+### Added
+- `typescript.maxMemory` configuration option for increasing TypeScript compiler memory during declaration generation
+- Tests for `generateBiomeConfig` generator
+- Tests for `generateTSConfig` generator
 
 ### Changed
 - Stabilized all public APIs for 1.0.0 release
 
-### Added
-- Tests for `generateBiomeConfig` generator
-- Tests for `generateTSConfig` generator
+### Fixed
+- `ResolvedFotConfig` type now correctly types `maxMemory` as optional
+- Plugin export paths in `generatePackageJson` use correct subdirectory pattern (`plugins/<name>/index.js`)
 
 ## [0.1.0]
 
