@@ -17,9 +17,15 @@
     "format": "fot format",
     "typecheck": "fot typecheck"
   },
+  "dependencies": {
+    "@f-o-t/condition-evaluator": "^2.0.2",
+    "@f-o-t/money": "^1.2.1",
+    "@f-o-t/rules-engine": "^0.1.0",
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
-    "@f-o-t/cli": "workspace:*",
-    "@f-o-t/config": "workspace:*"
+    "@f-o-t/cli": "^1.0.0",
+    "@f-o-t/config": "^1.0.0"
   },
   "repository": {
     "type": "git",

@@ -40,9 +40,12 @@
     "libraries/brasil-api": {
       "name": "@f-o-t/brasil-api",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/cli": {
@@ -52,7 +55,7 @@
         "fot": "./dist/index.js",
       },
       "dependencies": {
-        "@f-o-t/config": "^0.1.0",
+        "@f-o-t/config": "^1.0.0",
         "commander": "^12.1.0",
       },
       "devDependencies": {
@@ -71,15 +74,15 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/config": {
       "name": "@f-o-t/config",
       "version": "1.0.0",
       "dependencies": {
-        "zod": "4.3.6",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@biomejs/biome": "2.3.12",
@@ -98,41 +101,57 @@
     "libraries/content-analysis": {
       "name": "@f-o-t/content-analysis",
       "version": "0.1.0",
+      "dependencies": {
+        "@f-o-t/markdown": "^0.1.0",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/csv": {
       "name": "@f-o-t/csv",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/datetime": {
       "name": "@f-o-t/datetime",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/digital-certificate": {
       "name": "@f-o-t/digital-certificate",
       "version": "0.1.0",
+      "dependencies": {
+        "@f-o-t/xml": "^0.1.0",
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/markdown": {
       "name": "@f-o-t/markdown",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/money": {
@@ -143,8 +162,8 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
       "peerDependencies": {
         "@f-o-t/condition-evaluator": "^2.0.0",
@@ -156,41 +175,61 @@
     "libraries/ofx": {
       "name": "@f-o-t/ofx",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/pdf": {
       "name": "@f-o-t/pdf",
       "version": "0.1.0",
+      "dependencies": {
+        "@f-o-t/digital-certificate": "^0.1.0",
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/rules-engine": {
       "name": "@f-o-t/rules-engine",
       "version": "0.1.0",
+      "dependencies": {
+        "@f-o-t/condition-evaluator": "^2.0.2",
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/spelling": {
       "name": "@f-o-t/spelling",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/tax-calculator": {
       "name": "@f-o-t/tax-calculator",
       "version": "0.1.0",
+      "dependencies": {
+        "@f-o-t/condition-evaluator": "^2.0.2",
+        "@f-o-t/money": "^1.2.1",
+        "@f-o-t/rules-engine": "^0.1.0",
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
     "libraries/uom": {
@@ -201,9 +240,9 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/condition-evaluator": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/condition-evaluator": "^2.0.2",
+        "@f-o-t/config": "^1.0.0",
       },
       "peerDependencies": {
         "@f-o-t/condition-evaluator": "^2.0.0",
@@ -215,9 +254,12 @@
     "libraries/xml": {
       "name": "@f-o-t/xml",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.3.6",
+      },
       "devDependencies": {
-        "@f-o-t/cli": "workspace:*",
-        "@f-o-t/config": "workspace:*",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/config": "^1.0.0",
       },
     },
   },
@@ -1263,8 +1305,6 @@
     "@f-o-t/bigint/@f-o-t/cli": ["@f-o-t/cli@0.1.0", "", { "dependencies": { "@f-o-t/config": "workspace:*", "commander": "^12.1.0" }, "peerDependencies": { "typescript": ">=5.0.0" }, "bin": { "fot": "dist/index.js" } }, "sha512-VCCa0HRydihZ9NPb8WCARzJA2osE3HZD2wIGLkC7UlvJfqrmiJlSIf9a7ZuhW6r8Yyu6/4Zw/7zanXRnSAvA9A=="],
 
     "@f-o-t/bigint/@f-o-t/config": ["@f-o-t/config@0.1.0", "", { "dependencies": { "zod": "4.3.6" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-O1+C84jz+1NBiKhFtYjaX6AgPEC3vFOSIkLfBtbXzWot1CWDlHXahhdcBGD8wtp3XDMihaW2TxSaO1t918alDw=="],
-
-    "@f-o-t/cli/@f-o-t/config": ["@f-o-t/config@0.1.0", "", { "dependencies": { "zod": "4.3.6" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-O1+C84jz+1NBiKhFtYjaX6AgPEC3vFOSIkLfBtbXzWot1CWDlHXahhdcBGD8wtp3XDMihaW2TxSaO1t918alDw=="],
 
     "@f-o-t/config/@types/bun": ["@types/bun@1.3.6", "", { "dependencies": { "bun-types": "1.3.6" } }, "sha512-uWCv6FO/8LcpREhenN1d1b6fcspAB+cefwD7uti8C8VffIv0Um08TKMn98FynpTiU38+y2dUO55T11NgDt8VAA=="],
 
