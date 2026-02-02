@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-01
+
+### Changed
+
+- **Internal refactor**: Migrated to `@f-o-t/bigint` ^1.0.0 for bigint operations
+  - `parseDecimalToMinorUnits` now uses `parseToBigInt` from @f-o-t/bigint
+  - `minorUnitsToDecimal` now uses `formatFromBigInt` from @f-o-t/bigint
+  - `bankersRound` now imported from @f-o-t/bigint
+  - `roundToScale` now uses `convertScale` from @f-o-t/bigint
+- **Note**: This is an internal refactor with no breaking changes to public APIs
+- **Benefit**: Standardized bigint operations across all FOT libraries
+
+### Dependencies
+
+- Added `@f-o-t/bigint` ^1.0.0
+
 ## [1.1.1] - 2026-01-25
 
 ### Changed
@@ -221,4 +237,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `typescript` (>=4.5.0) - Optional for type checking
 
-[0.1.0]: https://github.com/F-O-T/montte-nx/releases/tag/@f-o-t/money@0.1.0
+[1.2.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/money@1.2.0
+[1.1.1]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/money@1.1.1
+[1.1.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/money@1.1.0
+[1.0.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/money@1.0.0
