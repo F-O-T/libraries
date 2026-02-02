@@ -1,47 +1,47 @@
 {
-  "name": "@f-o-t/bigint",
-  "version": "0.1.0",
-  "description": "Low-level bigint primitives for precise decimal arithmetic",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js",
-    "./operators": "./dist/plugins/operators/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format",
-    "check": "fot check"
-  },
-  "keywords": [
-    "bigint",
-    "decimal",
-    "arithmetic",
-    "precision",
-    "money",
-    "measurement"
-  ],
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^0.1.0",
-    "@f-o-t/config": "^0.1.0",
-    "@f-o-t/condition-evaluator": "^0.1.0",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "@f-o-t/condition-evaluator": "^0.1.0"
-  },
-  "peerDependenciesMeta": {
-    "@f-o-t/condition-evaluator": {
-      "optional": true
-    }
-  }
+   "name": "@f-o-t/bigint",
+   "version": "1.0.0",
+   "description": "Low-level bigint primitives for precise decimal arithmetic",
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": "./dist/index.js",
+      "./operators": "./dist/plugins/operators/index.js"
+   },
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "fot build",
+      "test": "fot test",
+      "lint": "fot lint",
+      "format": "fot format",
+      "check": "fot check"
+   },
+   "keywords": [
+      "bigint",
+      "decimal",
+      "arithmetic",
+      "precision",
+      "money",
+      "measurement"
+   ],
+   "dependencies": {
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^0.1.0",
+      "@f-o-t/config": "^0.1.0",
+      "@f-o-t/condition-evaluator": "^0.1.0",
+      "@types/bun": "latest"
+   },
+   "peerDependencies": {
+      "@f-o-t/condition-evaluator": "^0.1.0"
+   },
+   "peerDependenciesMeta": {
+      "@f-o-t/condition-evaluator": {
+         "optional": true
+      }
+   }
 }
