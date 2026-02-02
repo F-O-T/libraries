@@ -96,7 +96,11 @@ export interface ResolvedFotConfig {
    /**
     * TypeScript options
     */
-   typescript: Required<TypeScriptOptions>;
+   typescript: {
+      declaration: boolean;
+      isolatedDeclarations: boolean;
+      maxMemory?: number;
+   };
    /**
     * Biome options
     */
