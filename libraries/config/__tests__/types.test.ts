@@ -71,7 +71,7 @@ describe("ResolvedFotConfig", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: [],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [],
       };

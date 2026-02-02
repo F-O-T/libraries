@@ -7,7 +7,7 @@ describe("generatePackageJson", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: [],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [],
       };
@@ -35,7 +35,7 @@ describe("generatePackageJson", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: [],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [],
       };
@@ -53,7 +53,7 @@ describe("generatePackageJson", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: [],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [
             { name: "auth", enabled: true },
@@ -80,7 +80,7 @@ describe("generatePackageJson", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: [],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [],
       };
@@ -99,7 +99,7 @@ describe("generatePackageJson", () => {
       const config: ResolvedFotConfig = {
          formats: ["esm"],
          external: ["zod", "react"],
-         typescript: { declaration: true },
+         typescript: { declaration: true, isolatedDeclarations: false },
          biome: { enabled: true },
          plugins: [],
       };
