@@ -1,5 +1,6 @@
 import type { Money, RoundingMode } from "../types";
 import { bankersRound } from "./rounding";
+import { parseToBigInt } from "@f-o-t/bigint";
 
 /**
  * Create an immutable Money object
@@ -30,46 +31,7 @@ export function parseDecimalToMinorUnits(
    scale: number,
    roundingMode: RoundingMode = "truncate",
 ): bigint {
-   // Normalize the string
-   const normalized = amountStr.trim();
-
-   // Check for negative
-   const isNegative = normalized.startsWith("-");
-   const absStr = isNegative ? normalized.slice(1) : normalized;
-
-   // Split by decimal point
-   const parts = absStr.split(".");
-   const intPart = parts[0] || "0";
-   const decPart = parts[1] || "";
-
-   // Validate format
-   if (!/^\d*$/.test(intPart) || !/^\d*$/.test(decPart)) {
-      throw new Error(`Invalid amount format: ${amountStr}`);
-   }
-
-   // Pad or truncate/round decimal part to match scale
-   let amount: bigint;
-
-   if (decPart.length <= scale) {
-      // Pad with zeros
-      const adjustedDecPart = decPart.padEnd(scale, "0");
-      const combined = intPart + adjustedDecPart;
-      amount = BigInt(combined);
-   } else if (roundingMode === "truncate") {
-      // Truncate excess digits (default behavior)
-      const adjustedDecPart = decPart.slice(0, scale);
-      const combined = intPart + adjustedDecPart;
-      amount = BigInt(combined);
-   } else {
-      // Round using banker's rounding
-      // Parse with full precision, then round
-      const fullAmount = BigInt(intPart + decPart);
-      const extraDigits = decPart.length - scale;
-      const divisor = 10n ** BigInt(extraDigits);
-      amount = bankersRound(fullAmount, divisor);
-   }
-
-   return isNegative ? -amount : amount;
+   return parseToBigInt({ value: amountStr, scale, roundingMode });
 }
 
 /**
