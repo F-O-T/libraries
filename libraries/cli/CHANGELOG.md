@@ -5,6 +5,25 @@ All notable changes to @f-o-t/cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-02-02
+
+### Added
+- File watching for `fot dev` command — watches `src/` for `.ts` changes and rebuilds automatically
+- Full test coverage for all commands, builder, config-loader, templates, and CLI entry point
+- Commander-based CLI with proper `--help` auto-generation and option parsing
+- Dynamic version reading from `package.json` (no more hardcoded version strings)
+
+### Changed
+- Migrated CLI argument parsing from manual `switch` to `commander` library
+- `fot check` help text now correctly describes it as "Format and lint code with Biome"
+
+### Removed
+- Hardcoded `"fot v0.1.0"` version string (now reads from package.json)
+
+### Fixed
+- `fot check` documentation mismatch — help text previously said "typecheck + test" but implementation runs Biome
+- Watch mode TODO stub replaced with working implementation
+
 ## [0.1.0] - 2026-01-30
 
 ### Added
