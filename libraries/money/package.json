@@ -21,6 +21,10 @@
     "format": "fot format",
     "typecheck": "fot typecheck"
   },
+  "dependencies": {
+    "@f-o-t/bigint": "^1.0.0",
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",
     "@f-o-t/config": "workspace:*"
