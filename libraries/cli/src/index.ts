@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
 
+import { Command } from "commander";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   buildCommand,
   devCommand,
@@ -12,119 +16,74 @@ import {
   type CreateOptions,
 } from "./commands/index";
 
-// Export all commands and utilities
+// Re-export public API
 export { generateConfigFiles } from "./commands/generate";
 export { buildCommand } from "./commands/build";
 export { buildLibrary, type BuildOptions } from "./builder";
 export { loadFotConfig, hasFotConfig } from "./config-loader";
 
-function printHelp() {
-  console.log(`
-FOT CLI - Build tools for monorepo libraries
+// Read version from package.json
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
-Usage: fot <command> [options]
+const program = new Command();
 
-Commands:
-  build              Build the current library
-  dev                Start development mode with watch
-  test               Run tests
-    --watch          Run tests in watch mode
-    --coverage       Run tests with coverage
-  check              Format and lint code with Biome
-  typecheck          Run TypeScript type checking
-  generate           Generate configuration files
-  create <name>      Create a new library
-    [description]    Optional description for the library
-  help, --help, -h   Show this help message
-  version, --version, -v  Show version number
+program
+  .name("fot")
+  .description("Build tools for FOT monorepo libraries")
+  .version(pkg.version);
 
-Examples:
-  fot build
-  fot dev
-  fot test --coverage
-  fot test --watch
-  fot create my-lib "A new library"
-  fot generate
-  fot check
-`);
-}
+program
+  .command("build")
+  .description("Build the current library")
+  .action(async () => {
+    await buildCommand();
+  });
 
-async function main() {
-  const args = process.argv.slice(2);
-  const command = args[0];
+program
+  .command("dev")
+  .description("Start development mode with file watching")
+  .action(async () => {
+    await devCommand();
+  });
 
-  try {
-    switch (command) {
-      case "build":
-        await buildCommand();
-        break;
+program
+  .command("test")
+  .description("Run tests")
+  .option("--watch", "Run tests in watch mode")
+  .option("--coverage", "Run tests with coverage")
+  .action(async (options: TestOptions) => {
+    await testCommand(options);
+  });
 
-      case "dev":
-        await devCommand();
-        break;
+program
+  .command("check")
+  .description("Format and lint code with Biome")
+  .action(async () => {
+    await checkCommand();
+  });
 
-      case "test": {
-        const options: TestOptions = {
-          coverage: args.includes("--coverage"),
-          watch: args.includes("--watch"),
-        };
-        await testCommand(options);
-        break;
-      }
+program
+  .command("typecheck")
+  .description("Run TypeScript type checking")
+  .action(async () => {
+    await typecheckCommand();
+  });
 
-      case "check":
-        await checkCommand();
-        break;
+program
+  .command("generate")
+  .description("Generate config files from fot.config.ts")
+  .action(async () => {
+    await generateConfigFiles(process.cwd());
+  });
 
-      case "typecheck":
-        await typecheckCommand();
-        break;
+program
+  .command("create <name>")
+  .description("Scaffold a new library")
+  .argument("[description]", "Description for the library", "A new FOT library")
+  .action(async (name: string, description: string) => {
+    const options: CreateOptions = { name, description };
+    await createCommand(options);
+  });
 
-      case "generate":
-        await generateConfigFiles(process.cwd());
-        break;
-
-      case "create": {
-        const name = args[1];
-        if (!name) {
-          console.error("Error: Library name is required");
-          console.log('Usage: fot create <name> [description]');
-          process.exit(1);
-        }
-        const description = args[2] || `A new FOT library: ${name}`;
-        const options: CreateOptions = {
-          name,
-          description,
-        };
-        await createCommand(options);
-        break;
-      }
-
-      case "help":
-      case "--help":
-      case "-h":
-        printHelp();
-        break;
-
-      case "version":
-      case "--version":
-      case "-v":
-        console.log("fot v0.1.0");
-        break;
-
-      case undefined:
-        printHelp();
-        break;
-
-      default:
-        console.error(`Unknown command: ${command}`);
-        console.log('Run "fot --help" for usage information');
-        process.exit(1);
-    }
-  } catch (error) {
-    console.error("Error:", error instanceof Error ? error.message : error);
-    process.exit(1);
-  }
-}
-
-main();
+program.parse();

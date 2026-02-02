@@ -9,5 +9,5 @@ export default defineConfig({
   clean: true,
   minify: false,
   sourcemap: true,
-  external: ["@f-o-t/config"], // Keep as external - needed by user config files
+  external: ["@f-o-t/config", "commander"], // Keep as external - needed by user config files
 });
