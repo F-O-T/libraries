@@ -1,4 +1,5 @@
 import { createOperator } from "@f-o-t/condition-evaluator";
+import type { Operator } from "@f-o-t/condition-evaluator";
 import { z } from "zod";
 import { assertSameCurrency } from "../core/assertions";
 import { minorUnitsToDecimal } from "../core/internal";
@@ -57,7 +58,7 @@ export function toJSON(money: Money): MoneyJSON {
 /**
  * Money equals operator
  */
-export const moneyEqualsOperator = createOperator({
+export const moneyEqualsOperator: Operator = createOperator({
    name: "money_eq",
    type: "custom",
    description: "Check if two Money values are equal",
@@ -81,7 +82,7 @@ export const moneyEqualsOperator = createOperator({
 /**
  * Money not equals operator
  */
-export const moneyNotEqualsOperator = createOperator({
+export const moneyNotEqualsOperator: Operator = createOperator({
    name: "money_neq",
    type: "custom",
    description: "Check if two Money values are not equal",
@@ -97,7 +98,7 @@ export const moneyNotEqualsOperator = createOperator({
 /**
  * Money greater than operator
  */
-export const moneyGreaterThanOperator = createOperator({
+export const moneyGreaterThanOperator: Operator = createOperator({
    name: "money_gt",
    type: "custom",
    description: "Check if Money value is greater than expected",
@@ -113,7 +114,7 @@ export const moneyGreaterThanOperator = createOperator({
 /**
  * Money greater than or equal operator
  */
-export const moneyGreaterThanOrEqualOperator = createOperator({
+export const moneyGreaterThanOrEqualOperator: Operator = createOperator({
    name: "money_gte",
    type: "custom",
    description: "Check if Money value is greater than or equal to expected",
@@ -129,7 +130,7 @@ export const moneyGreaterThanOrEqualOperator = createOperator({
 /**
  * Money less than operator
  */
-export const moneyLessThanOperator = createOperator({
+export const moneyLessThanOperator: Operator = createOperator({
    name: "money_lt",
    type: "custom",
    description: "Check if Money value is less than expected",
@@ -145,7 +146,7 @@ export const moneyLessThanOperator = createOperator({
 /**
  * Money less than or equal operator
  */
-export const moneyLessThanOrEqualOperator = createOperator({
+export const moneyLessThanOrEqualOperator: Operator = createOperator({
    name: "money_lte",
    type: "custom",
    description: "Check if Money value is less than or equal to expected",
@@ -161,7 +162,7 @@ export const moneyLessThanOrEqualOperator = createOperator({
 /**
  * Money between operator (inclusive)
  */
-export const moneyBetweenOperator = createOperator({
+export const moneyBetweenOperator: Operator = createOperator({
    name: "money_between",
    type: "custom",
    description: "Check if Money value is between two values (inclusive)",
@@ -182,7 +183,7 @@ export const moneyBetweenOperator = createOperator({
 /**
  * Money is positive operator
  */
-export const moneyPositiveOperator = createOperator({
+export const moneyPositiveOperator: Operator = createOperator({
    name: "money_positive",
    type: "custom",
    description: "Check if Money value is positive (> 0)",
@@ -195,7 +196,7 @@ export const moneyPositiveOperator = createOperator({
 /**
  * Money is negative operator
  */
-export const moneyNegativeOperator = createOperator({
+export const moneyNegativeOperator: Operator = createOperator({
    name: "money_negative",
    type: "custom",
    description: "Check if Money value is negative (< 0)",
@@ -208,7 +209,7 @@ export const moneyNegativeOperator = createOperator({
 /**
  * Money is zero operator
  */
-export const moneyZeroOperator = createOperator({
+export const moneyZeroOperator: Operator = createOperator({
    name: "money_zero",
    type: "custom",
    description: "Check if Money value is zero",
