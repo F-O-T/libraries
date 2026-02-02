@@ -41,3 +41,4 @@ export {
 
 // Export operations
 export { convert } from "./operations/convert";
+export { add, subtract, multiply, divide } from "./operations/arithmetic";
