@@ -1,4 +1,6 @@
+import { parseToBigInt as parseToBigIntCore } from "@f-o-t/bigint";
 import { InvalidMeasurementError } from "../errors";
+import { ZodError } from "zod";
 
 /**
  * Default precision scale (12 decimal places)
@@ -24,26 +26,31 @@ export function parseDecimalToBigInt(
    value: number | string,
    scale: number,
 ): bigint {
-   if (scale < 0) {
-      throw new InvalidMeasurementError("Scale must be non-negative");
+   try {
+      return parseToBigIntCore({
+         value: String(value),
+         scale,
+         roundingMode: "truncate", // UOM uses truncate as default
+      });
+   } catch (error) {
+      // Convert ZodError to InvalidMeasurementError for backward compatibility
+      if (error instanceof ZodError) {
+         const firstIssue = error.issues[0];
+         if (firstIssue) {
+            // Extract meaningful error message
+            if (firstIssue.path.includes("scale")) {
+               throw new InvalidMeasurementError("Scale must be non-negative");
+            }
+            if (firstIssue.path.includes("value")) {
+               throw new InvalidMeasurementError(
+                  `Invalid number format: ${String(value)}`,
+               );
+            }
+         }
+         throw new InvalidMeasurementError(error.message);
+      }
+      throw error;
    }
-
-   const valueStr = String(value);
-
-   // Check for invalid number formats
-   if (!/^-?\d+(\.\d+)?$/.test(valueStr)) {
-      throw new InvalidMeasurementError(`Invalid number format: ${valueStr}`);
-   }
-
-   const [integerPart, decimalPart = ""] = valueStr.split(".");
-
-   // Pad or truncate decimal part to match scale
-   const paddedDecimal = decimalPart.padEnd(scale, "0").slice(0, scale);
-
-   // Combine integer and decimal parts
-   const combined = integerPart + paddedDecimal;
-
-   return BigInt(combined);
 }
 
 /**
