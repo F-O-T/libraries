@@ -7,7 +7,7 @@ CLI tool for managing FOT (Factories of Tomorrow) libraries in monorepo workspac
 - **Build** - Compile TypeScript libraries with optimized bundling
 - **Dev Mode** - Watch mode for rapid development with automatic rebuilds
 - **Test** - Run tests with optional coverage and watch mode
-- **Check** - Run all checks (typecheck + test) in one command
+- **Check** - Format and lint code with Biome
 - **Typecheck** - TypeScript type checking without builds
 - **Generate** - Generate configuration files from `fot.config.ts`
 - **Create** - Scaffold new libraries with complete boilerplate
@@ -102,17 +102,18 @@ fot test --coverage
 
 ### `fot check`
 
-Run all checks (typecheck + test) in sequence.
+Format and lint code with Biome.
 
 ```bash
 fot check
 ```
 
 **What it does:**
-- First runs TypeScript type checking
-- Then runs the full test suite
-- Exits with error if either check fails
-- Perfect for CI/CD pipelines
+- Runs Biome code formatter on all source files
+- Performs linting checks with Biome
+- Ensures code style consistency across the codebase
+- Exits with error if formatting or linting issues are found
+- Perfect for pre-commit hooks and CI/CD pipelines
 
 ---
 

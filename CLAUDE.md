@@ -83,7 +83,7 @@ export const myEqualsOperator = createOperator({
 - `fot test` — run tests via `bun test`
 - `fot lint` / `fot format` — linting and formatting
 - `fot generate` — regenerate all config files (package.json, tsconfig.json, biome.json)
-- `fot check` — run typecheck + tests
+- `fot check` — format and lint code with Biome
 - `fot create <name>` — scaffold a new library
 
 ## CHANGELOG Management
