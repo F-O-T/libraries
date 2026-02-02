@@ -8,7 +8,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./operators": "./dist/plugins/operators/index.js"
   },
   "scripts": {
     "build": "fot build",
@@ -23,7 +24,16 @@
   },
   "devDependencies": {
     "@f-o-t/cli": "workspace:*",
-    "@f-o-t/config": "workspace:*"
+    "@f-o-t/config": "workspace:*",
+    "@f-o-t/condition-evaluator": "workspace:*"
+  },
+  "peerDependencies": {
+    "@f-o-t/condition-evaluator": "^0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@f-o-t/condition-evaluator": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",

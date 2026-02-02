@@ -23,6 +23,17 @@ export const MeasurementSchema = z.object({
 });
 
 /**
+ * Runtime measurement schema for condition-evaluator operators
+ * Uses bigint for actual runtime values
+ */
+export const MeasurementRuntimeSchema = z.object({
+   value: z.bigint(),
+   unit: z.string(),
+   scale: z.number().int().min(0).max(20),
+   category: UnitCategorySchema,
+});
+
+/**
  * Input schema for creating measurements
  * Accepts string or number values for convenience
  */

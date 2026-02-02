@@ -16,6 +16,7 @@ export {
    MeasurementInputSchema,
    MeasurementJSONSchema,
    MeasurementSchema,
+   MeasurementRuntimeSchema,
    UnitCategorySchema,
    UnitDefinitionSchema,
 } from "./schemas";
