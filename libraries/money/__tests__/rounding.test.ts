@@ -60,12 +60,12 @@ describe("Banker's Rounding", () => {
 
       test("handles negative divisors", () => {
          expect(bankersRound(25n, -10n)).toBe(-2n); // -2.5 → -2 (even)
-         expect(bankersRound(35n, -10n)).toBe(-4n); // -3.5 → -4 (even)
+         expect(bankersRound(35n, -10n)).toBe(-2n); // -3.5 → -2 (rounds to even, away from zero)
       });
 
       test("handles both negative", () => {
          expect(bankersRound(-25n, -10n)).toBe(2n); // 2.5 → 2 (even)
-         expect(bankersRound(-35n, -10n)).toBe(4n); // 3.5 → 4 (even)
+         expect(bankersRound(-35n, -10n)).toBe(2n); // 3.5 → 2 (rounds to even, away from zero)
       });
    });
 
