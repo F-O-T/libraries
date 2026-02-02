@@ -9,7 +9,11 @@ import { FormatInputSchema, type FormatInput } from "./schemas";
  */
 export function formatFromBigInt(input: FormatInput): string {
   // Validate input
-  const { value, scale, trimTrailingZeros = true } = FormatInputSchema.parse(input);
+  const {
+    value,
+    scale,
+    trimTrailingZeros = true,
+  } = FormatInputSchema.parse(input);
 
   // Handle zero specially
   if (value === 0n) {
