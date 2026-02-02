@@ -33,11 +33,11 @@
    "devDependencies": {
       "@f-o-t/cli": "^0.1.0",
       "@f-o-t/config": "^0.1.0",
-      "@f-o-t/condition-evaluator": "^0.1.0",
+      "@f-o-t/condition-evaluator": "workspace:*",
       "@types/bun": "latest"
    },
    "peerDependencies": {
-      "@f-o-t/condition-evaluator": "^0.1.0"
+      "@f-o-t/condition-evaluator": "^2.0.0"
    },
    "peerDependenciesMeta": {
       "@f-o-t/condition-evaluator": {

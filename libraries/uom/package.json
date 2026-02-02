@@ -28,7 +28,7 @@
     "@f-o-t/condition-evaluator": "workspace:*"
   },
   "peerDependencies": {
-    "@f-o-t/condition-evaluator": "^0.1.0"
+    "@f-o-t/condition-evaluator": "^2.0.0"
   },
   "peerDependenciesMeta": {
     "@f-o-t/condition-evaluator": {
