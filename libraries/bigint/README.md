@@ -27,14 +27,14 @@ bun add @f-o-t/bigint
 import { parseToBigInt } from "@f-o-t/bigint";
 
 // Parse decimal string to bigint
-const value1 = parseToBigInt("10.50", 2);  // 1050n (scale 2)
-const value2 = parseToBigInt("123.456", 3); // 123456n (scale 3)
+const value1 = parseToBigInt({ value: "10.50", scale: 2 });  // 1050n (scale 2)
+const value2 = parseToBigInt({ value: "123.456", scale: 3 }); // 123456n (scale 3)
 
 // Different rounding modes
-parseToBigInt("10.999", 2, "truncate");  // 1099n (default)
-parseToBigInt("10.999", 2, "round");     // 1100n (banker's rounding)
-parseToBigInt("10.999", 2, "ceil");      // 1100n (round up)
-parseToBigInt("10.999", 2, "floor");     // 1099n (round down)
+parseToBigInt({ value: "10.999", scale: 2, roundingMode: "truncate" });  // 1099n (default)
+parseToBigInt({ value: "10.999", scale: 2, roundingMode: "round" });     // 1100n (banker's rounding)
+parseToBigInt({ value: "10.999", scale: 2, roundingMode: "ceil" });      // 1100n (round up)
+parseToBigInt({ value: "10.999", scale: 2, roundingMode: "floor" });     // 1099n (round down)
 ```
 
 ### Formatting
@@ -43,9 +43,9 @@ parseToBigInt("10.999", 2, "floor");     // 1099n (round down)
 import { formatFromBigInt } from "@f-o-t/bigint";
 
 // Format bigint to decimal string
-formatFromBigInt(1050n, 2);        // "10.5" (trims trailing zeros)
-formatFromBigInt(1050n, 2, false); // "10.50" (keeps trailing zeros)
-formatFromBigInt(100n, 0);         // "100" (no decimals)
+formatFromBigInt({ value: 1050n, scale: 2 });        // "10.5" (trims trailing zeros)
+formatFromBigInt({ value: 1050n, scale: 2, trimTrailingZeros: false }); // "10.50" (keeps trailing zeros)
+formatFromBigInt({ value: 100n, scale: 0 });         // "100" (no decimals)
 ```
 
 ### Arithmetic
@@ -56,16 +56,16 @@ All arithmetic operations require the same scale for both operands.
 import { add, subtract, multiply, divide } from "@f-o-t/bigint";
 
 // Addition and subtraction
-add(1050n, 525n, 2);       // 1575n (10.50 + 5.25 = 15.75)
-subtract(1050n, 525n, 2);  // 525n (10.50 - 5.25 = 5.25)
+add({ a: 1050n, b: 525n, scale: 2 });       // 1575n (10.50 + 5.25 = 15.75)
+subtract({ a: 1050n, b: 525n, scale: 2 });  // 525n (10.50 - 5.25 = 5.25)
 
 // Multiplication (result maintains scale)
-multiply(1000n, 500n, 2);  // 5000n (10.00 * 5.00 = 50.00)
+multiply({ a: 1000n, b: 500n, scale: 2 });  // 5000n (10.00 * 5.00 = 50.00)
 
 // Division with rounding
-divide(10000n, 300n, 2);            // 3333n (truncate, default)
-divide(10000n, 300n, 2, "round");   // 3333n (banker's rounding)
-divide(10000n, 300n, 2, "ceil");    // 3334n
+divide({ a: 10000n, b: 300n, scale: 2 });            // 3333n (truncate, default)
+divide({ a: 10000n, b: 300n, scale: 2, roundingMode: "round" });   // 3333n (banker's rounding)
+divide({ a: 10000n, b: 300n, scale: 2, roundingMode: "ceil" });    // 3334n
 ```
 
 ### Comparison
@@ -73,13 +73,13 @@ divide(10000n, 300n, 2, "ceil");    // 3334n
 ```typescript
 import { compare, equals, greaterThan, lessThan } from "@f-o-t/bigint";
 
-compare(100n, 50n, 2);     // 1 (greater)
-compare(50n, 100n, 2);     // -1 (less)
-compare(100n, 100n, 2);    // 0 (equal)
+compare({ a: 100n, b: 50n, scale: 2 });     // 1 (greater)
+compare({ a: 50n, b: 100n, scale: 2 });     // -1 (less)
+compare({ a: 100n, b: 100n, scale: 2 });    // 0 (equal)
 
-equals(100n, 100n, 2);     // true
-greaterThan(100n, 50n, 2); // true
-lessThan(50n, 100n, 2);    // true
+equals({ a: 100n, b: 100n, scale: 2 });     // true
+greaterThan({ a: 100n, b: 50n, scale: 2 }); // true
+lessThan({ a: 50n, b: 100n, scale: 2 });    // true
 ```
 
 ### Rounding & Scale Conversion
@@ -92,9 +92,9 @@ bankersRound(25n, 10n);  // 2n (2.5 → 2, even)
 bankersRound(35n, 10n);  // 4n (3.5 → 4, even)
 
 // Convert between scales
-convertScale(100n, 2, 4);              // 10000n (1.00 @ 2 → 1.0000 @ 4)
-convertScale(10050n, 4, 2, "round");   // 101n (1.0050 @ 4 → 1.01 @ 2)
-convertScale(10050n, 4, 2, "truncate"); // 100n (1.0050 @ 4 → 1.00 @ 2)
+convertScale({ value: 100n, fromScale: 2, toScale: 4 });              // 10000n (1.00 @ 2 → 1.0000 @ 4)
+convertScale({ value: 10050n, fromScale: 4, toScale: 2, roundingMode: "round" });   // 100n (1.0050 @ 4 → 1.00 @ 2, banker's rounding to even)
+convertScale({ value: 10050n, fromScale: 4, toScale: 2, roundingMode: "truncate" }); // 100n (1.0050 @ 4 → 1.00 @ 2)
 ```
 
 ## Condition-Evaluator Integration
