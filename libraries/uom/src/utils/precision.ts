@@ -1,4 +1,7 @@
-import { parseToBigInt as parseToBigIntCore } from "@f-o-t/bigint";
+import {
+   parseToBigInt as parseToBigIntCore,
+   formatFromBigInt,
+} from "@f-o-t/bigint";
 import { InvalidMeasurementError } from "../errors";
 import { ZodError } from "zod";
 
@@ -68,23 +71,9 @@ export function parseDecimalToBigInt(
  * ```
  */
 export function formatBigIntToDecimal(value: bigint, scale: number): string {
-   const valueStr = value.toString();
-   const isNegative = valueStr.startsWith("-");
-   const absStr = isNegative ? valueStr.slice(1) : valueStr;
-
-   // Pad with zeros if needed
-   const paddedStr = absStr.padStart(scale + 1, "0");
-
-   // Split into integer and decimal parts
-   const integerPart = paddedStr.slice(0, -scale) || "0";
-   const decimalPart = paddedStr.slice(-scale);
-
-   // Remove trailing zeros from decimal part
-   const trimmedDecimal = decimalPart.replace(/0+$/, "");
-
-   const result = trimmedDecimal
-      ? `${integerPart}.${trimmedDecimal}`
-      : integerPart;
-
-   return isNegative ? `-${result}` : result;
+   return formatFromBigInt({
+      value,
+      scale,
+      trimTrailingZeros: true, // UOM trims trailing zeros by default
+   });
 }
