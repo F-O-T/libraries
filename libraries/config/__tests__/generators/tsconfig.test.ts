@@ -60,4 +60,76 @@ describe("generateTSConfig", () => {
       expect(tsconfig.compilerOptions.module).toBe("Preserve");
       expect(tsconfig.compilerOptions.moduleResolution).toBe("bundler");
    });
+
+   it("should enable TypeScript import extensions", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.allowImportingTsExtensions).toBe(true);
+   });
+
+   it("should force module detection", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.moduleDetection).toBe("force");
+   });
+
+   it("should enable noEmit for type checking only", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noEmit).toBe(true);
+   });
+
+   it("should enable noFallthroughCasesInSwitch for safety", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noFallthroughCasesInSwitch).toBe(true);
+   });
+
+   it("should enable noImplicitOverride", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noImplicitOverride).toBe(true);
+   });
+
+   it("should disable noPropertyAccessFromIndexSignature for flexibility", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noPropertyAccessFromIndexSignature).toBe(false);
+   });
+
+   it("should enable noUncheckedIndexedAccess for safety", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noUncheckedIndexedAccess).toBe(true);
+   });
+
+   it("should disable noUnusedLocals to avoid build errors", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noUnusedLocals).toBe(false);
+   });
+
+   it("should disable noUnusedParameters to avoid build errors", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.noUnusedParameters).toBe(false);
+   });
+
+   it("should enable skipLibCheck for faster builds", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.skipLibCheck).toBe(true);
+   });
+
+   it("should enable verbatimModuleSyntax", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.compilerOptions.verbatimModuleSyntax).toBe(true);
+   });
+
+   it("should exclude bunup.config.ts from compilation", () => {
+      const tsconfig = generateTSConfig(baseConfig);
+
+      expect(tsconfig.exclude).toContain("bunup.config.ts");
+   });
 });
