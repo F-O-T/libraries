@@ -34,6 +34,14 @@ export interface TSConfig {
  * @returns The generated tsconfig.json object
  */
 export function generateTSConfig(config: ResolvedFotConfig): TSConfig {
+   // Exclude plugin directories from main tsconfig so their dependencies
+   // (e.g., @f-o-t/condition-evaluator) don't get type-checked in the main pass.
+   // Plugin declarations are handled separately by the build system.
+   const enabledPlugins = config.plugins.filter((p) => p.enabled !== false);
+   const pluginExcludes = enabledPlugins.map(
+      (p) => `src/plugins/${p.name}`,
+   );
+
    return {
       compilerOptions: {
          allowImportingTsExtensions: true,
@@ -54,7 +62,7 @@ export function generateTSConfig(config: ResolvedFotConfig): TSConfig {
          target: "ES2023",
          verbatimModuleSyntax: true,
       },
-      exclude: ["node_modules", "dist", "bunup.config.ts"],
+      exclude: ["node_modules", "dist", "bunup.config.ts", ...pluginExcludes],
       include: ["src/**/*"],
    };
 }
