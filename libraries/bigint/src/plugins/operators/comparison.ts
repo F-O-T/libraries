@@ -1,5 +1,5 @@
 import { createOperator } from "@f-o-t/condition-evaluator";
-import { compare, equals } from "../../compare";
+import { equals, greaterThan, greaterThanOrEqual, lessThan, lessThanOrEqual } from "../../compare";
 import { ScaledBigIntSchema, type ScaledBigInt } from "../../schemas";
 
 /**
@@ -63,7 +63,7 @@ export const bigintGreaterThanOperator = createOperator({
     const a = toScaledBigInt(actual);
     const b = toScaledBigInt(expected);
     assertSameScale(a, b);
-    return compare({ a: a.value, b: b.value, scale: a.scale }) > 0;
+    return greaterThan({ a: a.value, b: b.value, scale: a.scale });
   },
   valueSchema: ScaledBigIntSchema,
 });
@@ -79,7 +79,7 @@ export const bigintGreaterThanOrEqualOperator = createOperator({
     const a = toScaledBigInt(actual);
     const b = toScaledBigInt(expected);
     assertSameScale(a, b);
-    return compare({ a: a.value, b: b.value, scale: a.scale }) >= 0;
+    return greaterThanOrEqual({ a: a.value, b: b.value, scale: a.scale });
   },
   valueSchema: ScaledBigIntSchema,
 });
@@ -95,7 +95,7 @@ export const bigintLessThanOperator = createOperator({
     const a = toScaledBigInt(actual);
     const b = toScaledBigInt(expected);
     assertSameScale(a, b);
-    return compare({ a: a.value, b: b.value, scale: a.scale }) < 0;
+    return lessThan({ a: a.value, b: b.value, scale: a.scale });
   },
   valueSchema: ScaledBigIntSchema,
 });
@@ -111,7 +111,7 @@ export const bigintLessThanOrEqualOperator = createOperator({
     const a = toScaledBigInt(actual);
     const b = toScaledBigInt(expected);
     assertSameScale(a, b);
-    return compare({ a: a.value, b: b.value, scale: a.scale }) <= 0;
+    return lessThanOrEqual({ a: a.value, b: b.value, scale: a.scale });
   },
   valueSchema: ScaledBigIntSchema,
 });
