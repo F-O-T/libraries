@@ -1,6 +1,6 @@
 import type { Money, RoundingMode } from "../types";
 import { bankersRound } from "./rounding";
-import { parseToBigInt } from "@f-o-t/bigint";
+import { parseToBigInt, formatFromBigInt } from "@f-o-t/bigint";
 
 /**
  * Create an immutable Money object
@@ -42,19 +42,7 @@ export function parseDecimalToMinorUnits(
  * @returns Decimal string representation
  */
 export function minorUnitsToDecimal(amount: bigint, scale: number): string {
-   if (scale === 0) {
-      return amount.toString();
-   }
-
-   const isNegative = amount < 0n;
-   const absAmount = isNegative ? -amount : amount;
-   const str = absAmount.toString().padStart(scale + 1, "0");
-
-   const intPart = str.slice(0, -scale) || "0";
-   const decPart = str.slice(-scale);
-
-   const result = `${intPart}.${decPart}`;
-   return isNegative ? `-${result}` : result;
+   return formatFromBigInt({ value: amount, scale, trimTrailingZeros: false });
 }
 
 /**
