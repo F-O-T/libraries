@@ -49,3 +49,4 @@ export {
 	lessThan,
 	lessThanOrEqual,
 } from "./operations/compare";
+export { format, type FormatOptions } from "./operations/format";
