@@ -11,13 +11,13 @@
          "import": {
             "default": "./dist/index.js",
             "types": "./dist/index.d.ts"
-         },
-         "types": "./src/index.ts"
+         }
       },
       "./package.json": "./package.json"
    },
    "files": [
-      "dist"
+      "dist",
+      "src"
    ],
    "scripts": {
       "build": "bunup",

@@ -20,7 +20,7 @@
   "dependencies": {
     "@f-o-t/condition-evaluator": "^2.0.2",
     "@f-o-t/money": "^1.2.1",
-    "@f-o-t/rules-engine": "^0.1.0",
+    "@f-o-t/rules-engine": "^3.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@f-o-t/content-analysis",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "typecheck": "fot typecheck"
   },
   "dependencies": {
-    "@f-o-t/markdown": "^0.1.0"
+    "@f-o-t/markdown": "^1.0.2"
   },
   "devDependencies": {
     "@f-o-t/cli": "^1.0.0",
