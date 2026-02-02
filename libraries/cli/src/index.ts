@@ -30,7 +30,7 @@ Commands:
   test               Run tests
     --watch          Run tests in watch mode
     --coverage       Run tests with coverage
-  check              Run all checks (typecheck + test)
+  check              Format and lint code with Biome
   typecheck          Run TypeScript type checking
   generate           Generate configuration files
   create <name>      Create a new library

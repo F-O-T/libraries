@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test command** (`fot test`) - Run tests with Bun's native test runner
   - `--watch` flag for continuous testing during development
   - `--coverage` flag to generate test coverage reports
-- **Check command** (`fot check`) - Run all checks (typecheck + test) in sequence, perfect for CI/CD
+- **Check command** (`fot check`) - Format and lint code with Biome auto-fix
 - **Typecheck command** (`fot typecheck`) - Run TypeScript type checking without building
 - **Generate command** (`fot generate`) - Generate configuration files (package.json, tsconfig.json, biome.json) from fot.config.ts
 - **Create command** (`fot create <name> [description]`) - Scaffold new libraries with complete boilerplate including:
