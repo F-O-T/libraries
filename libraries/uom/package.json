@@ -12,11 +12,11 @@
     "./operators": "./dist/plugins/operators/index.js"
   },
   "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format",
-    "typecheck": "fot typecheck"
+    "build": "bun x --bun fot build",
+    "test": "bun x --bun fot test",
+    "lint": "bun x --bun fot lint",
+    "format": "bun x --bun fot format",
+    "typecheck": "bun x --bun fot typecheck"
   },
   "dependencies": {
     "@f-o-t/bigint": "^1.0.0",

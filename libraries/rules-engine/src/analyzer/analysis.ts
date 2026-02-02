@@ -284,7 +284,7 @@ export const analyzeOperatorUsage = <
             const key = `${c.type}:${c.operator}`;
             const existing = operatorMap.get(key) ?? {
                type: c.type,
-               rules: [],
+               rules: [] as Array<{ id: string; name: string }>,
             };
             if (!existing.rules.some((r) => r.id === rule.id)) {
                existing.rules.push({ id: rule.id, name: rule.name });

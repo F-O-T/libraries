@@ -25,9 +25,9 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@f-o-t/cli": "^0.1.0",
-        "@f-o-t/condition-evaluator": "^2.0.0",
-        "@f-o-t/config": "^0.1.0",
+        "@f-o-t/cli": "^1.0.0",
+        "@f-o-t/condition-evaluator": "^2.0.2",
+        "@f-o-t/config": "^1.0.0",
         "@types/bun": "latest",
       },
       "peerDependencies": {
@@ -166,7 +166,7 @@
         "@f-o-t/config": "^1.0.0",
       },
       "peerDependencies": {
-        "@f-o-t/condition-evaluator": "^2.0.0",
+        "@f-o-t/condition-evaluator": "^2.0.2",
       },
       "optionalPeers": [
         "@f-o-t/condition-evaluator",
@@ -1302,10 +1302,6 @@
 
     "@commitlint/types/chalk": ["chalk@5.6.2", "", {}, "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="],
 
-    "@f-o-t/bigint/@f-o-t/cli": ["@f-o-t/cli@0.1.0", "", { "dependencies": { "@f-o-t/config": "workspace:*", "commander": "^12.1.0" }, "peerDependencies": { "typescript": ">=5.0.0" }, "bin": { "fot": "dist/index.js" } }, "sha512-VCCa0HRydihZ9NPb8WCARzJA2osE3HZD2wIGLkC7UlvJfqrmiJlSIf9a7ZuhW6r8Yyu6/4Zw/7zanXRnSAvA9A=="],
-
-    "@f-o-t/bigint/@f-o-t/config": ["@f-o-t/config@0.1.0", "", { "dependencies": { "zod": "4.3.6" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-O1+C84jz+1NBiKhFtYjaX6AgPEC3vFOSIkLfBtbXzWot1CWDlHXahhdcBGD8wtp3XDMihaW2TxSaO1t918alDw=="],
-
     "@f-o-t/config/@types/bun": ["@types/bun@1.3.6", "", { "dependencies": { "bun-types": "1.3.6" } }, "sha512-uWCv6FO/8LcpREhenN1d1b6fcspAB+cefwD7uti8C8VffIv0Um08TKMn98FynpTiU38+y2dUO55T11NgDt8VAA=="],
 
     "@oxc-minify/binding-wasm32-wasi/@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.1", "", { "dependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1", "@tybys/wasm-util": "^0.10.1" } }, "sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A=="],
@@ -1342,8 +1338,6 @@
 
     "tinyglobby/picomatch": ["picomatch@4.0.3", "", {}, "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q=="],
 
-    "@f-o-t/bigint/@f-o-t/cli/@f-o-t/config": ["@f-o-t/config@workspace:libraries/config"],
-
     "@f-o-t/config/@types/bun/bun-types": ["bun-types@1.3.6", "", { "dependencies": { "@types/node": "*" } }, "sha512-OlFwHcnNV99r//9v5IIOgQ9Uk37gZqrNMCcqEaExdkVq3Avwqok1bJFmvGMCkCE0FqzdY8VMOZpfpR3lwI+CsQ=="],
 
     "@oxc-minify/binding-wasm32-wasi/@napi-rs/wasm-runtime/@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
@@ -1353,9 +1347,5 @@
     "@oxc-transform/binding-wasm32-wasi/@napi-rs/wasm-runtime/@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
     "babel-plugin-macros/cosmiconfig/yaml": ["yaml@1.10.2", "", {}, "sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg=="],
-
-    "@f-o-t/bigint/@f-o-t/cli/@f-o-t/config/@types/bun": ["@types/bun@1.3.6", "", { "dependencies": { "bun-types": "1.3.6" } }, "sha512-uWCv6FO/8LcpREhenN1d1b6fcspAB+cefwD7uti8C8VffIv0Um08TKMn98FynpTiU38+y2dUO55T11NgDt8VAA=="],
-
-    "@f-o-t/bigint/@f-o-t/cli/@f-o-t/config/@types/bun/bun-types": ["bun-types@1.3.6", "", { "dependencies": { "@types/node": "*" } }, "sha512-OlFwHcnNV99r//9v5IIOgQ9Uk37gZqrNMCcqEaExdkVq3Avwqok1bJFmvGMCkCE0FqzdY8VMOZpfpR3lwI+CsQ=="],
   }
 }

@@ -13,11 +13,11 @@
       "dist"
    ],
    "scripts": {
-      "build": "fot build",
-      "test": "fot test",
-      "lint": "fot lint",
-      "format": "fot format",
-      "check": "fot check"
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "check": "bun x --bun fot check"
    },
    "keywords": [
       "bigint",
@@ -31,9 +31,9 @@
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^0.1.0",
-      "@f-o-t/config": "^0.1.0",
-      "@f-o-t/condition-evaluator": "^2.0.0",
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0",
+      "@f-o-t/condition-evaluator": "^2.0.2",
       "@types/bun": "latest"
    },
    "peerDependencies": {

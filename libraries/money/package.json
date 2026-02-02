@@ -1,45 +1,45 @@
 {
-  "name": "@f-o-t/money",
-  "version": "1.2.1",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./plugins/operators": {
-      "types": "./dist/plugins/operators/index.d.ts",
-      "default": "./dist/plugins/operators/index.js"
-    }
-  },
-  "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format",
-    "typecheck": "fot typecheck"
-  },
-  "dependencies": {
-    "@f-o-t/bigint": "^1.0.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.0",
-    "@f-o-t/config": "^1.0.0"
-  },
-  "peerDependencies": {
-    "@f-o-t/condition-evaluator": "^2.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@f-o-t/condition-evaluator": {
-      "optional": true
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/money"
-  }
+   "name": "@f-o-t/money",
+   "version": "1.2.1",
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./plugins/operators": {
+         "types": "./dist/plugins/operators/index.d.ts",
+         "default": "./dist/plugins/operators/index.js"
+      }
+   },
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "typecheck": "bun x --bun fot typecheck"
+   },
+   "dependencies": {
+      "@f-o-t/bigint": "^1.0.0",
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0"
+   },
+   "peerDependencies": {
+      "@f-o-t/condition-evaluator": "^2.0.2"
+   },
+   "peerDependenciesMeta": {
+      "@f-o-t/condition-evaluator": {
+         "optional": true
+      }
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/money"
+   }
 }

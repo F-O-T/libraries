@@ -5,7 +5,9 @@ export class MoneyError extends Error {
    constructor(message: string) {
       super(message);
       this.name = "MoneyError";
-      Error.captureStackTrace?.(this, MoneyError);
+      if (typeof (Error as any).captureStackTrace === 'function') {
+         (Error as any).captureStackTrace(this, MoneyError);
+      }
    }
 }
 

@@ -60,7 +60,7 @@ export const countConditions = (
 ): number => {
    if (isConditionGroup(condition)) {
       return condition.conditions.reduce(
-         (sum, c) => sum + countConditions(c as Condition | ConditionGroup),
+         (sum: number, c: Condition | ConditionGroup) => sum + countConditions(c as Condition | ConditionGroup),
          0,
       );
    }
@@ -77,7 +77,7 @@ export const calculateMaxDepth = (
    if (isConditionGroup(condition)) {
       if (condition.conditions.length === 0) return currentDepth;
       return Math.max(
-         ...condition.conditions.map((c) =>
+         ...condition.conditions.map((c: Condition | ConditionGroup) =>
             calculateMaxDepth(
                c as Condition | ConditionGroup,
                currentDepth + 1,
@@ -98,7 +98,7 @@ export const countConditionGroups = (
       return (
          1 +
          condition.conditions.reduce(
-            (sum, c) =>
+            (sum: number, c: Condition | ConditionGroup) =>
                sum + countConditionGroups(c as Condition | ConditionGroup),
             0,
          )
