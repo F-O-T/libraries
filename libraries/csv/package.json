@@ -25,7 +25,8 @@
    },
    "devDependencies": {
       "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0"
+      "@f-o-t/config": "^1.0.0",
+      "@types/bun": "latest"
    },
    "repository": {
       "type": "git",

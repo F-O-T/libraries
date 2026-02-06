@@ -71,7 +71,7 @@ export class PDFReader {
       if (!match) {
          throw new PDFParseError("Could not find startxref");
       }
-      return parseInt(match[1], 10);
+      return parseInt(match[1]!, 10);
    }
 
    /**
@@ -86,22 +86,22 @@ export class PDFReader {
       let i = 0;
 
       // Skip "xref" keyword
-      while (i < lines.length && !lines[i].trim().startsWith("xref")) i++;
+      while (i < lines.length && !lines[i]!.trim().startsWith("xref")) i++;
       i++;
 
       // Parse subsections
-      while (i < lines.length && !lines[i].trim().startsWith("trailer")) {
-         const subsection = lines[i].trim().split(/\s+/);
+      while (i < lines.length && !lines[i]!.trim().startsWith("trailer")) {
+         const subsection = lines[i]!.trim().split(/\s+/);
          if (subsection.length === 2) {
-            const start = parseInt(subsection[0], 10);
-            const count = parseInt(subsection[1], 10);
+            const start = parseInt(subsection[0]!, 10);
+            const count = parseInt(subsection[1]!, 10);
             i++;
 
             // Parse entries
             for (let j = 0; j < count; j++) {
-               const entry = lines[i].trim().split(/\s+/);
+               const entry = lines[i]!.trim().split(/\s+/);
                if (entry.length >= 3 && entry[2] === "n") {
-                  const offset = parseInt(entry[0], 10);
+                  const offset = parseInt(entry[0]!, 10);
                   xref.set(start + j, offset);
                }
                i++;
@@ -152,7 +152,7 @@ export class PDFReader {
       const decoder = new TextDecoder();
       const header = decoder.decode(this.data.slice(0, 20));
       const match = header.match(/%PDF-(\d+\.\d+)/);
-      return match ? match[1] : "1.7";
+      return match ? match[1]! : "1.7";
    }
 
    /**
@@ -174,7 +174,7 @@ export class PDFReader {
       const pages: ParsedPDFPage[] = [];
 
       for (const kidRef of kids) {
-         if (typeof kidRef === "object" && "objectNumber" in kidRef) {
+         if (kidRef != null && typeof kidRef === "object" && "objectNumber" in kidRef) {
             const page = this.parsePage(kidRef as PDFRef);
             if (page) pages.push(page);
          }
@@ -221,7 +221,7 @@ export class PDFReader {
       const regex = /\(([^)]*)\)\s*Tj/g;
       let match;
       while ((match = regex.exec(content)) !== null) {
-         texts.push(match[1]);
+         texts.push(match[1]!);
       }
 
       return texts.join(" ");

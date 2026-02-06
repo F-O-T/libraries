@@ -59,7 +59,7 @@ export class PDFLexer {
          return { type: TokenType.EOF, value: null, position: this.position };
       }
 
-      const char = String.fromCharCode(this.data[this.position]);
+      const char = String.fromCharCode(this.data[this.position]!);
 
       // Delimiters
       if (char === "[") {
@@ -103,7 +103,7 @@ export class PDFLexer {
     */
    private peek(): string {
       if (this.position + 1 >= this.data.length) return "";
-      return String.fromCharCode(this.data[this.position + 1]);
+      return String.fromCharCode(this.data[this.position + 1]!);
    }
 
    /**
@@ -111,7 +111,7 @@ export class PDFLexer {
     */
    private skipWhitespace(): void {
       while (this.position < this.data.length) {
-         const char = this.data[this.position];
+         const char = this.data[this.position]!;
 
          // Whitespace
          if (char === 0x20 || char === 0x09 || char === 0x0A || char === 0x0D || char === 0x00) {
@@ -121,7 +121,7 @@ export class PDFLexer {
 
          // Comment (starts with %)
          if (char === 0x25) {
-            while (this.position < this.data.length && this.data[this.position] !== 0x0A && this.data[this.position] !== 0x0D) {
+            while (this.position < this.data.length && this.data[this.position]! !== 0x0A && this.data[this.position]! !== 0x0D) {
                this.position++;
             }
             continue;
@@ -140,8 +140,8 @@ export class PDFLexer {
 
       let value = "";
       while (this.position < this.data.length) {
-         const char = String.fromCharCode(this.data[this.position]);
-         if (this.isDelimiter(char) || this.isWhitespace(this.data[this.position])) {
+         const char = String.fromCharCode(this.data[this.position]!);
+         if (this.isDelimiter(char) || this.isWhitespace(this.data[this.position]!)) {
             break;
          }
          value += char;
@@ -162,13 +162,13 @@ export class PDFLexer {
       let depth = 1;
 
       while (this.position < this.data.length && depth > 0) {
-         const char = String.fromCharCode(this.data[this.position]);
+         const char = String.fromCharCode(this.data[this.position]!);
 
          if (char === "\\") {
             // Escape sequence
             this.position++;
             if (this.position < this.data.length) {
-               const escaped = String.fromCharCode(this.data[this.position]);
+               const escaped = String.fromCharCode(this.data[this.position]!);
                value += escaped === "n" ? "\n" : escaped === "r" ? "\r" : escaped === "t" ? "\t" : escaped;
             }
          } else if (char === "(") {
@@ -195,7 +195,7 @@ export class PDFLexer {
       let value = "";
 
       while (this.position < this.data.length) {
-         const char = String.fromCharCode(this.data[this.position]);
+         const char = String.fromCharCode(this.data[this.position]!);
          if (char === "-" || char === "+" || char === "." || (char >= "0" && char <= "9")) {
             value += char;
             this.position++;
@@ -215,8 +215,8 @@ export class PDFLexer {
       let value = "";
 
       while (this.position < this.data.length) {
-         const char = String.fromCharCode(this.data[this.position]);
-         if (this.isDelimiter(char) || this.isWhitespace(this.data[this.position])) {
+         const char = String.fromCharCode(this.data[this.position]!);
+         if (this.isDelimiter(char) || this.isWhitespace(this.data[this.position]!)) {
             break;
          }
          value += char;

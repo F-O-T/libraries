@@ -28,7 +28,8 @@
    "devDependencies": {
       "@f-o-t/cli": "^1.0.0",
       "@f-o-t/config": "^1.0.0",
-      "@f-o-t/condition-evaluator": "^2.0.2"
+      "@f-o-t/condition-evaluator": "^2.0.2",
+      "@types/bun": "latest"
    },
    "peerDependencies": {
       "@f-o-t/condition-evaluator": "^2.0.0"

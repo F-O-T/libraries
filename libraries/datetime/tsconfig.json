@@ -21,7 +21,11 @@
   "exclude": [
     "node_modules",
     "dist",
-    "bunup.config.ts"
+    "bunup.config.ts",
+    "src/plugins/timezone",
+    "src/plugins/business-days",
+    "src/plugins/format",
+    "src/plugins/relative-time"
   ],
   "include": [
     "src/**/*"

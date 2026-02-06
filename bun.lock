@@ -20,7 +20,7 @@
     },
     "libraries/bigint": {
       "name": "@f-o-t/bigint",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "dependencies": {
         "zod": "^4.3.6",
       },
@@ -39,18 +39,19 @@
     },
     "libraries/brasil-api": {
       "name": "@f-o-t/brasil-api",
-      "version": "0.1.0",
+      "version": "0.1.4",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/cli": {
       "name": "@f-o-t/cli",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bin": {
         "fot": "./dist/index.js",
       },
@@ -69,18 +70,19 @@
     },
     "libraries/condition-evaluator": {
       "name": "@f-o-t/condition-evaluator",
-      "version": "2.0.2",
+      "version": "2.0.6",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/config": {
       "name": "@f-o-t/config",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "dependencies": {
         "zod": "^4.3.6",
       },
@@ -100,40 +102,43 @@
     },
     "libraries/content-analysis": {
       "name": "@f-o-t/content-analysis",
-      "version": "1.0.2",
+      "version": "1.0.6",
       "dependencies": {
         "@f-o-t/markdown": "^1.0.2",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/csv": {
       "name": "@f-o-t/csv",
-      "version": "1.2.1",
+      "version": "1.2.5",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/datetime": {
       "name": "@f-o-t/datetime",
-      "version": "0.1.0",
+      "version": "0.1.4",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/digital-certificate": {
       "name": "@f-o-t/digital-certificate",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "dependencies": {
         "@f-o-t/xml": "^1.0.0",
         "zod": "^4.3.6",
@@ -141,22 +146,24 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/markdown": {
       "name": "@f-o-t/markdown",
-      "version": "1.0.2",
+      "version": "1.0.6",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/money": {
       "name": "@f-o-t/money",
-      "version": "1.2.1",
+      "version": "1.2.5",
       "dependencies": {
         "@f-o-t/bigint": "^1.0.0",
         "zod": "^4.3.6",
@@ -164,6 +171,7 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
       "peerDependencies": {
         "@f-o-t/condition-evaluator": "^2.0.2",
@@ -174,18 +182,19 @@
     },
     "libraries/ofx": {
       "name": "@f-o-t/ofx",
-      "version": "2.4.1",
+      "version": "2.4.5",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/pdf": {
       "name": "@f-o-t/pdf",
-      "version": "0.1.0",
+      "version": "0.1.4",
       "dependencies": {
         "@f-o-t/digital-certificate": "^1.0.0",
         "zod": "^4.3.6",
@@ -193,11 +202,12 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/rules-engine": {
       "name": "@f-o-t/rules-engine",
-      "version": "3.0.0",
+      "version": "3.0.4",
       "dependencies": {
         "@f-o-t/condition-evaluator": "^2.0.2",
         "zod": "^4.3.6",
@@ -205,22 +215,24 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/spelling": {
       "name": "@f-o-t/spelling",
-      "version": "1.0.1",
+      "version": "1.0.5",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/tax-calculator": {
       "name": "@f-o-t/tax-calculator",
-      "version": "0.1.0",
+      "version": "0.1.4",
       "dependencies": {
         "@f-o-t/condition-evaluator": "^2.0.2",
         "@f-o-t/money": "^1.2.1",
@@ -230,11 +242,12 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
     "libraries/uom": {
       "name": "@f-o-t/uom",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "dependencies": {
         "@f-o-t/bigint": "^1.0.0",
         "zod": "^4.3.6",
@@ -243,6 +256,7 @@
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/condition-evaluator": "^2.0.2",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
       "peerDependencies": {
         "@f-o-t/condition-evaluator": "^2.0.0",
@@ -253,13 +267,14 @@
     },
     "libraries/xml": {
       "name": "@f-o-t/xml",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "dependencies": {
         "zod": "^4.3.6",
       },
       "devDependencies": {
         "@f-o-t/cli": "^1.0.0",
         "@f-o-t/config": "^1.0.0",
+        "@types/bun": "latest",
       },
     },
   },
