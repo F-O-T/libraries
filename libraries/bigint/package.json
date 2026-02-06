@@ -1,13 +1,19 @@
 {
    "name": "@f-o-t/bigint",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "description": "Low-level bigint primitives for precise decimal arithmetic",
    "type": "module",
    "main": "./dist/index.js",
    "types": "./dist/index.d.ts",
    "exports": {
-      ".": "./dist/index.js",
-      "./operators": "./dist/plugins/operators/index.js"
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./operators": {
+         "types": "./dist/plugins/operators/index.d.ts",
+         "default": "./dist/plugins/operators/index.js"
+      }
    },
    "files": [
       "dist"
