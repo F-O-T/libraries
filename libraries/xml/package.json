@@ -1,47 +1,47 @@
 {
-  "name": "@f-o-t/xml",
-  "version": "1.0.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./plugins/stream": {
-      "types": "./dist/plugins/stream/index.d.ts",
-      "default": "./dist/plugins/stream/index.js"
-    },
-    "./plugins/xpath": {
-      "types": "./dist/plugins/xpath/index.d.ts",
-      "default": "./dist/plugins/xpath/index.js"
-    },
-    "./plugins/canonicalize": {
-      "types": "./dist/plugins/canonicalize/index.d.ts",
-      "default": "./dist/plugins/canonicalize/index.js"
-    }
-  },
-  "scripts": {
-    "build": "bun x --bun fot build",
-    "test": "bun x --bun fot test",
-    "lint": "bun x --bun fot lint",
-    "format": "bun x --bun fot format",
-    "typecheck": "bun x --bun fot typecheck"
-  },
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.0",
-    "@f-o-t/config": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/xml"
-  }
+   "name": "@f-o-t/xml",
+   "version": "1.0.2",
+   "type": "module",
+   "files": [
+      "dist"
+   ],
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./plugins/stream": {
+         "types": "./dist/plugins/stream/index.d.ts",
+         "default": "./dist/plugins/stream/index.js"
+      },
+      "./plugins/xpath": {
+         "types": "./dist/plugins/xpath/index.d.ts",
+         "default": "./dist/plugins/xpath/index.js"
+      },
+      "./plugins/canonicalize": {
+         "types": "./dist/plugins/canonicalize/index.d.ts",
+         "default": "./dist/plugins/canonicalize/index.js"
+      }
+   },
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "typecheck": "bun x --bun fot typecheck"
+   },
+   "dependencies": {
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/xml"
+   }
 }

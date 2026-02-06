@@ -1,39 +1,39 @@
 {
-  "name": "@f-o-t/content-analysis",
-  "version": "1.0.3",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./plugins/types": {
-      "types": "./dist/plugins/types/index.d.ts",
-      "default": "./dist/plugins/types/index.js"
-    }
-  },
-  "scripts": {
-    "build": "bun x --bun fot build",
-    "test": "bun x --bun fot test",
-    "lint": "bun x --bun fot lint",
-    "format": "bun x --bun fot format",
-    "typecheck": "bun x --bun fot typecheck"
-  },
-  "dependencies": {
-    "@f-o-t/markdown": "^1.0.2"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.0",
-    "@f-o-t/config": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/content-analysis"
-  }
+   "name": "@f-o-t/content-analysis",
+   "version": "1.0.4",
+   "type": "module",
+   "files": [
+      "dist"
+   ],
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./plugins/types": {
+         "types": "./dist/plugins/types/index.d.ts",
+         "default": "./dist/plugins/types/index.js"
+      }
+   },
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "typecheck": "bun x --bun fot typecheck"
+   },
+   "dependencies": {
+      "@f-o-t/markdown": "^1.0.2"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/content-analysis"
+   }
 }

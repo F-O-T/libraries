@@ -1,44 +1,44 @@
 {
-  "name": "@f-o-t/pdf",
-  "version": "0.1.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./plugins/generation": {
-      "types": "./dist/plugins/generation/index.d.ts",
-      "default": "./dist/plugins/generation/index.js"
-    },
-    "./plugins/parsing": {
-      "types": "./dist/plugins/parsing/index.d.ts",
-      "default": "./dist/plugins/parsing/index.js"
-    }
-  },
-  "scripts": {
-    "build": "bun x --bun fot build",
-    "test": "bun x --bun fot test",
-    "lint": "bun x --bun fot lint",
-    "format": "bun x --bun fot format",
-    "typecheck": "bun x --bun fot typecheck"
-  },
-  "dependencies": {
-    "@f-o-t/digital-certificate": "^1.0.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.0",
-    "@f-o-t/config": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/pdf"
-  }
+   "name": "@f-o-t/pdf",
+   "version": "0.1.2",
+   "type": "module",
+   "files": [
+      "dist"
+   ],
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./plugins/generation": {
+         "types": "./dist/plugins/generation/index.d.ts",
+         "default": "./dist/plugins/generation/index.js"
+      },
+      "./plugins/parsing": {
+         "types": "./dist/plugins/parsing/index.d.ts",
+         "default": "./dist/plugins/parsing/index.js"
+      }
+   },
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "typecheck": "bun x --bun fot typecheck"
+   },
+   "dependencies": {
+      "@f-o-t/digital-certificate": "^1.0.0",
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/pdf"
+   }
 }

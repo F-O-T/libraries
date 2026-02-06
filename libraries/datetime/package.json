@@ -1,51 +1,51 @@
 {
-  "name": "@f-o-t/datetime",
-  "version": "0.1.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./plugins/timezone": {
-      "types": "./dist/plugins/timezone/index.d.ts",
-      "default": "./dist/plugins/timezone/index.js"
-    },
-    "./plugins/business-days": {
-      "types": "./dist/plugins/business-days/index.d.ts",
-      "default": "./dist/plugins/business-days/index.js"
-    },
-    "./plugins/format": {
-      "types": "./dist/plugins/format/index.d.ts",
-      "default": "./dist/plugins/format/index.js"
-    },
-    "./plugins/relative-time": {
-      "types": "./dist/plugins/relative-time/index.d.ts",
-      "default": "./dist/plugins/relative-time/index.js"
-    }
-  },
-  "scripts": {
-    "build": "bun x --bun fot build",
-    "test": "bun x --bun fot test",
-    "lint": "bun x --bun fot lint",
-    "format": "bun x --bun fot format",
-    "typecheck": "bun x --bun fot typecheck"
-  },
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.0",
-    "@f-o-t/config": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/datetime"
-  }
+   "name": "@f-o-t/datetime",
+   "version": "0.1.2",
+   "type": "module",
+   "files": [
+      "dist"
+   ],
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      },
+      "./plugins/timezone": {
+         "types": "./dist/plugins/timezone/index.d.ts",
+         "default": "./dist/plugins/timezone/index.js"
+      },
+      "./plugins/business-days": {
+         "types": "./dist/plugins/business-days/index.d.ts",
+         "default": "./dist/plugins/business-days/index.js"
+      },
+      "./plugins/format": {
+         "types": "./dist/plugins/format/index.d.ts",
+         "default": "./dist/plugins/format/index.js"
+      },
+      "./plugins/relative-time": {
+         "types": "./dist/plugins/relative-time/index.d.ts",
+         "default": "./dist/plugins/relative-time/index.js"
+      }
+   },
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "typecheck": "bun x --bun fot typecheck"
+   },
+   "dependencies": {
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.0",
+      "@f-o-t/config": "^1.0.0"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/datetime"
+   }
 }

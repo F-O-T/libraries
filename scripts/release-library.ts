@@ -271,6 +271,25 @@ async function releaseLibrary(
       return result;
    }
 
+   // Verify dist/ was actually produced
+   try {
+      const distPath = path.join(lib.path, "dist");
+      const distStat = await fs.stat(distPath);
+      if (!distStat.isDirectory()) {
+         throw new Error("dist is not a directory");
+      }
+      const distFiles = await fs.readdir(distPath);
+      if (distFiles.length === 0) {
+         throw new Error("dist/ directory is empty");
+      }
+      console.log(`  │  ✓ dist/ verified (${distFiles.length} entries)`);
+   } catch (err) {
+      result.steps.build = "failed";
+      result.error = `dist/ verification failed: ${err instanceof Error ? err.message : String(err)}`;
+      console.log(`  │  ✗ dist/ not found or empty after build`);
+      return result;
+   }
+
    try {
       console.log(`  ├─ Creating GitHub release...`);
       const releaseUrl = await createGitHubRelease(lib, token);

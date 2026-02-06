@@ -1,0 +1,7 @@
+src/
+__tests__/
+*.test.ts
+tsconfig.json
+fot.config.ts
+biome.json
+.turbo

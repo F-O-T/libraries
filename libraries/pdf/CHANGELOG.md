@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.2] - 2026-02-06
+
+### Fixed
+
+- Add .npmignore to ensure dist/ is included in npm tarball regardless of .gitignore settings
+
 ## [0.1.1] - 2026-02-06
 
 ### Fixed

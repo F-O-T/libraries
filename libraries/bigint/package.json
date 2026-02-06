@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/bigint",
-   "version": "1.0.0",
+   "version": "1.0.1",
    "description": "Low-level bigint primitives for precise decimal arithmetic",
    "type": "module",
    "main": "./dist/index.js",
