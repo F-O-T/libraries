@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2026-02-06
+
+### Fixed
+
+- Add missing `"files": ["dist"]` to package.json — dist/ was excluded from published package due to .gitignore
+
 ## 1.0.0
 
 ### Features

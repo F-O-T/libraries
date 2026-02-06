@@ -1,7 +1,10 @@
 {
   "name": "@f-o-t/ofx",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
