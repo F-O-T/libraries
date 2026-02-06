@@ -268,6 +268,26 @@ function buildToolchain() {
    }
 }
 
+function buildAllLibraries(libraries: Library[]) {
+   console.log(`\n🔨 Building ${libraries.length} libraries...`);
+   const failed: string[] = [];
+   for (const lib of libraries) {
+      try {
+         execSync(`bun --bun ${FOT_BIN} build`, {
+            cwd: lib.path,
+            stdio: "inherit",
+         });
+         console.log(`  ✓ ${lib.name} built`);
+      } catch {
+         console.log(`  ✗ ${lib.name} build failed`);
+         failed.push(lib.name);
+      }
+   }
+   if (failed.length > 0) {
+      console.log(`\n⚠️  ${failed.length} library build(s) failed: ${failed.join(", ")}`);
+   }
+}
+
 async function releaseLibrary(
    lib: Library,
    token: string,
@@ -282,24 +302,7 @@ async function releaseLibrary(
       },
    };
 
-   try {
-      console.log(`  ├─ Building...`);
-      // Use the fot binary directly instead of `bun run build` which uses
-      // `bun x fot` — bun x resolves to the wrong `fot` npm package in CI
-      execSync(`bun --bun ${FOT_BIN} build`, {
-         cwd: lib.path,
-         stdio: "inherit",
-      });
-      result.steps.build = "success";
-      console.log(`  │  ✓ Build complete`);
-   } catch (err) {
-      result.steps.build = "failed";
-      result.error = `Build failed: ${err instanceof Error ? err.message : String(err)}`;
-      console.log(`  │  ✗ Build failed`);
-      return result;
-   }
-
-   // Verify dist/ was actually produced
+   // Verify dist/ was actually produced (built in the upfront build step)
    try {
       const distPath = path.join(lib.path, "dist");
       const distStat = await fs.stat(distPath);
@@ -415,6 +418,8 @@ export async function run() {
    }
 
    console.log(`\n🚀 Releasing ${toRelease.length} library(ies)...\n`);
+
+   buildAllLibraries(libraries);
 
    const results: ReleaseResult[] = [];
 

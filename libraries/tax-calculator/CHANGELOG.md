@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.5] - 2026-02-06
+
+### Fixed
+
+- Fix CI release: build all libraries upfront so cross-library type declarations are available
+
 ## [0.1.4] - 2026-02-06
 
 ### Fixed
