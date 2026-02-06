@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
@@ -9,6 +10,7 @@ import {
 
 const GITHUB_API = "https://api.github.com";
 const LIBRARIES_DIR = "libraries";
+const FOT_BIN = path.resolve(LIBRARIES_DIR, "cli", "dist", "index.js");
 
 interface Library {
    name: string;
@@ -255,6 +257,15 @@ function buildToolchain() {
          throw new Error(`Toolchain build failed for @f-o-t/${pkg}: ${message}`);
       }
    }
+
+   // Verify the fot binary exists
+   try {
+      const stat = statSync(FOT_BIN);
+      if (!stat.isFile()) throw new Error("Not a file");
+      console.log(`  ✓ fot binary verified at ${FOT_BIN}`);
+   } catch {
+      throw new Error(`fot binary not found at ${FOT_BIN} after building toolchain`);
+   }
 }
 
 async function releaseLibrary(
@@ -273,7 +284,9 @@ async function releaseLibrary(
 
    try {
       console.log(`  ├─ Building...`);
-      execSync("bun run build", {
+      // Use the fot binary directly instead of `bun run build` which uses
+      // `bun x fot` — bun x resolves to the wrong `fot` npm package in CI
+      execSync(`bun --bun ${FOT_BIN} build`, {
          cwd: lib.path,
          stdio: "inherit",
       });

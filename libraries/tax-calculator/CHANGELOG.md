@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4] - 2026-02-06
+
+### Fixed
+
+- Fix CI release: invoke fot CLI binary directly instead of `bun x` which resolves to wrong npm package
+
 ## [0.1.3] - 2026-02-06
 
 ### Fixed
