@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/digital-certificate",
-   "version": "1.0.4",
+   "version": "1.0.5",
    "type": "module",
    "files": [
       "dist"
@@ -29,12 +29,12 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
-      "@f-o-t/xml": "^1.0.0",
+      "@f-o-t/xml": "^1.0.4",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0",
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
       "@types/bun": "latest"
    },
    "repository": {

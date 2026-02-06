@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.5] - 2026-02-06
+
+### Changed
+
+- Update internal dependencies to latest versions
+
 ## [1.0.4] - 2026-02-06
 
 ### Fixed

@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/tax-calculator",
-   "version": "0.1.5",
+   "version": "0.1.6",
    "type": "module",
    "files": [
       "dist"
@@ -21,14 +21,14 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
-      "@f-o-t/condition-evaluator": "^2.0.2",
-      "@f-o-t/money": "^1.2.1",
-      "@f-o-t/rules-engine": "^3.0.0",
+      "@f-o-t/condition-evaluator": "^2.0.6",
+      "@f-o-t/money": "^1.2.5",
+      "@f-o-t/rules-engine": "^3.0.5",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0",
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
       "@types/bun": "latest"
    },
    "repository": {

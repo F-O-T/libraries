@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/money",
-   "version": "1.2.5",
+   "version": "1.2.6",
    "type": "module",
    "files": [
       "dist"
@@ -25,16 +25,16 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
-      "@f-o-t/bigint": "^1.0.0",
+      "@f-o-t/bigint": "^1.0.4",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0",
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
       "@types/bun": "latest"
    },
    "peerDependencies": {
-      "@f-o-t/condition-evaluator": "^2.0.2"
+      "@f-o-t/condition-evaluator": "^2.0.6"
    },
    "peerDependenciesMeta": {
       "@f-o-t/condition-evaluator": {

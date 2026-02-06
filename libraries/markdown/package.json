@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/markdown",
-   "version": "1.0.6",
+   "version": "1.0.7",
    "type": "module",
    "files": [
       "dist"
@@ -24,8 +24,8 @@
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0",
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
       "@types/bun": "latest"
    },
    "repository": {

@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/uom",
-   "version": "1.0.5",
+   "version": "1.0.6",
    "type": "module",
    "files": [
       "dist"
@@ -12,7 +12,10 @@
          "types": "./dist/index.d.ts",
          "default": "./dist/index.js"
       },
-      "./operators": "./dist/plugins/operators/index.js"
+      "./operators": {
+         "types": "./dist/plugins/operators/index.d.ts",
+         "default": "./dist/plugins/operators/index.js"
+      }
    },
    "scripts": {
       "build": "bun x --bun fot build",
@@ -22,17 +25,17 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
-      "@f-o-t/bigint": "^1.0.0",
+      "@f-o-t/bigint": "^1.0.4",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.0",
-      "@f-o-t/config": "^1.0.0",
-      "@f-o-t/condition-evaluator": "^2.0.2",
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
+      "@f-o-t/condition-evaluator": "^2.0.6",
       "@types/bun": "latest"
    },
    "peerDependencies": {
-      "@f-o-t/condition-evaluator": "^2.0.0"
+      "@f-o-t/condition-evaluator": "^2.0.6"
    },
    "peerDependenciesMeta": {
       "@f-o-t/condition-evaluator": {
