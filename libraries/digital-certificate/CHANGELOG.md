@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.3] - 2026-02-06
+
+### Fixed
+
+- Fix CI build: build toolchain (config + cli) before other libraries to ensure `fot` binary is available
+
 ## [1.0.2] - 2026-02-06
 
 ### Fixed

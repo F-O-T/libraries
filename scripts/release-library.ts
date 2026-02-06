@@ -242,6 +242,21 @@ function ensureWorkspaceDependencies() {
    }
 }
 
+function buildToolchain() {
+   console.log("\n🔨 Building toolchain (config + cli)...");
+   const toolchainPackages = ["config", "cli"];
+   for (const pkg of toolchainPackages) {
+      const pkgPath = path.resolve(LIBRARIES_DIR, pkg);
+      try {
+         execSync("bun run build", { cwd: pkgPath, stdio: "inherit" });
+         console.log(`  ✓ @f-o-t/${pkg} built`);
+      } catch (err) {
+         const message = err instanceof Error ? err.message : String(err);
+         throw new Error(`Toolchain build failed for @f-o-t/${pkg}: ${message}`);
+      }
+   }
+}
+
 async function releaseLibrary(
    lib: Library,
    token: string,
@@ -358,6 +373,7 @@ export async function run() {
 
    setupNpmAuth();
    ensureWorkspaceDependencies();
+   buildToolchain();
 
    const specificLibrary = process.env.INPUT_LIBRARY || undefined;
 
