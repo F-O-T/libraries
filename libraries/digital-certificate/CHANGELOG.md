@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- PDF signing capability dependencies (pdf-lib, qrcode) for plugins/pdf-signer module
+
 ## [1.0.5] - 2026-02-06
 
 ### Changed
