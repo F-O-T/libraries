@@ -19,6 +19,10 @@
       "./plugins/mtls": {
          "types": "./dist/plugins/mtls/index.d.ts",
          "default": "./dist/plugins/mtls/index.js"
+      },
+      "./plugins/pdf-signer": {
+         "types": "./dist/plugins/pdf-signer/index.d.ts",
+         "default": "./dist/plugins/pdf-signer/index.js"
       }
    },
    "scripts": {
@@ -30,12 +34,15 @@
    },
    "dependencies": {
       "@f-o-t/xml": "^1.0.4",
+      "pdf-lib": "^1.17.1",
+      "qrcode": "^1.5.3",
       "zod": "^4.3.6"
    },
    "devDependencies": {
       "@f-o-t/cli": "^1.0.1",
       "@f-o-t/config": "^1.0.3",
-      "@types/bun": "latest"
+      "@types/bun": "latest",
+      "@types/qrcode": "^1.5.5"
    },
    "repository": {
       "type": "git",
