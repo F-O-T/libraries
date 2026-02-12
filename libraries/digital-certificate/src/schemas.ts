@@ -12,7 +12,7 @@ export const signatureAlgorithmSchema = z.enum(["sha1", "sha256"]);
 
 export const signOptionsSchema = z.object({
    certificate: z.lazy(() => certificateInfoSchema),
-   referenceUri: z.string(),
+   referenceUri: z.string().regex(/^#?[\w-]+$/, "Invalid URI reference"),
    algorithm: signatureAlgorithmSchema.default("sha256"),
    signatureParent: z.string().optional(),
    includeDeclaration: z.boolean().default(true),
@@ -51,11 +51,13 @@ const certificateIssuerSchema = z.object({
 const certificateValiditySchema = z.object({
    notBefore: z.date(),
    notAfter: z.date(),
+}).refine((val) => val.notBefore < val.notAfter, {
+   message: "notBefore must be before notAfter",
 });
 
 const brazilianFieldsSchema = z.object({
-   cnpj: z.string().nullable(),
-   cpf: z.string().nullable(),
+   cnpj: z.string().regex(/^\d{14}$/, "CNPJ must be 14 digits").nullable(),
+   cpf: z.string().regex(/^\d{11}$/, "CPF must be 11 digits").nullable(),
 });
 
 export const certificateInfoSchema = z.object({
@@ -63,11 +65,11 @@ export const certificateInfoSchema = z.object({
    subject: certificateSubjectSchema,
    issuer: certificateIssuerSchema,
    validity: certificateValiditySchema,
-   fingerprint: z.string(),
+   fingerprint: z.string().regex(/^[a-f0-9]{64}$/, "Invalid SHA-256 fingerprint"),
    isValid: z.boolean(),
    brazilian: brazilianFieldsSchema,
-   certPem: z.string(),
-   keyPem: z.string(),
+   certPem: z.string().regex(/-----BEGIN CERTIFICATE-----/, "Invalid PEM certificate"),
+   keyPem: z.string().regex(/-----BEGIN (RSA )?PRIVATE KEY-----/, "Invalid PEM private key"),
    pfxBuffer: z.instanceof(Buffer),
    pfxPassword: z.string(),
 });
@@ -78,18 +80,18 @@ export const certificateInfoSchema = z.object({
 
 export const signaturePlacementSchema = z.object({
    page: z.number().int().default(-1),
-   x: z.number().default(50),
-   y: z.number().default(100),
-   width: z.number().default(400),
-   height: z.number().default(120),
+   x: z.number().min(0).default(50),
+   y: z.number().min(0).default(100),
+   width: z.number().min(1).default(400),
+   height: z.number().min(1).default(120),
 });
 
 export const signatureAppearanceStyleSchema = z.object({
-   textColor: z.string().default("#000000"),
-   backgroundColor: z.string().default("#FFFFFF"),
-   borderColor: z.string().default("#000000"),
-   fontSize: z.number().default(10),
-   borderWidth: z.number().default(2),
+   textColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid hex color").default("#000000"),
+   backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid hex color").default("#FFFFFF"),
+   borderColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid hex color").default("#000000"),
+   fontSize: z.number().min(6).max(72).default(10),
+   borderWidth: z.number().min(0).max(10).default(2),
 });
 
 export const signatureAppearanceOptionsSchema = z.object({
