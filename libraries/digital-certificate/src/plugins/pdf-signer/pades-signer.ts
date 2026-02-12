@@ -87,7 +87,7 @@ export function createPAdESSignature(options: PAdESSignOptions): Buffer {
     // Create signed attributes (required for PAdES-BES)
     console.log('Creating authenticated attributes...');
     
-    // Simplified - let node-forge handle the encoding
+    // Basic required attributes
     const authenticatedAttributes = [
       {
         type: forge.pki.oids.contentType,
@@ -102,6 +102,43 @@ export function createPAdESSignature(options: PAdESSignOptions): Buffer {
         value: new Date(),
       },
     ];
+
+    // Add ICP-Brasil Signature Policy (MANDATORY for ICP-Brasil validation)
+    // This tells validators which policy was used for signing
+    const sigPolicyId = ICP_BRASIL_POLICIES.AD_RB_v2_3; // PA_AD_RB_v2_3
+    
+    // Create signature policy identifier attribute
+    // OID: 1.2.840.113549.1.9.16.2.15 (id-aa-ets-sigPolicyId)
+    const sigPolicyAttr = {
+      type: "1.2.840.113549.1.9.16.2.15",
+      value: forge.asn1.create(
+        forge.asn1.Class.UNIVERSAL,
+        forge.asn1.Type.SEQUENCE,
+        true,
+        [
+          // SignaturePolicyIdentifier ::= SEQUENCE {
+          //   signaturePolicyId   SignaturePolicyId,
+          //   signaturePolicyHash SignaturePolicyHash OPTIONAL
+          // }
+          forge.asn1.create(
+            forge.asn1.Class.UNIVERSAL,
+            forge.asn1.Type.SEQUENCE,
+            true,
+            [
+              // SignaturePolicyId ::= OBJECT IDENTIFIER
+              forge.asn1.create(
+                forge.asn1.Class.UNIVERSAL,
+                forge.asn1.Type.OID,
+                false,
+                forge.asn1.oidToDer(sigPolicyId).getBytes()
+              ),
+            ]
+          ),
+        ]
+      ),
+    };
+
+    authenticatedAttributes.push(sigPolicyAttr);
 
     console.log('Adding signer...');
     // Add signer
