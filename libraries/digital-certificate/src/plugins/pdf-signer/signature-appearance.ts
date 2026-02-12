@@ -1,72 +1,87 @@
 import type { PDFPage } from "pdf-lib";
 import { rgb } from "pdf-lib";
-import QRCode from "qrcode";
+import type {
+	CertificateInfo,
+	SignaturePlacement,
+	SignatureAppearanceStyle,
+} from "../../types";
 
 /**
- * Certificate data for signature appearance
+ * Default style for signature appearance
  */
-export interface CertificateData {
-	commonName: string;
-	cpfCnpj: string;
-	validFrom: Date;
-	validTo: Date;
-}
+const DEFAULT_STYLE: SignatureAppearanceStyle = {
+	textColor: "#000000",
+	backgroundColor: "#F5F5F5",
+	borderColor: "#000000",
+	fontSize: 8,
+	borderWidth: 1,
+};
 
 /**
  * Draws a signature appearance on a PDF page
+ *
+ * @param page - The PDF page to draw on
+ * @param cert - Certificate information
+ * @param qrCodeBuffer - QR code PNG buffer
+ * @param placement - Signature placement on the page
+ * @param style - Visual style overrides
  */
-export function drawSignatureAppearance(
+export async function drawSignatureAppearance(
 	page: PDFPage,
-	certData: CertificateData,
-	x: number,
-	y: number,
-	width: number,
-	height: number,
-): void {
+	cert: CertificateInfo,
+	qrCodeBuffer: Buffer,
+	placement: SignaturePlacement,
+	style: Partial<SignatureAppearanceStyle> = {},
+): Promise<void> {
+	const finalStyle = { ...DEFAULT_STYLE, ...style };
+
+	// Convert hex colors to RGB
+	const bgColor = hexToRgb(finalStyle.backgroundColor!);
+	const borderColor = hexToRgb(finalStyle.borderColor!);
+	const textColor = hexToRgb(finalStyle.textColor!);
+
 	// Draw background box
 	page.drawRectangle({
-		x,
-		y,
-		width,
-		height,
-		borderColor: rgb(0, 0, 0),
-		borderWidth: 1,
-		color: rgb(0.95, 0.95, 0.95),
+		x: placement.x,
+		y: placement.y,
+		width: placement.width,
+		height: placement.height,
+		borderColor: rgb(borderColor.r, borderColor.g, borderColor.b),
+		borderWidth: finalStyle.borderWidth!,
+		color: rgb(bgColor.r, bgColor.g, bgColor.b),
 	});
 
-	// Generate QR code (placeholder - will contain certificate chain hash)
-	const qrData = `CN:${certData.commonName}|CPF/CNPJ:${certData.cpfCnpj}`;
-	const qrSize = height - 10;
+	// Embed QR code image
+	const pdfDoc = page.doc;
+	const qrImage = await pdfDoc.embedPng(qrCodeBuffer);
+	const qrSize = placement.height - 10;
 
-	// Draw QR code placeholder (actual QR code generation happens async)
-	generateQRCode(qrData, qrSize)
-		.then((qrImage) => {
-			// In real implementation, embed QR code image
-			// For now, just draw a placeholder box
-			page.drawRectangle({
-				x: x + 5,
-				y: y + 5,
-				width: qrSize,
-				height: qrSize,
-				borderColor: rgb(0, 0, 0),
-				borderWidth: 1,
-			});
-		})
-		.catch(() => {
-			// Silently fail QR generation
-		});
+	page.drawImage(qrImage, {
+		x: placement.x + 5,
+		y: placement.y + 5,
+		width: qrSize,
+		height: qrSize,
+	});
 
 	// Draw certificate info text
-	const textX = x + qrSize + 15;
-	const textY = y + height - 15;
-	const fontSize = 8;
+	const textX = placement.x + qrSize + 15;
+	const textY = placement.y + placement.height - 15;
+	const fontSize = finalStyle.fontSize!;
 	const lineHeight = fontSize + 2;
 
+	// Format certificate data
+	const commonName = cert.subject.commonName || "Unknown";
+	const cpfCnpj = formatCpfCnpj(
+		cert.brazilian.cnpj || cert.brazilian.cpf || "",
+	);
+	const validFrom = formatDate(cert.validity.notBefore);
+	const validTo = formatDate(cert.validity.notAfter);
+
 	const lines = [
-		`Assinado por: ${certData.commonName}`,
-		`${formatCpfCnpj(certData.cpfCnpj)}`,
-		`Válido de: ${formatDate(certData.validFrom)}`,
-		`até: ${formatDate(certData.validTo)}`,
+		`Assinado por: ${commonName}`,
+		cpfCnpj,
+		`Válido de: ${validFrom}`,
+		`até: ${validTo}`,
 	];
 
 	for (let i = 0; i < lines.length; i++) {
@@ -74,25 +89,8 @@ export function drawSignatureAppearance(
 			x: textX,
 			y: textY - i * lineHeight,
 			size: fontSize,
-			color: rgb(0, 0, 0),
+			color: rgb(textColor.r, textColor.g, textColor.b),
 		});
-	}
-}
-
-/**
- * Generates a QR code as a base64 PNG
- */
-async function generateQRCode(
-	data: string,
-	size: number,
-): Promise<string | null> {
-	try {
-		return await QRCode.toDataURL(data, {
-			width: size,
-			margin: 1,
-		});
-	} catch {
-		return null;
 	}
 }
 
