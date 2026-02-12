@@ -19,7 +19,7 @@ const ICP_BRASIL_POLICIES = {
 export interface PAdESSignOptions {
   p12Buffer: Buffer;
   password: string;
-  pdfBuffer: Buffer;
+  bytesToSign: Buffer; // The actual bytes to sign (from ByteRange)
   reason?: string;
   location?: string;
   contactInfo?: string;
@@ -58,7 +58,7 @@ function extractP12(p12Buffer: Buffer, password: string) {
  * Create PAdES-BES signature for PDF
  */
 export function createPAdESSignature(options: PAdESSignOptions): Buffer {
-  const { p12Buffer, password, pdfBuffer, reason, location } = options;
+  const { p12Buffer, password, bytesToSign, reason, location } = options;
 
   try {
     // Extract certificate and private key
@@ -66,8 +66,8 @@ export function createPAdESSignature(options: PAdESSignOptions): Buffer {
     const { cert, key, certChain } = extractP12(p12Buffer, password);
     console.log('P12 extracted successfully');
 
-    // Calculate document hash
-    const documentHash = createHash("sha256").update(pdfBuffer).digest();
+    // Calculate document hash from the bytes to sign
+    const documentHash = createHash("sha256").update(bytesToSign).digest();
 
     // Create PKCS#7 signed data structure
     console.log('Creating PKCS#7 signed data...');

@@ -1,9 +1,9 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import { plainAddPlaceholder } from "@signpdf/placeholder-plain";
+import signpdf from "node-signpdf";
 import { createHash } from "node:crypto";
 import { generateQRCode } from "./qr-generator";
 import { parseCertificate } from "../../certificate";
-import { createPAdESSignature } from "./pades-signer";
 import type { SignPdfOptions } from "./types";
 
 /**
@@ -208,35 +208,15 @@ export async function signPdf(
       location: options.location,
     });
 
-    // Create PAdES-BES signature with ICP-Brasil attributes
-    const signature = createPAdESSignature({
-      p12Buffer: options.certificate.p12,
-      password: options.certificate.password || '',
-      pdfBuffer: modifiedPdfBuffer,
-      reason: options.reason,
-      location: options.location,
-      contactInfo: options.contactInfo,
-    });
+    // Sign the PDF
+    const signedPdf = signpdf.sign(
+      pdfWithPlaceholder, 
+      options.certificate.p12,
+      {
+        passphrase: options.certificate.password || '',
+      }
+    );
 
-    // Embed the signature in the placeholder
-    // The placeholder reserves space with /Contents <00000...>
-    // We need to replace it with our actual signature
-    const signatureHex = signature.toString('hex');
-    const placeholderHex = '0'.repeat(signatureHex.length);
-    
-    // Find and replace the placeholder
-    let pdfString = pdfWithPlaceholder.toString('latin1');
-    const placeholderPattern = new RegExp(`<${placeholderHex}>`, 'g');
-    
-    if (!placeholderPattern.test(pdfString)) {
-      // Fallback: if exact match not found, find any large enough placeholder
-      const paddedHex = signatureHex.padEnd(8192 * 2, '0');
-      pdfString = pdfString.replace(/<0{8000,}>/g, `<${paddedHex.substring(0, 8192 * 2)}>`);
-    } else {
-      pdfString = pdfString.replace(placeholderPattern, `<${signatureHex}>`);
-    }
-
-    const signedPdf = Buffer.from(pdfString, 'latin1');
     return signedPdf;
   } catch (error) {
     if (error instanceof Error) {
