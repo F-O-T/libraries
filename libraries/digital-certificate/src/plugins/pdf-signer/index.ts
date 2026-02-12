@@ -66,20 +66,9 @@ export async function signPdf(
       const { x, y, width, height } = options.appearance;
 
       // Colors
-      const bgColor = rgb(0.91, 0.96, 0.97); // Light blue #E8F4F8
-      const borderColor = rgb(1, 0, 0); // Red #FF0000
       const textColor = rgb(0, 0, 0); // Black
 
-      // Draw light blue background rectangle
-      page.drawRectangle({
-        x,
-        y,
-        width,
-        height,
-        color: bgColor,
-        borderColor: borderColor,
-        borderWidth: 2,
-      });
+      // No background or border - transparent signature
 
       // Embed and draw QR code
       const qrImage = await pdfDoc.embedPng(qrImageBuffer);
