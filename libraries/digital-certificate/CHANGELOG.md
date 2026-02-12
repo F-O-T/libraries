@@ -11,6 +11,9 @@
 - Types: `SignPdfOptions`, `SignatureAppearanceOptions`, `SignaturePlacement`, `SignatureAppearanceStyle`
 - RFC 3161 timestamp client for ICP-Brasil compliance
 - Comprehensive test suite for timestamp client with real TSA servers
+- Signature Policy module for ICP-Brasil PAdES compliance
+- Automatic download and caching of ICP-Brasil signature policy document (PA_AD_RB_v2_3)
+- id-aa-ets-sigPolicyId attribute with policy OID and SHA-256 hash
 
 ## [1.0.5] - 2026-02-06
 
