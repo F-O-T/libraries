@@ -1,6 +1,7 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import { plainAddPlaceholder } from "@signpdf/placeholder-plain";
 import signpdf from "node-signpdf";
+import { createHash } from "node:crypto";
 import { generateQRCode } from "./qr-generator";
 import { parseCertificate } from "../../certificate";
 import type { SignPdfOptions } from "./types";
@@ -52,7 +53,32 @@ export async function signPdf(
 
     // Generate QR code if requested and appearance is specified
     if (options.qrCode && options.appearance) {
-      const qrImageBuffer = await generateQRCode(options.qrCode.data);
+      // Calculate document hash for verification
+      const documentHash = createHash('sha256').update(pdfBuffer).digest('hex');
+      
+      // Generate verification data
+      let qrData = options.qrCode.data;
+      
+      // If no custom data provided, create verification URL/data
+      if (!qrData && certInfo) {
+        const timestamp = new Date().toISOString();
+        const certFingerprint = certInfo.fingerprint;
+        
+        // Format verification data
+        // You can replace this URL with your validation service
+        qrData = `https://validar.iti.gov.br/?` +
+          `doc=${documentHash.substring(0, 16)}&` +
+          `cert=${certFingerprint.substring(0, 16)}&` +
+          `time=${encodeURIComponent(timestamp)}`;
+        
+        // Alternative: Encode raw verification data
+        // qrData = `VERIFICAÇÃO\n` +
+        //   `Hash: ${documentHash.substring(0, 32)}...\n` +
+        //   `Cert: ${certFingerprint.substring(0, 32)}...\n` +
+        //   `Data: ${timestamp}`;
+      }
+
+      const qrImageBuffer = await generateQRCode(qrData);
 
       // Get the page to draw on
       const pageIndex = options.appearance.page;

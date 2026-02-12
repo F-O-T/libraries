@@ -53,7 +53,6 @@ describe.skipIf(!hasRealCertificate())("Real Certificate - PDF Signing", () => {
     const signedPdf = await signPdf(Buffer.from(originalPdf), {
       certificate: { p12, password, name },
       qrCode: {
-        data: `CERT:${certInfo.fingerprint}`,
         size: 100,
       },
       appearance: {

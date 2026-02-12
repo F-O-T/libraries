@@ -3,8 +3,8 @@
  */
 
 export interface QRCodeOptions {
-  /** Data to encode in QR code */
-  data: string;
+  /** Data to encode in QR code (optional - will auto-generate verification URL if not provided) */
+  data?: string;
   /** Size of QR code in pixels */
   size: number;
 }
