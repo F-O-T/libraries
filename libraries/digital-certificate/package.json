@@ -34,6 +34,10 @@
    },
    "dependencies": {
       "@f-o-t/xml": "^1.0.4",
+      "@signpdf/placeholder-pdfkit010": "^3.3.0",
+      "@signpdf/placeholder-plain": "^3.3.0",
+      "@signpdf/signpdf": "^3.3.0",
+      "node-signpdf": "^3.0.0",
       "pdf-lib": "^1.17.1",
       "qrcode": "^1.5.4",
       "zod": "^4.3.6"

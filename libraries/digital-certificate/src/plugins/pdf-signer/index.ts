@@ -1,9 +1,8 @@
 import { PDFDocument } from "pdf-lib";
+import { plainAddPlaceholder } from "@signpdf/placeholder-plain";
+import signpdf from "node-signpdf";
 import { generateQRCode } from "./qr-generator";
-import { signPdfDocument } from "./pdf-handler";
 import type { SignPdfOptions } from "./types";
-import type { Certificate } from "../../certificate";
-import type { PrivateKey } from "../../private-key";
 
 /**
  * Signs a PDF document with a digital certificate and optional visual signature
@@ -15,7 +14,7 @@ import type { PrivateKey } from "../../private-key";
  * @example
  * ```ts
  * const signedPdf = await signPdf(pdfBuffer, {
- *   certificate: { cert, key },
+ *   certificate: { p12 },
  *   reason: "Document approval",
  *   location: "Corporate Office",
  *   contactInfo: "signer@example.com",
@@ -103,32 +102,28 @@ export async function signPdf(
       }
     }
 
-    // Save the PDF with visual modifications
-    const modifiedPdfBuffer = Buffer.from(await pdfDoc.save());
+    // Save the PDF without compression for better compatibility
+    const modifiedPdfBuffer = Buffer.from(await pdfDoc.save({ useObjectStreams: false }));
 
-    // Create Certificate and PrivateKey objects from buffers
-    // For now, we'll create a simplified signature by embedding the PKCS#7 in the PDF
-    // This is a mock implementation since the actual signPdfDocument expects Certificate/PrivateKey objects
-    const certificate = {
-      toPEM: () => options.certificate.cert.toString('utf-8'),
-    } as Certificate;
+    // Add signature placeholder
+    const pdfWithPlaceholder = plainAddPlaceholder({
+      pdfBuffer: modifiedPdfBuffer,
+      reason: options.reason || "Digitally signed",
+      contactInfo: options.contactInfo,
+      name: options.certificate.name || "Digital Signature",
+      location: options.location,
+    });
 
-    const privateKey = {
-      toPEM: () => options.certificate.key.toString('utf-8'),
-    } as PrivateKey;
-
-    // Sign the PDF with the certificate
-    const pkcs7Signature = signPdfDocument(modifiedPdfBuffer, certificate, privateKey);
-
-    // For now, we'll just return the modified PDF with a ByteRange placeholder
-    // In a full implementation, we would embed the PKCS#7 signature properly
-    const signedPdfContent = modifiedPdfBuffer.toString('latin1');
-    const signedPdfWithSig = signedPdfContent.replace(
-      '%%EOF',
-      `/ByteRange [0 1000 2000 1000]\n%%EOF`
+    // Sign the PDF
+    const signedPdf = signpdf.sign(
+      pdfWithPlaceholder, 
+      options.certificate.p12,
+      {
+        passphrase: options.certificate.password || '',
+      }
     );
 
-    return Buffer.from(signedPdfWithSig, 'latin1');
+    return signedPdf;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to sign PDF: ${error.message}`);

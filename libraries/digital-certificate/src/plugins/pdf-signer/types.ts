@@ -23,21 +23,23 @@ export interface SignatureAppearance {
 }
 
 export interface Certificate {
-  /** Certificate buffer (PEM or DER format) */
-  cert: Buffer;
-  /** Private key buffer (PEM or DER format) */
-  key: Buffer;
+  /** P12/PFX certificate buffer for signing */
+  p12: Buffer;
+  /** Password for P12/PFX file */
+  password?: string;
+  /** Optional signer name to display in signature */
+  name?: string;
 }
 
 export interface SignPdfOptions {
-  /** Certificate and private key for signing */
+  /** Certificate for signing (P12/PFX format) */
   certificate: Certificate;
   /** Reason for signing */
-  reason: string;
+  reason?: string;
   /** Location where signing occurred */
-  location: string;
+  location?: string;
   /** Contact information */
-  contactInfo: string;
+  contactInfo?: string;
   /** Optional QR code to embed */
   qrCode?: QRCodeOptions;
   /** Optional signature appearance configuration */
