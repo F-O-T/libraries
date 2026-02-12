@@ -9,6 +9,8 @@
 - QR code generation for signature verification
 - `signPdf()` function for signing PDF documents
 - Types: `SignPdfOptions`, `SignatureAppearanceOptions`, `SignaturePlacement`, `SignatureAppearanceStyle`
+- RFC 3161 timestamp client for ICP-Brasil compliance
+- Comprehensive test suite for timestamp client with real TSA servers
 
 ## [1.0.5] - 2026-02-06
 
