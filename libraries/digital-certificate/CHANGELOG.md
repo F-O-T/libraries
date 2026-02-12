@@ -3,7 +3,12 @@
 ## [Unreleased]
 
 ### Added
-- PDF signing capability dependencies (pdf-lib, qrcode) for plugins/pdf-signer module
+- PDF signing capability via new `plugins/pdf-signer` module
+- Visible signature appearance with QR code and certificate information
+- Support for custom signature placement and styling
+- QR code generation for signature verification
+- `signPdf()` function for signing PDF documents
+- Types: `SignPdfOptions`, `SignatureAppearanceOptions`, `SignaturePlacement`, `SignatureAppearanceStyle`
 
 ## [1.0.5] - 2026-02-06
 
