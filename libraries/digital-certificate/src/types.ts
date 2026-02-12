@@ -101,3 +101,59 @@ export interface MtlsOptions {
    /** Whether to reject unauthorized connections (default: true) */
    rejectUnauthorized?: boolean;
 }
+
+// =============================================================================
+// PDF Signer Types
+// =============================================================================
+
+export interface SignaturePlacement {
+   /** Page number (1-indexed, -1 = last page) */
+   page: number;
+   /** X coordinate from left (in points) */
+   x: number;
+   /** Y coordinate from bottom (in points) */
+   y: number;
+   /** Width of signature box (in points) */
+   width: number;
+   /** Height of signature box (in points) */
+   height: number;
+}
+
+export interface SignatureAppearanceStyle {
+   /** Text color (hex) */
+   textColor?: string;
+   /** Background color (hex) */
+   backgroundColor?: string;
+   /** Border color (hex) */
+   borderColor?: string;
+   /** Font size (in points) */
+   fontSize?: number;
+   /** Border width (in points) */
+   borderWidth?: number;
+}
+
+export interface SignatureAppearanceOptions {
+   /** Whether the signature is visible */
+   visible: boolean;
+   /** Placement of the signature on the page */
+   placement?: SignaturePlacement;
+   /** Whether to show QR code */
+   showQRCode?: boolean;
+   /** Visual style of the signature */
+   style?: SignatureAppearanceStyle;
+   /** Custom text to display (defaults to certificate subject) */
+   customText?: string;
+}
+
+export interface SignPdfOptions {
+   /** The parsed certificate to use for signing */
+   certificate: CertificateInfo;
+   /** Signature appearance options */
+   appearance?: SignatureAppearanceOptions;
+   /** Reason for signing */
+   reason?: string;
+   /** Location where signing occurred */
+   location?: string;
+   /** Contact information */
+   contactInfo?: string;
+}
