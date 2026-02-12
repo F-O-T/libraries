@@ -23,7 +23,8 @@
     "dist",
     "bunup.config.ts",
     "src/plugins/xml-signer",
-    "src/plugins/mtls"
+    "src/plugins/mtls",
+    "src/plugins/pdf-signer"
   ],
   "include": [
     "src/**/*"
