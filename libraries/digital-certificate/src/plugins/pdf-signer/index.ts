@@ -1,7 +1,8 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { plainAddPlaceholder } from "@signpdf/placeholder-plain";
 import signpdf from "node-signpdf";
 import { generateQRCode } from "./qr-generator";
+import { parseCertificate } from "../../certificate";
 import type { SignPdfOptions } from "./types";
 
 /**
@@ -40,6 +41,15 @@ export async function signPdf(
     // Load the PDF document
     const pdfDoc = await PDFDocument.load(pdfBuffer);
 
+    // Parse certificate to get info for display
+    let certInfo;
+    try {
+      certInfo = parseCertificate(options.certificate.p12, options.certificate.password || '');
+    } catch (error) {
+      // If parsing fails, continue without cert info
+      console.warn('Failed to parse certificate for display:', error);
+    }
+
     // Generate QR code if requested and appearance is specified
     if (options.qrCode && options.appearance) {
       const qrImageBuffer = await generateQRCode(options.qrCode.data);
@@ -53,52 +63,121 @@ export async function signPdf(
       }
 
       const page = pages[pageIndex];
+      const { x, y, width, height } = options.appearance;
+
+      // Colors
+      const bgColor = rgb(0.91, 0.96, 0.97); // Light blue #E8F4F8
+      const borderColor = rgb(1, 0, 0); // Red #FF0000
+      const textColor = rgb(0, 0, 0); // Black
+
+      // Draw light blue background rectangle
+      page.drawRectangle({
+        x,
+        y,
+        width,
+        height,
+        color: bgColor,
+        borderColor: borderColor,
+        borderWidth: 2,
+      });
 
       // Embed and draw QR code
       const qrImage = await pdfDoc.embedPng(qrImageBuffer);
-      const qrSize = Math.min(options.qrCode.size, options.appearance.height - 10);
+      const qrSize = Math.min(100, height - 20);
 
-      // Draw background rectangle
-      page.drawRectangle({
-        x: options.appearance.x,
-        y: options.appearance.y,
-        width: options.appearance.width,
-        height: options.appearance.height,
-        borderWidth: 1,
-      });
-
-      // Draw QR code
       page.drawImage(qrImage, {
-        x: options.appearance.x + 5,
-        y: options.appearance.y + 5,
+        x: x + 10,
+        y: y + 10,
         width: qrSize,
         height: qrSize,
       });
 
-      // Draw signature text
-      const textX = options.appearance.x + qrSize + 15;
-      const textY = options.appearance.y + options.appearance.height - 15;
+      // Draw certificate information text
+      const textX = x + qrSize + 20;
+      let textY = y + height - 20;
+      const fontSize = 10;
+      const lineHeight = 14;
 
-      page.drawText(`Signed: ${options.reason || 'Digital Signature'}`, {
+      // Header
+      page.drawText("ASSINADO DIGITALMENTE", {
         x: textX,
         y: textY,
-        size: 10,
+        size: 12,
+        color: textColor,
       });
+      textY -= lineHeight * 1.5;
 
-      if (options.location) {
-        page.drawText(`Location: ${options.location}`, {
+      // Signer name
+      if (certInfo) {
+        const signerName = certInfo.subject.commonName || options.certificate.name || "N/A";
+        page.drawText(`Assinado por: ${signerName}`, {
           x: textX,
-          y: textY - 15,
-          size: 8,
+          y: textY,
+          size: fontSize,
+          color: textColor,
         });
-      }
+        textY -= lineHeight;
 
-      if (options.contactInfo) {
-        page.drawText(`Contact: ${options.contactInfo}`, {
+        // CNPJ or CPF
+        if (certInfo.brazilian.cnpj) {
+          const cnpj = certInfo.brazilian.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+          page.drawText(`CNPJ: ${cnpj}`, {
+            x: textX,
+            y: textY,
+            size: fontSize,
+            color: textColor,
+          });
+          textY -= lineHeight;
+        } else if (certInfo.brazilian.cpf) {
+          const cpf = certInfo.brazilian.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+          page.drawText(`CPF: ${cpf}`, {
+            x: textX,
+            y: textY,
+            size: fontSize,
+            color: textColor,
+          });
+          textY -= lineHeight;
+        }
+
+        // Date and time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('pt-BR');
+        const timeStr = now.toLocaleTimeString('pt-BR');
+        page.drawText(`Data: ${dateStr} ${timeStr}`, {
           x: textX,
-          y: textY - 28,
-          size: 8,
+          y: textY,
+          size: fontSize,
+          color: textColor,
         });
+        textY -= lineHeight;
+
+        // Location if provided
+        if (options.location) {
+          page.drawText(`Local: ${options.location}`, {
+            x: textX,
+            y: textY,
+            size: fontSize - 1,
+            color: textColor,
+          });
+        }
+      } else {
+        // Fallback if cert info not available
+        page.drawText(`Signed: ${options.reason || 'Digital Signature'}`, {
+          x: textX,
+          y: textY,
+          size: fontSize,
+          color: textColor,
+        });
+        textY -= lineHeight;
+
+        if (options.location) {
+          page.drawText(`Location: ${options.location}`, {
+            x: textX,
+            y: textY,
+            size: fontSize,
+            color: textColor,
+          });
+        }
       }
     }
 
@@ -110,7 +189,7 @@ export async function signPdf(
       pdfBuffer: modifiedPdfBuffer,
       reason: options.reason || "Digitally signed",
       contactInfo: options.contactInfo,
-      name: options.certificate.name || "Digital Signature",
+      name: certInfo?.subject.commonName || options.certificate.name || "Digital Signature",
       location: options.location,
     });
 
