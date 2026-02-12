@@ -51,49 +51,47 @@ describe.skipIf(!hasRealCertificate())("PAdES Integration - Complete ICP-Brasil 
     // Convert to regular sequence for easier parsing
     const attrs = authenticatedAttrs.value;
 
-    // Track which required attributes we find
-    let foundContentType = false;
-    let foundMessageDigest = false;
-    let foundSigningTime = false;
-    let foundSignaturePolicy = false;
-    let foundSigningCertV2 = false;
+    // Verify attributes are in exact order (not just present)
+    // ICP-Brasil requires this specific order for signed attributes
+    expect(attrs.length).toBe(5); // Should have exactly 5 signed attributes
 
-    for (const attr of attrs) {
+    console.log(`\nFound ${attrs.length} signed attributes`);
+
+    // Extract OIDs for each attribute
+    const attrOids = attrs.map((attr) => {
       const attrType = attr.value[0];
-      const oid = forge.asn1.derToOid(attrType.value);
+      return forge.asn1.derToOid(attrType.value);
+    });
 
-      if (oid === forge.pki.oids.contentType) {
-        foundContentType = true;
-        console.log("✅ content-type attribute found");
-      } else if (oid === forge.pki.oids.messageDigest) {
-        foundMessageDigest = true;
-        console.log("✅ message-digest attribute found");
-      } else if (oid === forge.pki.oids.signingTime) {
-        foundSigningTime = true;
-        console.log("✅ signing-time attribute found");
-      } else if (oid === "1.2.840.113549.1.9.16.2.15") {
-        foundSignaturePolicy = true;
-        console.log("✅ signature-policy-identifier attribute found (id-aa-ets-sigPolicyId)");
-        
-        // Just verify the attribute value exists
-        expect(attr.value[1]).toBeDefined();
-        console.log("   Policy data: Present");
-      } else if (oid === "1.2.840.113549.1.9.16.2.47") {
-        foundSigningCertV2 = true;
-        console.log("✅ signing-certificate-v2 attribute found (id-aa-signingCertificateV2)");
-        
-        // Just verify the attribute value exists
-        expect(attr.value[1]).toBeDefined();
-        console.log("   Certificate data: Present");
-      }
-    }
+    // Verify order - ICP-Brasil compliance requires this exact sequence:
+    // 1. content-type
+    // 2. message-digest
+    // 3. signing-time
+    // 4. signature-policy-identifier
+    // 5. signing-certificate-v2
 
-    // Verify all required signed attributes are present
-    expect(foundContentType).toBe(true);
-    expect(foundMessageDigest).toBe(true);
-    expect(foundSigningTime).toBe(true);
-    expect(foundSignaturePolicy).toBe(true);
-    expect(foundSigningCertV2).toBe(true);
+    expect(attrOids[0]).toBe(forge.pki.oids.contentType);
+    console.log("✅ [1] content-type attribute in correct position");
+
+    expect(attrOids[1]).toBe(forge.pki.oids.messageDigest);
+    console.log("✅ [2] message-digest attribute in correct position");
+
+    expect(attrOids[2]).toBe(forge.pki.oids.signingTime);
+    console.log("✅ [3] signing-time attribute in correct position");
+
+    expect(attrOids[3]).toBe("1.2.840.113549.1.9.16.2.15");
+    console.log("✅ [4] signature-policy-identifier attribute in correct position (id-aa-ets-sigPolicyId)");
+    
+    // Verify the policy attribute value exists
+    expect(attrs[3].value[1]).toBeDefined();
+    console.log("   Policy data: Present");
+
+    expect(attrOids[4]).toBe("1.2.840.113549.1.9.16.2.47");
+    console.log("✅ [5] signing-certificate-v2 attribute in correct position (id-aa-signingCertificateV2)");
+    
+    // Verify the certificate attribute value exists
+    expect(attrs[4].value[1]).toBeDefined();
+    console.log("   Certificate data: Present");
 
     console.log("\n=== Verifying Unsigned Attributes ===");
 
