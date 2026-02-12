@@ -26,6 +26,7 @@ export interface PAdESSignOptions {
   reason?: string;
   location?: string;
   contactInfo?: string;
+  tsaUrl?: string; // Optional timestamp server URL
 }
 
 /**
@@ -65,22 +66,18 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
 
   try {
     // Extract certificate and private key
-    console.log('Extracting P12...');
     const { cert, key, certChain } = extractP12(p12Buffer, password);
-    console.log('P12 extracted successfully');
 
     // Calculate document hash from the bytes to sign
     const documentHash = createHash("sha256").update(bytesToSign).digest();
 
     // Create PKCS#7 signed data structure
-    console.log('Creating PKCS#7 signed data...');
     const p7 = forge.pkcs7.createSignedData();
 
     // Add content (detached signature)
     p7.content = forge.util.createBuffer(documentHash.toString("binary"));
 
     // Add certificate chain
-    console.log('Adding certificate chain...');
     for (const certificate of certChain) {
       if (certificate) {
         p7.addCertificate(certificate);
@@ -88,7 +85,6 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
     }
 
     // Create signed attributes (required for PAdES-BES)
-    console.log('Creating authenticated attributes...');
     
     // Basic required attributes
     const authenticatedAttributes = [
@@ -107,16 +103,13 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
     ];
 
     // Add ICP-Brasil Signature Policy (MANDATORY for ICP-Brasil validation)
-    console.log('Adding signature policy attribute...');
     const sigPolicyAttr = await getSignaturePolicyAttribute();
     authenticatedAttributes.push(sigPolicyAttr);
 
     // Add Signing Certificate V2 (MANDATORY for ICP-Brasil validation)
-    console.log('Adding signing certificate V2 attribute...');
     const signingCertV2Attr = getSigningCertificateV2Attribute(cert);
     authenticatedAttributes.push(signingCertV2Attr);
 
-    console.log('Adding signer...');
     // Add signer
     p7.addSigner({
       key: key,
@@ -125,15 +118,12 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
       authenticatedAttributes: authenticatedAttributes,
     });
 
-    console.log('Signing...');
     // Sign
     p7.sign({ detached: true });
 
     // Add timestamp as unsigned attribute (MANDATORY for ICP-Brasil)
     // This proves when the signature was created according to a trusted third party
     try {
-      console.log('Requesting timestamp...');
-      
       // Convert to ASN.1 to access the signature bytes
       const p7Asn1 = p7.toAsn1();
       
@@ -187,10 +177,10 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
         throw new Error("Could not find signature bytes in PKCS#7 structure");
       }
       
-      console.log(`Found signature: ${signatureBytes.length} bytes`);
-      
       // Request timestamp for the signature
-      const timestampResp = await requestTimestamp(signatureBytes);
+      const timestampResp = await requestTimestamp(signatureBytes, {
+        tsaUrl: options.tsaUrl,
+      });
       const timestampToken = extractTimestampToken(timestampResp);
       
       // Add timestamp as unsigned attribute
@@ -203,7 +193,6 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
         value: timestampAsn1,
       };
       
-      // Add to PKCS#7 structure
       // Create unsignedAttrs [1] IMPLICIT SET OF Attribute
       const unsignedAttrs = forge.asn1.create(
         forge.asn1.Class.CONTEXT_SPECIFIC,
@@ -235,21 +224,18 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
       // Add unsignedAttrs to SignerInfo (append as 7th field)
       signerInfo.value.push(unsignedAttrs);
       
-      console.log('Timestamp added successfully');
     } catch (error) {
       console.warn('Failed to add timestamp (signature is still valid without it):', error);
       // Timestamp failure is not critical - the signature is still valid
       // ICP-Brasil requires timestamps, but for testing we allow it to proceed
     }
 
-    console.log('Converting to DER...');
     // Convert to DER format
     const der = forge.asn1.toDer(p7.toAsn1()).getBytes();
     return Buffer.from(der, "binary");
   } catch (error) {
-    console.error('Error in createPAdESSignature:', error);
     if (error instanceof Error) {
-      throw new Error(`PAdES signing failed: ${error.message}\nStack: ${error.stack}`);
+      throw new Error(`PAdES signing failed: ${error.message}`);
     }
     throw error;
   }

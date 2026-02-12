@@ -1,10 +1,15 @@
 import { PDFDocument, rgb } from "pdf-lib";
 import { plainAddPlaceholder } from "@signpdf/placeholder-plain";
-import signpdf from "node-signpdf";
 import { createHash } from "node:crypto";
 import { generateQRCode } from "./qr-generator";
 import { parseCertificate } from "../../certificate";
 import type { SignPdfOptions } from "./types";
+import { createPAdESSignature } from "./pades-signer";
+import {
+  findByteRange,
+  extractBytesToSign,
+  embedSignature,
+} from "./pdf-signature-utils";
 
 /**
  * Signs a PDF document with a digital certificate and optional visual signature
@@ -48,7 +53,6 @@ export async function signPdf(
       certInfo = parseCertificate(options.certificate.p12, options.certificate.password || '');
     } catch (error) {
       // If parsing fails, continue without cert info
-      console.warn('Failed to parse certificate for display:', error);
     }
 
     // Generate QR code if requested and appearance is specified
@@ -208,14 +212,23 @@ export async function signPdf(
       location: options.location,
     });
 
-    // Sign the PDF
-    const signedPdf = signpdf.sign(
-      pdfWithPlaceholder, 
-      options.certificate.p12,
-      {
-        passphrase: options.certificate.password || '',
-      }
-    );
+    // Extract ByteRange and bytes to sign
+    const { byteRange } = findByteRange(pdfWithPlaceholder);
+    const bytesToSign = extractBytesToSign(pdfWithPlaceholder, byteRange);
+
+    // Create PAdES signature with ICP-Brasil compliance
+    const signature = await createPAdESSignature({
+      p12Buffer: options.certificate.p12,
+      password: options.certificate.password || '',
+      bytesToSign,
+      reason: options.reason,
+      location: options.location,
+      contactInfo: options.contactInfo,
+      tsaUrl: options.tsaUrl,
+    });
+
+    // Embed signature into PDF
+    const signedPdf = embedSignature(pdfWithPlaceholder, signature, byteRange);
 
     return signedPdf;
   } catch (error) {
