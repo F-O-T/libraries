@@ -225,7 +225,6 @@ export async function createPAdESSignature(options: PAdESSignOptions): Promise<B
       signerInfo.value.push(unsignedAttrs);
       
     } catch (error) {
-      console.warn('Failed to add timestamp (signature is still valid without it):', error);
       // Timestamp failure is not critical - the signature is still valid
       // ICP-Brasil requires timestamps, but for testing we allow it to proceed
     }
