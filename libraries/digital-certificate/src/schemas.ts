@@ -11,6 +11,7 @@ import { z } from "zod";
 export const signatureAlgorithmSchema = z.enum(["sha1", "sha256"]);
 
 export const signOptionsSchema = z.object({
+   certificate: z.lazy(() => certificateInfoSchema),
    referenceUri: z.string(),
    algorithm: signatureAlgorithmSchema.default("sha256"),
    signatureParent: z.string().optional(),
@@ -24,6 +25,51 @@ export const signOptionsSchema = z.object({
 export const mtlsOptionsSchema = z.object({
    caCerts: z.array(z.string()).optional(),
    rejectUnauthorized: z.boolean().default(true),
+});
+
+// =============================================================================
+// Certificate Info Schema
+// =============================================================================
+
+const certificateSubjectSchema = z.object({
+   commonName: z.string().nullable(),
+   organization: z.string().nullable(),
+   organizationalUnit: z.string().nullable(),
+   country: z.string().nullable(),
+   state: z.string().nullable(),
+   locality: z.string().nullable(),
+   raw: z.string(),
+});
+
+const certificateIssuerSchema = z.object({
+   commonName: z.string().nullable(),
+   organization: z.string().nullable(),
+   country: z.string().nullable(),
+   raw: z.string(),
+});
+
+const certificateValiditySchema = z.object({
+   notBefore: z.date(),
+   notAfter: z.date(),
+});
+
+const brazilianFieldsSchema = z.object({
+   cnpj: z.string().nullable(),
+   cpf: z.string().nullable(),
+});
+
+export const certificateInfoSchema = z.object({
+   serialNumber: z.string(),
+   subject: certificateSubjectSchema,
+   issuer: certificateIssuerSchema,
+   validity: certificateValiditySchema,
+   fingerprint: z.string(),
+   isValid: z.boolean(),
+   brazilian: brazilianFieldsSchema,
+   certPem: z.string(),
+   keyPem: z.string(),
+   pfxBuffer: z.instanceof(Buffer),
+   pfxPassword: z.string(),
 });
 
 // =============================================================================
@@ -55,6 +101,7 @@ export const signatureAppearanceOptionsSchema = z.object({
 });
 
 export const signPdfOptionsSchema = z.object({
+   certificate: certificateInfoSchema,
    appearance: signatureAppearanceOptionsSchema.optional(),
    reason: z.string().default("Assinado digitalmente"),
    location: z.string().optional(),
