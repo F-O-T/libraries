@@ -10,7 +10,7 @@ function createTestPdf(): Uint8Array {
 
 async function loadP12(): Promise<Uint8Array> {
 	const file = Bun.file(
-		"/home/yorizel/Documents/fot-libraries/libraries/crypto/__tests__/fixtures/test.p12",
+		`${import.meta.dir}/fixtures/test.p12`,
 	);
 	return new Uint8Array(await file.arrayBuffer());
 }

@@ -67,17 +67,23 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
     authenticatedAttributes,
   );
 
-  // 3. DER-encode attrs with SET tag (0x31) for signing
-  const attrsSetNode = set(...authAttrs);
-  const attrsDer = encodeDer(attrsSetNode);
+  // 3. DER-encode attrs with SET tag (0x31) for signing.
+  //    The encoder sorts SET OF children per X.690 §11.6 (DER).
+  const attrsDer = encodeDer(set(...authAttrs));
 
   // 4. Sign the DER-encoded attributes
   const signatureValue = signData(attrsDer, privateKey, hashAlgorithm);
 
-  // 5. Extract IssuerAndSerialNumber from certificate
+  // 5. Decode the sorted SET back so the signerInfo stores children
+  //    in the same DER-sorted order that was signed. This is critical:
+  //    verifiers reconstruct the SET from the [0] IMPLICIT encoding
+  //    and the bytes must match what was signed.
+  const sortedAttrsSet = decodeDer(attrsDer);
+
+  // 6. Extract IssuerAndSerialNumber from certificate
   const issuerAndSerial = extractIssuerAndSerial(certificate);
 
-  // 6. Build SignerInfo
+  // 7. Build SignerInfo
   const signerInfoChildren: Asn1Node[] = [
     // version = 1
     integer(1),
@@ -86,7 +92,7 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
     // digestAlgorithm
     algorithmIdentifier(digestOid),
     // signedAttrs [0] IMPLICIT SET — replaces SET tag (0x31) with context [0] (0xA0)
-    contextTag(0, [set(...authAttrs)], false),
+    contextTag(0, [sortedAttrsSet], false),
     // signatureAlgorithm
     algorithmIdentifier(signatureAlgOid),
     // signature OCTET STRING
@@ -103,12 +109,12 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
 
   const signerInfo = sequence(...signerInfoChildren);
 
-  // 7. Build certificates [0] IMPLICIT SET OF Certificate
+  // 8. Build certificates [0] IMPLICIT SET OF Certificate
   const allCerts = [certificate, ...chain];
   const certNodes = allCerts.map((certDer) => decodeDer(certDer));
   const certsSet = set(...certNodes);
 
-  // 8. Build EncapsulatedContentInfo
+  // 9. Build EncapsulatedContentInfo
   const encapContentInfoChildren: Asn1Node[] = [oid(OID.data)];
   if (!detached) {
     // Include content as [0] EXPLICIT OCTET STRING
@@ -118,7 +124,7 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
   }
   const encapContentInfo = sequence(...encapContentInfoChildren);
 
-  // 9. Assemble SignedData
+  // 10. Assemble SignedData
   const signedData = sequence(
     // version = 1
     integer(1),
@@ -132,7 +138,7 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
     set(signerInfo),
   );
 
-  // 10. Wrap in ContentInfo
+  // 11. Wrap in ContentInfo
   const contentInfo = sequence(
     oid(OID.signedData),
     contextTag(0, [signedData]),

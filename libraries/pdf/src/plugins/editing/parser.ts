@@ -46,7 +46,11 @@ export function findStartXref(data: Uint8Array): number {
 }
 
 /**
- * Parse the trailer dictionary to extract Root, Size, Info, and Prev xref offset
+ * Parse the trailer dictionary to extract Root, Size, Info, and Prev xref offset.
+ *
+ * Supports both traditional trailers (`trailer << ... >>`) and
+ * cross-reference streams (PDF 1.5+) where the trailer entries live
+ * inside the xref stream object dictionary.
  */
 export function parseTrailer(data: Uint8Array): {
 	root: number;
@@ -55,21 +59,40 @@ export function parseTrailer(data: Uint8Array): {
 	prevXref: number;
 } {
 	const pdf = toLatin1(data);
-
 	const startxrefIdx = pdf.lastIndexOf("startxref");
-	const trailerIdx = pdf.lastIndexOf("trailer");
-	if (trailerIdx === -1) throw new Error("Cannot find trailer in PDF");
-	const trailerStr = pdf.slice(trailerIdx, startxrefIdx);
 
-	const rootMatch = trailerStr.match(/\/Root\s+(\d+)\s+\d+\s+R/);
+	// Try traditional trailer first
+	const trailerIdx = pdf.lastIndexOf("trailer");
+
+	let dictStr: string;
+
+	if (trailerIdx !== -1 && trailerIdx < startxrefIdx) {
+		// Traditional trailer
+		dictStr = pdf.slice(trailerIdx, startxrefIdx);
+	} else {
+		// Cross-reference stream (PDF 1.5+): startxref points to an object
+		// whose dictionary contains the trailer entries (Root, Size, Info, etc.)
+		const xrefOffset = findStartXref(data);
+		const xrefObjStr = pdf.slice(xrefOffset, xrefOffset + 4096);
+		const dictStart = xrefObjStr.indexOf("<<");
+		if (dictStart === -1) {
+			throw new Error("Cannot find trailer or xref stream dictionary in PDF");
+		}
+		const dictEnd = findMatchingDictEnd(xrefObjStr, dictStart);
+		if (dictEnd === -1) {
+			throw new Error("Cannot find end of xref stream dictionary");
+		}
+		dictStr = xrefObjStr.slice(dictStart, dictEnd + 2);
+	}
+
+	const rootMatch = dictStr.match(/\/Root\s+(\d+)\s+\d+\s+R/);
 	if (!rootMatch) throw new Error("Cannot find Root ref in trailer");
 
-	const sizeMatch = trailerStr.match(/\/Size\s+(\d+)/);
+	const sizeMatch = dictStr.match(/\/Size\s+(\d+)/);
 	if (!sizeMatch) throw new Error("Cannot find Size in trailer");
 
-	const infoMatch = trailerStr.match(/\/Info\s+(\d+)\s+\d+\s+R/);
-
-	const prevMatch = trailerStr.match(/\/Prev\s+(\d+)/);
+	const infoMatch = dictStr.match(/\/Info\s+(\d+)\s+\d+\s+R/);
+	const prevMatch = dictStr.match(/\/Prev\s+(\d+)/);
 
 	return {
 		root: parseInt(rootMatch[1]!, 10),

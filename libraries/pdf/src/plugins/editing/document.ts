@@ -189,8 +189,11 @@ export class PdfDocumentImpl implements PdfDocument {
 		// --- 2. Embedded image XObjects ---
 		for (const img of this.embeddedImages) {
 			const colorSpace = img.colorType === 2 ? "/DeviceRGB" : img.colorType === 0 ? "/DeviceGray" : "/DeviceRGB";
+			const colors = img.colorType === 2 ? 3 : 1;
 			const bpc = img.bitDepth;
 
+			// PNG IDAT data uses per-row filter bytes. Tell the PDF reader
+			// via DecodeParms with Predictor 15 (PNG optimum prediction).
 			objects.push({
 				objNum: img.objNum,
 				content: [
@@ -201,6 +204,7 @@ export class PdfDocumentImpl implements PdfDocument {
 					`/ColorSpace ${colorSpace}`,
 					`/BitsPerComponent ${bpc}`,
 					"/Filter /FlateDecode",
+					`/DecodeParms << /Predictor 15 /Colors ${colors} /BitsPerComponent ${bpc} /Columns ${img.width} >>`,
 					`/Length ${img.idatData.length}`,
 					">>",
 				].join("\n"),
@@ -276,15 +280,9 @@ export class PdfDocumentImpl implements PdfDocument {
 					const resEnd = findMatchingDictEndInContent(pageContent, resStart);
 					if (resEnd !== -1) {
 						const existingResContent = pageContent.slice(resStart + 2, resEnd);
-						// Remove existing Font entry if any, we'll add our own
-						let cleanedRes = existingResContent.replace(
-							/\/Font\s*<<[^>]*>>/g,
-							"",
-						);
-						cleanedRes = cleanedRes.replace(
-							/\/XObject\s*<<[^>]*>>/g,
-							"",
-						);
+						// Remove existing Font and XObject entries — must handle nested dicts
+						let cleanedRes = removeNestedDictEntry(existingResContent, "/Font");
+						cleanedRes = removeNestedDictEntry(cleanedRes, "/XObject");
 						const newResContent = `${cleanedRes}\n${resourceParts.join("\n")}`;
 						pageContent =
 							pageContent.slice(0, resStart) +
@@ -625,6 +623,26 @@ function findMatchingDictEndInContent(str: string, startPos: number): number {
 	}
 
 	return -1;
+}
+
+/**
+ * Remove a named dictionary entry (e.g. "/Font << ... >>") from a string,
+ * correctly handling arbitrarily nested sub-dictionaries.
+ */
+function removeNestedDictEntry(content: string, name: string): string {
+	const idx = content.indexOf(name);
+	if (idx === -1) return content;
+
+	// Find the opening << after the name
+	const dictOpen = content.indexOf("<<", idx + name.length);
+	if (dictOpen === -1) return content;
+
+	// Use nesting-aware search to find the matching >>
+	const dictClose = findMatchingDictEndInContent(content, dictOpen);
+	if (dictClose === -1) return content;
+
+	// Remove from name start through the closing >>
+	return content.slice(0, idx) + content.slice(dictClose + 2);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,19 +1,15 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.0] - 2026-02-13
 
-### Added
-- PDF signing capability via new `plugins/pdf-signer` module
-- Visible signature appearance with QR code and certificate information
-- Support for custom signature placement and styling
-- QR code generation for signature verification
-- `signPdf()` function for signing PDF documents
-- Types: `SignPdfOptions`, `SignatureAppearanceOptions`, `SignaturePlacement`, `SignatureAppearanceStyle`
-- RFC 3161 timestamp client for ICP-Brasil compliance
-- Comprehensive test suite for timestamp client with real TSA servers
-- Signature Policy module for ICP-Brasil PAdES compliance
-- Automatic download and caching of ICP-Brasil signature policy document (PA_AD_RB_v2_3)
-- id-aa-ets-sigPolicyId attribute with policy OID and SHA-256 hash
+### Removed
+- **BREAKING**: Removed `plugins/pdf-signer` — PDF signing has moved to `@f-o-t/e-signature`
+- Removed all external dependencies: `node-forge`, `pdf-lib`, `axios`, `qrcode`, `@signpdf/*` (4 packages), `asn1js`, `pkijs`
+- Removed `@types/qrcode` dev dependency
+
+### Changed
+- **BREAKING**: The `./plugins/pdf-signer` export no longer exists. Use `@f-o-t/e-signature` instead.
+- Library now only depends on `@f-o-t/xml` + `zod` (zero third-party runtime deps)
 
 ## [1.0.5] - 2026-02-06
 

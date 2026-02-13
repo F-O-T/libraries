@@ -34,14 +34,14 @@ export function drawSignatureAppearance(
 
 	let qrSize = 0;
 
-	// Draw QR code if requested
-	if (showQrCode && options.qrCode) {
+	// Draw QR code if requested (enabled by default)
+	if (showQrCode) {
 		const qrData =
-			options.qrCode.data ||
+			options.qrCode?.data ||
 			createVerificationData(certInfo, options.pdfData);
 
 		const qrPng = generateQrCode(qrData, {
-			size: options.qrCode.size || 100,
+			size: options.qrCode?.size || 100,
 		});
 
 		const qrImage = doc.embedPng(qrPng);

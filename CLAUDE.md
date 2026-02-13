@@ -19,11 +19,32 @@ Each library needs:
 - `tsconfig.json` is **not manually maintained** — it's generated on every build from `generateTSConfig()` in `@f-o-t/config`. Don't edit it by hand.
 - Runtime dependencies go in `external` in `fot.config.ts` so they're not bundled.
 
+### Code Style
+
+- **Functional approach** — Public APIs export pure functions, not classes
+- **Classes only for Errors** — Custom error types extend `Error`
+- **Zod for input validation** — All input parsing and type inference via `z.infer<>`
+
+### Dependency Philosophy
+
+- **Zero external deps** — Libraries should only depend on other `@f-o-t/*` packages + `zod`
+- **No third-party runtime deps** — Use Node.js/Bun native APIs (`node:crypto`, `node:zlib`, `fetch`, etc.) instead of npm packages
+- **Zod is the only exception** — Used in every library for input validation and type inference via `z.infer<>`
+- **Build your own** — When functionality is needed, create a new `@f-o-t/*` library rather than pulling in an external package
+
+### Documentation
+
+- **README.md is required** — Every library MUST have a `README.md` as its documentation
+- README should cover: what the library does, installation, public API, usage examples
+- **Always keep README up to date** — When changing a library's API, types, exports, or behavior, update the README in the same commit. The README must always reflect the current state of the library.
+- Keep it concise and developer-focused — show don't tell
+
 ### Standard Dependencies
 
 - **Zod version**: Use `^4.3.6` for all libraries
 - **Validation**: ALL input validation should be handled via Zod schemas with refinements
-- **Dependencies**: Use version numbers like `^0.1.0`, NOT `workspace:*`
+- **Dependencies**: Use version numbers like `^1.0.0`, NOT `workspace:*`
+- **Initial version**: All libraries start at `1.0.0`
 
 ### Example `fot.config.ts`
 

@@ -91,8 +91,14 @@ function encodeLength(length: number): Uint8Array {
 
 function encodeValue(node: Asn1Node): Uint8Array {
    if (node.constructed && Array.isArray(node.value)) {
-      // Recursively encode children and concatenate
-      const childBuffers = node.value.map((child) => encodeDer(child));
+      // Recursively encode children
+      let childBuffers = node.value.map((child) => encodeDer(child));
+
+      // DER: SET OF elements must be sorted by encoded value (X.690 §11.6)
+      if (node.class === "universal" && node.tag === 0x11) {
+         childBuffers = childBuffers.slice().sort(compareDerBytes);
+      }
+
       const totalLength = childBuffers.reduce(
          (sum, buf) => sum + buf.length,
          0,
@@ -108,4 +114,16 @@ function encodeValue(node: Asn1Node): Uint8Array {
 
    // Primitive: value is Uint8Array
    return node.value as Uint8Array;
+}
+
+/**
+ * Compare two DER-encoded byte arrays lexicographically.
+ * Used for DER SET OF sorting per X.690 §11.6.
+ */
+function compareDerBytes(a: Uint8Array, b: Uint8Array): number {
+   const minLen = Math.min(a.length, b.length);
+   for (let i = 0; i < minLen; i++) {
+      if (a[i]! !== b[i]!) return a[i]! - b[i]!;
+   }
+   return a.length - b.length;
 }

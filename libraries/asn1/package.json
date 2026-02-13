@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/asn1",
-   "version": "0.1.0",
+   "version": "1.0.0",
    "description": "ASN.1 DER encoding and decoding",
    "type": "module",
    "main": "./dist/index.js",
