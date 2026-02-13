@@ -1,0 +1,216 @@
+/**
+ * Lightweight PDF structure parser for incremental editing
+ *
+ * Parses just enough of an existing PDF to enable incremental updates:
+ * - Finds the cross-reference table via startxref
+ * - Reads the trailer to get Root, Size, Info
+ * - Follows Root -> Pages -> Kids to locate page objects
+ * - Extracts MediaBox dimensions from pages
+ *
+ * Uses latin1 string matching on the raw PDF bytes (1 byte = 1 char)
+ * for correctness with binary PDF content.
+ */
+
+/**
+ * Parsed PDF structure needed for incremental updates
+ */
+export type PdfStructure = {
+	xrefOffset: number;
+	rootNum: number;
+	infoNum: number | null;
+	size: number;
+	pagesNum: number;
+	pageNums: number[];
+	rootDictContent: string;
+	pageDictContents: string[];
+};
+
+const decoder = new TextDecoder("latin1");
+
+/**
+ * Decode Uint8Array to latin1 string for raw PDF text matching
+ */
+function toLatin1(data: Uint8Array): string {
+	return decoder.decode(data);
+}
+
+/**
+ * Find the byte offset recorded after the last `startxref` keyword
+ */
+export function findStartXref(data: Uint8Array): number {
+	const pdf = toLatin1(data);
+	const idx = pdf.lastIndexOf("startxref");
+	if (idx === -1) throw new Error("Cannot find startxref in PDF");
+	const after = pdf.slice(idx + 9).trim().split(/[\r\n\s]/)[0];
+	return parseInt(after!, 10);
+}
+
+/**
+ * Parse the trailer dictionary to extract Root, Size, Info, and Prev xref offset
+ */
+export function parseTrailer(data: Uint8Array): {
+	root: number;
+	size: number;
+	info: number | null;
+	prevXref: number;
+} {
+	const pdf = toLatin1(data);
+
+	const startxrefIdx = pdf.lastIndexOf("startxref");
+	const trailerIdx = pdf.lastIndexOf("trailer");
+	if (trailerIdx === -1) throw new Error("Cannot find trailer in PDF");
+	const trailerStr = pdf.slice(trailerIdx, startxrefIdx);
+
+	const rootMatch = trailerStr.match(/\/Root\s+(\d+)\s+\d+\s+R/);
+	if (!rootMatch) throw new Error("Cannot find Root ref in trailer");
+
+	const sizeMatch = trailerStr.match(/\/Size\s+(\d+)/);
+	if (!sizeMatch) throw new Error("Cannot find Size in trailer");
+
+	const infoMatch = trailerStr.match(/\/Info\s+(\d+)\s+\d+\s+R/);
+
+	const prevMatch = trailerStr.match(/\/Prev\s+(\d+)/);
+
+	return {
+		root: parseInt(rootMatch[1]!, 10),
+		size: parseInt(sizeMatch[1]!, 10),
+		info: infoMatch ? parseInt(infoMatch[1]!, 10) : null,
+		prevXref: prevMatch ? parseInt(prevMatch[1]!, 10) : findStartXref(data),
+	};
+}
+
+/**
+ * Extract the dictionary content (between outer << and >>) for a given object number.
+ * Returns the content string without the delimiters.
+ */
+export function extractObjectDictContent(
+	data: Uint8Array,
+	objNum: number,
+): string {
+	const pdf = toLatin1(data);
+	const objRegex = new RegExp(`(?:^|\\s)${objNum}\\s+0\\s+obj`, "m");
+	const match = pdf.match(objRegex);
+	if (!match || match.index === undefined) {
+		throw new Error(`Cannot find object ${objNum} in PDF`);
+	}
+
+	const searchStart = match.index + match[0].length;
+	const dictStart = pdf.indexOf("<<", searchStart);
+	if (dictStart === -1 || dictStart > searchStart + 200) {
+		throw new Error(`Cannot find dictionary start for object ${objNum}`);
+	}
+
+	const dictEnd = findMatchingDictEnd(pdf, dictStart);
+	if (dictEnd === -1) {
+		throw new Error(`Cannot find dictionary end for object ${objNum}`);
+	}
+
+	return pdf.slice(dictStart + 2, dictEnd);
+}
+
+/**
+ * Find all page object numbers by following Root -> Pages -> Kids
+ */
+export function findPageObjects(data: Uint8Array, rootNum: number): number[] {
+	const rootContent = extractObjectDictContent(data, rootNum);
+	const pagesMatch = rootContent.match(/\/Pages\s+(\d+)\s+\d+\s+R/);
+	if (!pagesMatch) throw new Error("Cannot find Pages ref in Root catalog");
+	const pagesNum = parseInt(pagesMatch[1]!, 10);
+
+	const pagesContent = extractObjectDictContent(data, pagesNum);
+	const kidsMatch = pagesContent.match(/\/Kids\s*\[([^\]]+)\]/);
+	if (!kidsMatch) throw new Error("Cannot find Kids array in Pages");
+
+	const refs: number[] = [];
+	const refRegex = /(\d+)\s+\d+\s+R/g;
+	let m: RegExpExecArray | null;
+	while ((m = refRegex.exec(kidsMatch[1]!)) !== null) {
+		refs.push(parseInt(m[1]!, 10));
+	}
+
+	return refs;
+}
+
+/**
+ * Get the MediaBox for a page object: [x1, y1, x2, y2]
+ */
+export function getMediaBox(
+	data: Uint8Array,
+	pageObjNum: number,
+): [number, number, number, number] {
+	const content = extractObjectDictContent(data, pageObjNum);
+	const mediaBoxMatch = content.match(
+		/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/,
+	);
+	if (!mediaBoxMatch) {
+		throw new Error(`Cannot find MediaBox for page object ${pageObjNum}`);
+	}
+
+	return [
+		parseFloat(mediaBoxMatch[1]!),
+		parseFloat(mediaBoxMatch[2]!),
+		parseFloat(mediaBoxMatch[3]!),
+		parseFloat(mediaBoxMatch[4]!),
+	];
+}
+
+/**
+ * Parse the full PDF structure needed for incremental editing
+ */
+export function parsePdfStructure(data: Uint8Array): PdfStructure {
+	const xrefOffset = findStartXref(data);
+	const trailer = parseTrailer(data);
+
+	const rootContent = extractObjectDictContent(data, trailer.root);
+	const pagesMatch = rootContent.match(/\/Pages\s+(\d+)\s+\d+\s+R/);
+	if (!pagesMatch) throw new Error("Cannot find Pages ref in Root catalog");
+	const pagesNum = parseInt(pagesMatch[1]!, 10);
+
+	const pageNums = findPageObjects(data, trailer.root);
+	const pageDictContents = pageNums.map((pn) =>
+		extractObjectDictContent(data, pn),
+	);
+
+	return {
+		xrefOffset,
+		rootNum: trailer.root,
+		infoNum: trailer.info,
+		size: trailer.size,
+		pagesNum,
+		pageNums,
+		rootDictContent: rootContent,
+		pageDictContents,
+	};
+}
+
+/**
+ * Find the position of the >> that closes the dictionary starting at startPos.
+ * Handles nested << >> and skips PDF string literals in parentheses.
+ */
+function findMatchingDictEnd(str: string, startPos: number): number {
+	let depth = 0;
+	let i = startPos;
+
+	while (i < str.length - 1) {
+		if (str[i] === "(") {
+			// skip parenthesized string
+			i++;
+			while (i < str.length && str[i] !== ")") {
+				if (str[i] === "\\") i++;
+				i++;
+			}
+			i++; // skip ')'
+		} else if (str[i] === "<" && str[i + 1] === "<") {
+			depth++;
+			i += 2;
+		} else if (str[i] === ">" && str[i + 1] === ">") {
+			depth--;
+			if (depth === 0) return i;
+			i += 2;
+		} else {
+			i++;
+		}
+	}
+
+	return -1;
+}

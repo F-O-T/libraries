@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/pdf",
-   "version": "0.1.5",
+   "version": "0.2.0",
    "type": "module",
    "files": [
       "dist"
@@ -19,6 +19,10 @@
       "./plugins/parsing": {
          "types": "./dist/plugins/parsing/index.d.ts",
          "default": "./dist/plugins/parsing/index.js"
+      },
+      "./plugins/editing": {
+         "types": "./dist/plugins/editing/index.d.ts",
+         "default": "./dist/plugins/editing/index.js"
       }
    },
    "scripts": {
@@ -29,7 +33,6 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
-      "@f-o-t/digital-certificate": "^1.0.4",
       "zod": "^4.3.6"
    },
    "devDependencies": {

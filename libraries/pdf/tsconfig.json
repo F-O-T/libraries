@@ -23,7 +23,8 @@
     "dist",
     "bunup.config.ts",
     "src/plugins/generation",
-    "src/plugins/parsing"
+    "src/plugins/parsing",
+    "src/plugins/editing"
   ],
   "include": [
     "src/**/*"

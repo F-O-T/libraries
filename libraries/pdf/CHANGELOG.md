@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0] - 2026-02-13
+
+### Added
+
+- Editing plugin (`@f-o-t/pdf/plugins/editing`) for loading and modifying existing PDFs
+- `loadPdf()` function to load a PDF from `Uint8Array` and return a `PdfDocument`
+- `PdfDocument` type with `pageCount`, `getPage()`, `embedPng()`, `save()`, and `saveWithPlaceholder()`
+- `PdfPage` type with `drawText()`, `drawRectangle()`, and `drawImage()` for page modifications
+- Incremental update support: modifications are appended after the original PDF content
+- Signature placeholder support via `saveWithPlaceholder()` with DocMDP, AcroForm, and widget annotations
+- Signature utility functions: `findByteRange()`, `extractBytesToSign()`, `embedSignature()`
+- PNG image embedding support via `embedPng()`
+
+### Changed
+
+- Removed `@f-o-t/digital-certificate` dependency (editing plugin replaces the PDF manipulation code that was in digital-certificate)
+
 ## [0.1.5] - 2026-02-06
 
 ### Changed
