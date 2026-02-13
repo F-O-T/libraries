@@ -268,6 +268,7 @@
       "devDependencies": {
         "@f-o-t/cli": "^1.0.1",
         "@f-o-t/config": "^1.0.3",
+        "@f-o-t/money": "^1.2.6",
         "@types/bun": "latest",
       },
     },

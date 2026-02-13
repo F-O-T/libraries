@@ -18,8 +18,10 @@ describe("test command", () => {
     const exitCode = await proc.exited;
     const stderr = await new Response(proc.stderr).text();
 
-    // bun test with no test files exits 1 (not 0 as spec suggested)
+    // bun test with no test files exits 1
     expect(exitCode).toBe(1);
-    expect(stderr).toContain("0 test files");
+    // Message varies by Bun version: "0 test files" or "No tests found!"
+    const hasExpectedMessage = stderr.includes("0 test files") || stderr.includes("No tests found!");
+    expect(hasExpectedMessage).toBe(true);
   });
 });

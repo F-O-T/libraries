@@ -11,11 +11,9 @@ describe("generate command", () => {
 
   afterEach(() => {
     // Clean up generated files after each test
+    // Note: tsconfig.json is kept as a stub so Nx can process the project graph
     if (existsSync(packageJsonPath)) {
       rmSync(packageJsonPath);
-    }
-    if (existsSync(tsconfigPath)) {
-      rmSync(tsconfigPath);
     }
     if (existsSync(biomeConfigPath)) {
       rmSync(biomeConfigPath);

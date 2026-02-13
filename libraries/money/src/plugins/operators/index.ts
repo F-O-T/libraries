@@ -175,3 +175,23 @@ export const moneyZeroOperator = createOperator({
       return a.amount === 0n;
    },
 });
+
+/**
+ * All money operators bundled for use with createEngine/createEvaluator
+ *
+ * @example
+ * import { moneyOperators } from "@f-o-t/money/plugins/operators";
+ * const engine = createEngine({ operators: moneyOperators });
+ */
+export const moneyOperators = {
+   money_eq: moneyEqualsOperator,
+   money_neq: moneyNotEqualsOperator,
+   money_gt: moneyGreaterThanOperator,
+   money_gte: moneyGreaterThanOrEqualOperator,
+   money_lt: moneyLessThanOperator,
+   money_lte: moneyLessThanOrEqualOperator,
+   money_between: moneyBetweenOperator,
+   money_positive: moneyPositiveOperator,
+   money_negative: moneyNegativeOperator,
+   money_zero: moneyZeroOperator,
+};

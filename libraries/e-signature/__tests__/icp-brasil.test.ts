@@ -1,13 +1,43 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeAll } from "bun:test";
 import { buildSigningCertificateV2 } from "../src/icp-brasil.ts";
 import { parsePkcs12 } from "@f-o-t/crypto";
 import { decodeDer, type Asn1Node } from "@f-o-t/asn1";
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+
+const fixtureDir = join(import.meta.dir, "fixtures");
+const p12Path = join(fixtureDir, "test.p12");
+
+beforeAll(() => {
+	if (!existsSync(fixtureDir)) {
+		mkdirSync(fixtureDir, { recursive: true });
+	}
+	if (!existsSync(p12Path)) {
+		const keyPath = join(fixtureDir, "key.pem");
+		const certPath = join(fixtureDir, "cert.pem");
+
+		execSync(
+			`openssl req -x509 -newkey rsa:2048 -keyout "${keyPath}" -out "${certPath}" -days 365 -nodes -subj "/CN=Test/O=FOT"`,
+			{ stdio: "pipe" },
+		);
+
+		try {
+			execSync(
+				`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${certPath}" -password pass:test123 -legacy`,
+				{ stdio: "pipe" },
+			);
+		} catch {
+			execSync(
+				`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${certPath}" -password pass:test123`,
+				{ stdio: "pipe" },
+			);
+		}
+	}
+});
 
 async function loadP12(): Promise<Uint8Array> {
-	const file = Bun.file(
-		`${import.meta.dir}/fixtures/test.p12`,
-	);
-	return new Uint8Array(await file.arrayBuffer());
+	return new Uint8Array(await Bun.file(p12Path).arrayBuffer());
 }
 
 describe("buildSigningCertificateV2", () => {
