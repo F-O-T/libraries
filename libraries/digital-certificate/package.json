@@ -19,7 +19,7 @@
       "./plugins/mtls": {
          "types": "./dist/plugins/mtls/index.d.ts",
          "default": "./dist/plugins/mtls/index.js"
-      },
+      }
    },
    "scripts": {
       "build": "bun x --bun fot build",
