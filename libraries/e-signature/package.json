@@ -1,0 +1,42 @@
+{
+  "name": "@f-o-t/e-signature",
+  "version": "0.1.0",
+  "description": "PAdES PDF signing with ICP-Brasil compliance",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun x --bun fot build",
+    "test": "bun x --bun fot test",
+    "lint": "bun x --bun fot lint",
+    "format": "bun x --bun fot format",
+    "check": "bun x --bun fot check"
+  },
+  "dependencies": {
+    "@f-o-t/asn1": "^0.1.0",
+    "@f-o-t/crypto": "^0.1.0",
+    "@f-o-t/digital-certificate": "^1.0.5",
+    "@f-o-t/pdf": "^0.2.0",
+    "@f-o-t/qrcode": "^0.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@f-o-t/cli": "^1.0.1",
+    "@f-o-t/config": "^1.0.3",
+    "@types/bun": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/F-O-T/libraries.git",
+    "directory": "libraries/e-signature"
+  }
+}
