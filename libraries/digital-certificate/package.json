@@ -29,6 +29,7 @@
       "typecheck": "bun x --bun fot typecheck"
    },
    "dependencies": {
+      "@f-o-t/crypto": "^1.0.0",
       "@f-o-t/xml": "^1.0.4",
       "zod": "^4.3.6"
    },
