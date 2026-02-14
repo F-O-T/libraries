@@ -6,7 +6,13 @@
  * overrides objects without rewriting the original content.
  */
 
-import { parsePdfStructure, getMediaBox, extractObjectDictContent } from "./parser.ts";
+import {
+	parsePdfStructure,
+	getMediaBox,
+	extractObjectDictContent,
+	parseResourcesDict,
+	mergeResourcesDicts,
+} from "./parser.ts";
 import { PdfPageImpl } from "./page.ts";
 import type {
 	PdfDocument,
@@ -256,10 +262,9 @@ export class PdfDocumentImpl implements PdfDocument {
 				}
 			}
 
-			// Build resources additions
-			const resourceParts: string[] = [];
-			// Font resource
-			resourceParts.push(`/Font << /F1 ${this.fontObjNum} 0 R >>`);
+			// Build signature's new resources
+			const newResourceParts: string[] = [];
+			newResourceParts.push(`/Font << /F1 ${this.fontObjNum} 0 R >>`);
 
 			// Image resources
 			const imageRefs = page.dirty ? (page as PdfPageImpl).getImageRefs() : new Map<string, number>();
@@ -267,38 +272,51 @@ export class PdfDocumentImpl implements PdfDocument {
 				const xobjEntries = Array.from(imageRefs.entries())
 					.map(([name, objNum]) => `/${name} ${objNum} 0 R`)
 					.join(" ");
-				resourceParts.push(`/XObject << ${xobjEntries} >>`);
+				newResourceParts.push(`/XObject << ${xobjEntries} >>`);
 			}
 
-			// Merge resources into page dictionary
+			const newResources: Record<string, string> = {};
+			for (const part of newResourceParts) {
+				const [resType, ...rest] = part.split(/\s+/);
+				if (resType) {
+					newResources[resType] = rest.join(" ");
+				}
+			}
+
+			// Parse existing Resources from page
+			const existingResources = parseResourcesDict(pageContent, this.originalData);
+
+			// Merge existing with new
+			const mergedResources = mergeResourcesDicts(existingResources, newResources);
+
+			// Build merged Resources dictionary string
+			const resourceEntries = Object.entries(mergedResources)
+				.map(([name, value]) => `${name} ${value}`)
+				.join("\n");
+
+			// Update page content with merged Resources
 			if (pageContent.match(/\/Resources\s*<</)) {
-				// There's an existing inline Resources dict — insert our entries before its closing >>
-				// Find the Resources dict
+				// Replace existing inline Resources
 				const resIdx = pageContent.indexOf("/Resources");
 				const resStart = pageContent.indexOf("<<", resIdx);
 				if (resStart !== -1) {
 					const resEnd = findMatchingDictEndInContent(pageContent, resStart);
 					if (resEnd !== -1) {
-						const existingResContent = pageContent.slice(resStart + 2, resEnd);
-						// Remove existing Font and XObject entries — must handle nested dicts
-						let cleanedRes = removeNestedDictEntry(existingResContent, "/Font");
-						cleanedRes = removeNestedDictEntry(cleanedRes, "/XObject");
-						const newResContent = `${cleanedRes}\n${resourceParts.join("\n")}`;
 						pageContent =
 							pageContent.slice(0, resStart) +
-							`<< ${newResContent} >>` +
+							`<< ${resourceEntries} >>` +
 							pageContent.slice(resEnd + 2);
 					}
 				}
 			} else if (pageContent.match(/\/Resources\s+\d+\s+\d+\s+R/)) {
-				// Resources is a reference — replace with inline dict including our additions
+				// Replace indirect reference with merged inline dictionary
 				pageContent = pageContent.replace(
 					/\/Resources\s+\d+\s+\d+\s+R/,
-					`/Resources << ${resourceParts.join(" ")} >>`,
+					`/Resources << ${resourceEntries} >>`,
 				);
 			} else {
 				// No resources at all — add them
-				pageContent += `\n/Resources << ${resourceParts.join(" ")} >>`;
+				pageContent += `\n/Resources << ${resourceEntries} >>`;
 			}
 
 			objects.push({
@@ -623,26 +641,6 @@ function findMatchingDictEndInContent(str: string, startPos: number): number {
 	}
 
 	return -1;
-}
-
-/**
- * Remove a named dictionary entry (e.g. "/Font << ... >>") from a string,
- * correctly handling arbitrarily nested sub-dictionaries.
- */
-function removeNestedDictEntry(content: string, name: string): string {
-	const idx = content.indexOf(name);
-	if (idx === -1) return content;
-
-	// Find the opening << after the name
-	const dictOpen = content.indexOf("<<", idx + name.length);
-	if (dictOpen === -1) return content;
-
-	// Use nesting-aware search to find the matching >>
-	const dictClose = findMatchingDictEndInContent(content, dictOpen);
-	if (dictClose === -1) return content;
-
-	// Remove from name start through the closing >>
-	return content.slice(0, idx) + content.slice(dictClose + 2);
 }
 
 // ---------------------------------------------------------------------------
