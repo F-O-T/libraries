@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0] - 2026-02-14
+
+### Changed
+- Replaced OpenSSL CLI dependency with pure JavaScript PKCS#12 parsing via `@f-o-t/crypto`
+- OpenSSL is no longer required to be installed on the system
+- PFX extraction now works in Bun, serverless environments, and platforms without `/dev/stdin`
+
+### Added
+- `@f-o-t/crypto` as a runtime dependency
+
+### Removed
+- OpenSSL CLI system dependency
+- Internal `opensslExtract` and `escapeShellArg` helper functions
+
 ## [2.0.0] - 2026-02-13
 
 ### Removed
