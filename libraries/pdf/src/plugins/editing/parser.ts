@@ -311,6 +311,93 @@ export function parseResourcesDict(
 }
 
 /**
+ * Merge two Resources dictionaries, combining entries from both.
+ *
+ * For dictionary-type entries like /Font, /XObject, extracts individual
+ * name-reference pairs and combines them. For array-type entries like
+ * /ProcSet, uses the existing value (no merge needed).
+ *
+ * @param existing - Parsed Resources from original page
+ * @param additions - New Resources to add (from signature appearance)
+ * @returns Merged Resources dictionary entries
+ */
+export function mergeResourcesDicts(
+	existing: Record<string, string>,
+	additions: Record<string, string>,
+): Record<string, string> {
+	const result = { ...existing };
+
+	for (const [resType, addValue] of Object.entries(additions)) {
+		if (!result[resType]) {
+			// No existing entry for this type, just add it
+			result[resType] = addValue;
+			continue;
+		}
+
+		const existingValue = result[resType]!;
+
+		// Arrays (like /ProcSet) - keep existing, don't merge
+		if (existingValue.startsWith("[")) {
+			continue;
+		}
+
+		// Dictionaries - merge entries
+		if (existingValue.startsWith("<<")) {
+			result[resType] = mergeDictEntries(existingValue, addValue);
+		}
+	}
+
+	return result;
+}
+
+/**
+ * Merge two PDF dictionary strings by combining their name-reference pairs.
+ *
+ * Example:
+ *   existing: "<< /F1 10 0 R /F2 11 0 R >>"
+ *   additions: "<< /SigF1 20 0 R >>"
+ *   result: "<< /F1 10 0 R /F2 11 0 R /SigF1 20 0 R >>"
+ */
+function mergeDictEntries(existing: string, additions: string): string {
+	// Extract entries from both dictionaries
+	const existingEntries = extractDictEntries(existing);
+	const additionEntries = extractDictEntries(additions);
+
+	// Combine (additions override existing if same key)
+	const merged = { ...existingEntries, ...additionEntries };
+
+	// Rebuild dictionary string
+	const entries = Object.entries(merged)
+		.map(([name, ref]) => `${name} ${ref}`)
+		.join(" ");
+
+	return `<< ${entries} >>`;
+}
+
+/**
+ * Extract name-reference pairs from a PDF dictionary string.
+ *
+ * Example: "<< /F1 10 0 R /F2 11 0 R >>"
+ * Returns: { "/F1": "10 0 R", "/F2": "11 0 R" }
+ */
+function extractDictEntries(dict: string): Record<string, string> {
+	const entries: Record<string, string> = {};
+
+	// Remove outer << >>
+	const inner = dict.replace(/^<<\s*/, "").replace(/\s*>>$/, "");
+
+	// Match /Name objNum gen R patterns
+	const regex = /(\/\w+)\s+(\d+\s+\d+\s+R)/g;
+	let match: RegExpExecArray | null;
+
+	while ((match = regex.exec(inner)) !== null) {
+		entries[match[1]!] = match[2]!;
+	}
+
+	return entries;
+}
+
+/**
  * Parse individual resource entries from a Resources dictionary content string.
  *
  * Extracts top-level entries like /Font, /XObject, /ExtGState, etc.

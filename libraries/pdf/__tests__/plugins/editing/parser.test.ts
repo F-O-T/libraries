@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { parseResourcesDict } from "../../../src/plugins/editing/parser";
+import { parseResourcesDict, mergeResourcesDicts } from "../../../src/plugins/editing/parser";
 
 describe("parseResourcesDict", () => {
 	test("extracts inline Resources dictionary", () => {
@@ -145,5 +145,67 @@ endobj`;
 		// Should also get XObject
 		expect(result).toHaveProperty("/XObject");
 		expect(result["/XObject"]).toBe("<< /Img1 10 0 R >>");
+	});
+});
+
+describe("mergeResourcesDicts", () => {
+	test("merges Font entries from both dictionaries", () => {
+		const existing = {
+			"/Font": "<< /F1 10 0 R /F2 11 0 R >>",
+			"/ProcSet": "[/PDF /Text]",
+		};
+
+		const additions = {
+			"/Font": "<< /SigF1 20 0 R >>",
+			"/XObject": "<< /Im1 21 0 R >>",
+		};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		expect(result["/Font"]).toContain("/F1 10 0 R");
+		expect(result["/Font"]).toContain("/F2 11 0 R");
+		expect(result["/Font"]).toContain("/SigF1 20 0 R");
+		expect(result["/XObject"]).toBe("<< /Im1 21 0 R >>");
+		expect(result["/ProcSet"]).toBe("[/PDF /Text]");
+	});
+
+	test("handles empty existing Resources", () => {
+		const existing = {};
+		const additions = {
+			"/Font": "<< /F1 20 0 R >>",
+		};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		expect(result["/Font"]).toBe("<< /F1 20 0 R >>");
+	});
+
+	test("preserves existing resources when no additions", () => {
+		const existing = {
+			"/Font": "<< /F1 10 0 R >>",
+			"/ExtGState": "<< /Gs1 9 0 R >>",
+		};
+		const additions = {};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		expect(result).toEqual(existing);
+	});
+
+	test("merges ExtGState and ColorSpace entries", () => {
+		const existing = {
+			"/ExtGState": "<< /Gs1 9 0 R >>",
+			"/ColorSpace": "<< /Cs1 8 0 R >>",
+		};
+
+		const additions = {
+			"/ExtGState": "<< /Gs2 19 0 R >>",
+		};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		expect(result["/ExtGState"]).toContain("/Gs1 9 0 R");
+		expect(result["/ExtGState"]).toContain("/Gs2 19 0 R");
+		expect(result["/ColorSpace"]).toBe("<< /Cs1 8 0 R >>");
 	});
 });
