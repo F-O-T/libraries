@@ -208,4 +208,49 @@ describe("mergeResourcesDicts", () => {
 		expect(result["/ExtGState"]).toContain("/Gs2 19 0 R");
 		expect(result["/ColorSpace"]).toBe("<< /Cs1 8 0 R >>");
 	});
+
+	test("additions override existing for duplicate keys", () => {
+		const existing = {
+			"/Font": "<< /F1 10 0 R /F2 11 0 R >>",
+		};
+		const additions = {
+			"/Font": "<< /F1 20 0 R >>", // Same /F1, different object
+		};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		expect(result["/Font"]).toContain("/F1 20 0 R"); // New version
+		expect(result["/Font"]).not.toContain("/F1 10 0 R"); // Old version gone
+		expect(result["/Font"]).toContain("/F2 11 0 R"); // F2 preserved
+	});
+
+	test("handles PDF names with hyphens, dots, and special characters", () => {
+		const existing = {
+			"/Font": "<< /F-Bold 10 0 R /Times.Roman 11 0 R >>",
+		};
+		const additions = {
+			"/Font": "<< /Helvetica-Oblique 20 0 R /Name#20With#20Spaces 21 0 R >>",
+		};
+
+		const result = mergeResourcesDicts(existing, additions);
+
+		// All names should be preserved
+		expect(result["/Font"]).toContain("/F-Bold 10 0 R");
+		expect(result["/Font"]).toContain("/Times.Roman 11 0 R");
+		expect(result["/Font"]).toContain("/Helvetica-Oblique 20 0 R");
+		expect(result["/Font"]).toContain("/Name#20With#20Spaces 21 0 R");
+	});
+
+	test("throws error for unexpected resource format", () => {
+		const existing = {
+			"/Font": "10 0 R", // Invalid: should be array or dict, not bare reference
+		};
+		const additions = {
+			"/Font": "<< /F1 20 0 R >>",
+		};
+
+		expect(() => {
+			mergeResourcesDicts(existing, additions);
+		}).toThrow("Unexpected resource format for /Font: 10 0 R");
+	});
 });

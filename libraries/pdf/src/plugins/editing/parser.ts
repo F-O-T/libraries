@@ -344,6 +344,8 @@ export function mergeResourcesDicts(
 		// Dictionaries - merge entries
 		if (existingValue.startsWith("<<")) {
 			result[resType] = mergeDictEntries(existingValue, addValue);
+		} else {
+			throw new Error(`Unexpected resource format for ${resType}: ${existingValue}`);
 		}
 	}
 
@@ -387,7 +389,8 @@ function extractDictEntries(dict: string): Record<string, string> {
 	const inner = dict.replace(/^<<\s*/, "").replace(/\s*>>$/, "");
 
 	// Match /Name objNum gen R patterns
-	const regex = /(\/\w+)\s+(\d+\s+\d+\s+R)/g;
+	// Pattern matches PDF names with hyphens, dots, and hex-encoded characters
+	const regex = /(\/[^\s<>\[\]()\/]+)\s+(\d+\s+\d+\s+R)/g;
 	let match: RegExpExecArray | null;
 
 	while ((match = regex.exec(inner)) !== null) {
