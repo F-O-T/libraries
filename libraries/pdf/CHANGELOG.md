@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.3.0] - 2026-02-14
+
+### Added
+- `parseResourcesDict()` function to parse Resources dictionaries from page content, handling both inline dictionaries and indirect object references
+- `mergeResourcesDicts()` function to merge Resources dictionaries, preserving all existing entries while adding new ones
+
+### Fixed
+- Visual signature appearances now merge with existing page Resources instead of replacing them, preserving all original fonts and resource types
+- Fixed corruption of PDFs with CIDFont fonts (common in @react-pdf/renderer) when adding visual signature
+- Fixed indirect Resources references being replaced instead of resolved and merged
+
 ## [0.2.0] - 2026-02-13
 
 ### Added
@@ -58,3 +71,11 @@
 - PDF generation capabilities
 - Object creation utilities
 - Comprehensive error handling: PDFParseError, PDFGenerationError, InvalidPDFObjectError, FontNotFoundError, InvalidImageError, PDFSignatureError, PDFEncryptionError
+
+[0.3.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.2.0...@f-o-t/pdf@0.3.0
+[0.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.5...@f-o-t/pdf@0.2.0
+[0.1.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.4...@f-o-t/pdf@0.1.5
+[0.1.4]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.3...@f-o-t/pdf@0.1.4
+[0.1.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.2...@f-o-t/pdf@0.1.3
+[0.1.2]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.1...@f-o-t/pdf@0.1.2
+[0.1.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.0...@f-o-t/pdf@0.1.1
