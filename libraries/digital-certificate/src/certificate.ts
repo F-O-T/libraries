@@ -1,11 +1,11 @@
 /**
  * Certificate Parser — Parse and manage Brazilian A1 digital certificates
  *
- * Handles .pfx/.p12 files using OpenSSL CLI for PFX extraction
+ * Handles .pfx/.p12 files using @f-o-t/crypto for PFX extraction
  * and Node.js crypto for X.509 parsing.
  */
 
-import { execSync } from "node:child_process";
+import { parsePkcs12, derToPem } from "@f-o-t/crypto";
 import crypto from "node:crypto";
 import type {
    BrazilianFields,
@@ -87,32 +87,31 @@ export function getPemPair(cert: CertificateInfo): {
 }
 
 // =============================================================================
-// PFX Extraction via OpenSSL
+// PFX Extraction via @f-o-t/crypto
 // =============================================================================
 
 function extractPemFromPfx(
    pfx: Buffer,
    password: string,
 ): { certPem: string; keyPem: string } {
-   const escapedPassword = escapeShellArg(password);
+   let result;
+   try {
+      result = parsePkcs12(new Uint8Array(pfx), password);
+   } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      throw new Error(
+         `Failed to parse PFX: ${message}. Ensure the file is a valid PKCS#12 archive and the password is correct.`,
+      );
+   }
 
-   // Extract certificate — try with -legacy flag first (OpenSSL 3.x), fallback without
-   const certPem = opensslExtract(
-      pfx,
-      `-nokeys -clcerts -passin pass:${escapedPassword}`,
-   );
+   const certPem = derToPem(result.certificate, "CERTIFICATE");
+   const keyPem = derToPem(result.privateKey, "PRIVATE KEY");
 
    if (!certPem.includes("-----BEGIN CERTIFICATE-----")) {
       throw new Error(
          "Failed to extract certificate from PFX. Ensure the file is a valid PKCS#12 archive and the password is correct.",
       );
    }
-
-   // Extract private key
-   const keyPem = opensslExtract(
-      pfx,
-      `-nocerts -passin pass:${escapedPassword} -passout pass: -nodes`,
-   );
 
    if (
       !keyPem.includes("-----BEGIN PRIVATE KEY-----") &&
@@ -124,32 +123,6 @@ function extractPemFromPfx(
    }
 
    return { certPem: certPem.trim(), keyPem: keyPem.trim() };
-}
-
-function opensslExtract(pfx: Buffer, args: string): string {
-   // Try with -legacy flag (needed for OpenSSL 3.x with older PFX formats)
-   try {
-      return execSync(`openssl pkcs12 -in /dev/stdin ${args} -legacy`, {
-         input: pfx,
-         stdio: ["pipe", "pipe", "pipe"],
-      }).toString();
-   } catch {
-      // Fallback without -legacy (older OpenSSL or newer PFX formats)
-      try {
-         return execSync(`openssl pkcs12 -in /dev/stdin ${args}`, {
-            input: pfx,
-            stdio: ["pipe", "pipe", "pipe"],
-         }).toString();
-      } catch (e: unknown) {
-         const message = e instanceof Error ? e.message : String(e);
-         throw new Error(`OpenSSL PKCS12 extraction failed: ${message}`);
-      }
-   }
-}
-
-function escapeShellArg(arg: string): string {
-   // Escape single quotes for shell safety
-   return arg.replace(/'/g, "'\\''");
 }
 
 // =============================================================================
