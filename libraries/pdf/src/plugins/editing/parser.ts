@@ -237,3 +237,90 @@ function findMatchingDictEnd(str: string, startPos: number): number {
 
 	return -1;
 }
+
+/**
+ * Parse a Resources dictionary from page content, handling both inline
+ * dictionaries and indirect references.
+ *
+ * Returns a map of resource type names to their dictionary/array content strings.
+ * Example: { "/Font": "<< /F1 10 0 R >>", "/ProcSet": "[/PDF /Text]" }
+ */
+export function parseResourcesDict(
+	pageContent: string,
+	pdfData: Uint8Array,
+): Record<string, string> {
+	const result: Record<string, string> = {};
+
+	// Check for inline Resources dictionary
+	const inlineMatch = pageContent.match(/\/Resources\s*<</);
+	if (inlineMatch) {
+		const resIdx = pageContent.indexOf("/Resources");
+		const resStart = pageContent.indexOf("<<", resIdx);
+		const resEnd = findMatchingDictEnd(pageContent, resStart);
+
+		if (resEnd === -1) {
+			throw new Error("Cannot find end of Resources dictionary");
+		}
+
+		const resContent = pageContent.slice(resStart + 2, resEnd);
+		return parseResourceEntries(resContent);
+	}
+
+	// Check for indirect Resources reference
+	const refMatch = pageContent.match(/\/Resources\s+(\d+)\s+\d+\s+R/);
+	if (refMatch) {
+		const objNum = parseInt(refMatch[1]!, 10);
+		const objContent = extractObjectDictContent(pdfData, objNum);
+		return parseResourceEntries(objContent);
+	}
+
+	// No Resources found
+	return result;
+}
+
+/**
+ * Parse individual resource entries from a Resources dictionary content string.
+ *
+ * Extracts top-level entries like /Font, /XObject, /ExtGState, etc.
+ */
+function parseResourceEntries(content: string): Record<string, string> {
+	const result: Record<string, string> = {};
+
+	// Resource entry names to extract
+	const resourceTypes = [
+		"/Font",
+		"/XObject",
+		"/ExtGState",
+		"/ColorSpace",
+		"/Pattern",
+		"/Shading",
+		"/ProcSet",
+	];
+
+	for (const resType of resourceTypes) {
+		const idx = content.indexOf(resType);
+		if (idx === -1) continue;
+
+		// Find the value (either << dict >> or [ array ])
+		let valueStart = idx + resType.length;
+		while (valueStart < content.length && /\s/.test(content[valueStart]!)) {
+			valueStart++;
+		}
+
+		if (content[valueStart] === "<" && content[valueStart + 1] === "<") {
+			// Dictionary value
+			const dictEnd = findMatchingDictEnd(content, valueStart);
+			if (dictEnd !== -1) {
+				result[resType] = content.slice(valueStart, dictEnd + 2);
+			}
+		} else if (content[valueStart] === "[") {
+			// Array value
+			const arrayEnd = content.indexOf("]", valueStart);
+			if (arrayEnd !== -1) {
+				result[resType] = content.slice(valueStart, arrayEnd + 1);
+			}
+		}
+	}
+
+	return result;
+}
