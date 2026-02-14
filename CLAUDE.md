@@ -170,3 +170,47 @@ Bump version to 1.2.0."
 - **PATCH** (0.0.x) — Bug fixes, internal refactors with no API changes
 - **MINOR** (0.x.0) — New features, additions to API (backward compatible)
 - **MAJOR** (x.0.0) — Breaking changes to public API
+
+## Publishing Releases
+
+**CRITICAL: Libraries are ALWAYS released via GitHub CI. NEVER publish manually using `npm publish`.**
+
+### Release Process
+
+1. **Prepare the release commit:**
+   - Update CHANGELOG.md: move [Unreleased] entries to new version section with date
+   - Update package.json: bump version according to semver guidelines
+   - Commit both files together with message format: `chore: release @f-o-t/library-name@x.y.z`
+
+2. **Push to master:**
+   ```bash
+   git push origin master
+   ```
+
+3. **GitHub CI automatically:**
+   - Detects version changes in package.json files
+   - Builds the library (`bun x --bun fot build`)
+   - Runs tests (`bun test`)
+   - Creates GitHub release with tag `@f-o-t/library-name@x.y.z`
+   - Publishes to npm with `--access public`
+
+### Why GitHub CI Only?
+
+- **Consistency:** All releases go through the same build and test pipeline
+- **Audit trail:** Every release is tied to a commit and CI run
+- **No local environment issues:** Eliminates "works on my machine" problems
+- **Automatic dist/ verification:** CI ensures dist/ directory is properly built and included
+- **Tag management:** Automatically creates and pushes git tags
+
+### Example Release Commit
+
+```bash
+git add libraries/pdf/CHANGELOG.md libraries/pdf/package.json
+git commit -m "chore: release @f-o-t/pdf@0.3.0
+
+- Added parseResourcesDict() and mergeResourcesDicts() public API
+- Fixed visual signature appearances corrupting fonts"
+git push origin master
+```
+
+The CI will detect the version change and automatically publish to npm.
