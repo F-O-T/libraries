@@ -239,6 +239,38 @@ function findMatchingDictEnd(str: string, startPos: number): number {
 }
 
 /**
+ * Find the position of the ] that closes the array starting at startPos.
+ * Handles nested [ ] and skips PDF string literals in parentheses.
+ */
+function findMatchingArrayEnd(str: string, startPos: number): number {
+	let depth = 0;
+	let i = startPos;
+
+	while (i < str.length) {
+		if (str[i] === "(") {
+			// skip parenthesized string
+			i++;
+			while (i < str.length && str[i] !== ")") {
+				if (str[i] === "\\") i++;
+				i++;
+			}
+			i++; // skip ')'
+		} else if (str[i] === "[") {
+			depth++;
+			i++;
+		} else if (str[i] === "]") {
+			depth--;
+			if (depth === 0) return i;
+			i++;
+		} else {
+			i++;
+		}
+	}
+
+	return -1;
+}
+
+/**
  * Parse a Resources dictionary from page content, handling both inline
  * dictionaries and indirect references.
  *
@@ -298,9 +330,17 @@ function parseResourceEntries(content: string): Record<string, string> {
 	];
 
 	for (const resType of resourceTypes) {
-		const idx = content.indexOf(resType);
-		if (idx === -1) continue;
-
+		// Use regex to match resource type at dictionary level (not nested inside values)
+		// Pattern: /ResourceType followed by whitespace and then either << or [
+		const pattern = new RegExp(
+			`${resType.replace(/\//g, "\\/")}\\s+([<\\[])`
+		);
+		const match = content.match(pattern);
+		
+		if (!match) continue;
+		
+		const idx = match.index!;
+		
 		// Find the value (either << dict >> or [ array ])
 		let valueStart = idx + resType.length;
 		while (valueStart < content.length && /\s/.test(content[valueStart]!)) {
@@ -310,15 +350,21 @@ function parseResourceEntries(content: string): Record<string, string> {
 		if (content[valueStart] === "<" && content[valueStart + 1] === "<") {
 			// Dictionary value
 			const dictEnd = findMatchingDictEnd(content, valueStart);
-			if (dictEnd !== -1) {
-				result[resType] = content.slice(valueStart, dictEnd + 2);
+			if (dictEnd === -1) {
+				throw new Error(
+					`Cannot find end of ${resType} dictionary`
+				);
 			}
+			result[resType] = content.slice(valueStart, dictEnd + 2);
 		} else if (content[valueStart] === "[") {
 			// Array value
-			const arrayEnd = content.indexOf("]", valueStart);
-			if (arrayEnd !== -1) {
-				result[resType] = content.slice(valueStart, arrayEnd + 1);
+			const arrayEnd = findMatchingArrayEnd(content, valueStart);
+			if (arrayEnd === -1) {
+				throw new Error(
+					`Cannot find end of ${resType} array`
+				);
 			}
+			result[resType] = content.slice(valueStart, arrayEnd + 1);
 		}
 	}
 
