@@ -8,6 +8,15 @@ PAdES PDF signing with ICP-Brasil compliance. Signs PDF documents using CMS/PKCS
 bun add @f-o-t/e-signature
 ```
 
+## Features
+
+- Visual signature appearances preserve all original page fonts and resources
+- Works with PDFs from @react-pdf/renderer with CIDFont fonts
+- PAdES-BES and ICP-Brasil compliant signatures
+- RFC 3161 timestamp support
+- QR code generation for signature verification
+- Configurable DocMDP permissions for document modification control
+
 ## API
 
 ### `signPdf(pdf: Uint8Array, options: PdfSignOptions): Promise<Uint8Array>`
