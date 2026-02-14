@@ -13,7 +13,7 @@ Brazilian A1 digital certificate handling with XML/PDF signing and mTLS support.
 - **XML Digital Signatures**: Sign XML documents with XML-DSig (via plugin)
 - **PDF Signing**: Sign PDF documents with visual signatures and QR codes (via plugin)
 - **Mutual TLS**: Create mTLS contexts for secure HTTPS connections (via plugin)
-- **OpenSSL Integration**: Uses OpenSSL CLI for PFX extraction (supports both OpenSSL 1.x and 3.x)
+- **Pure JavaScript**: No system dependencies — PKCS#12 parsing via `@f-o-t/crypto`
 - **Validity Checking**: Built-in certificate expiry validation
 - **Framework Agnostic**: Works with any JavaScript/TypeScript project
 
@@ -34,9 +34,7 @@ pnpm add @f-o-t/digital-certificate
 ```
 
 **Requirements:**
-- OpenSSL CLI must be installed and available in PATH
 - For XML signing: `@f-o-t/xml` (automatically included)
-- For PDF signing: `pdf-lib` and `qrcode` (automatically included)
 
 ## Quick Start
 
@@ -641,7 +639,7 @@ function checkCertificateExpiry(cert: CertificateInfo) {
 setInterval(() => checkCertificateExpiry(cert), 24 * 60 * 60 * 1000);
 ```
 
-### 4. Handle OpenSSL Errors Gracefully
+### 4. Handle Parsing Errors Gracefully
 
 ```typescript
 try {
@@ -650,8 +648,8 @@ try {
   if (error instanceof Error) {
     if (error.message.includes("password")) {
       console.error("Invalid certificate password");
-    } else if (error.message.includes("OpenSSL")) {
-      console.error("OpenSSL not found or failed");
+    } else if (error.message.includes("PFX")) {
+      console.error("Invalid PFX file");
     } else {
       console.error("Certificate parsing failed:", error.message);
     }
@@ -719,28 +717,6 @@ Optimized for production use:
 - **Create mTLS agent**: < 10ms
 
 All benchmarks run on modern hardware with Bun runtime.
-
-## Requirements
-
-### OpenSSL
-
-This library requires OpenSSL CLI to be installed:
-
-```bash
-# Check if OpenSSL is installed
-openssl version
-
-# Ubuntu/Debian
-sudo apt-get install openssl
-
-# macOS (usually pre-installed)
-brew install openssl
-
-# Windows
-# Download from: https://slproweb.com/products/Win32OpenSSL.html
-```
-
-Both OpenSSL 1.x and 3.x are supported. The library automatically handles compatibility.
 
 ## Contributing
 
