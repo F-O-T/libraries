@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2026-02-14
 
+### Changed
+- Updated `@f-o-t/pdf` dependency from `^0.2.0` to `^0.3.0`
+
 ### Fixed
-- Visual signature appearances no longer corrupt document fonts (fixed in @f-o-t/pdf@0.3.0 dependency)
+- Visual signature appearances no longer corrupt document fonts (fixed via @f-o-t/pdf@0.3.0 dependency upgrade)
 - PDFs from @react-pdf/renderer with CIDFont fonts now render correctly after signing with visual appearance
 
 ## [1.0.0] - 2026-02-13
