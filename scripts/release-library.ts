@@ -107,7 +107,7 @@ async function isVersionPublished(
 
 async function discoverLibraries(): Promise<Library[]> {
    const libraries: Library[] = [];
-   const librariesPath = path.resolve(LIBRARIES_DIR);
+   const librariesPath = LIBRARIES_DIR;
 
    let entries: string[];
    try {
