@@ -2,11 +2,11 @@
  * Certificate Parser — Parse and manage Brazilian A1 digital certificates
  *
  * Handles .pfx/.p12 files using @f-o-t/crypto for PFX extraction
- * and Node.js crypto for X.509 parsing.
+ * and X.509 parsing (pure JavaScript, works in Bun without OpenSSL).
  */
 
 import { parsePkcs12, derToPem } from "@f-o-t/crypto";
-import crypto from "node:crypto";
+import { parseX509Certificate } from "./x509.ts";
 import type {
    BrazilianFields,
    CertificateInfo,
@@ -34,22 +34,21 @@ export function parseCertificate(
 ): CertificateInfo {
    const { certPem, keyPem } = extractPemFromPfx(pfx, password);
 
-   // Parse the X.509 certificate
-   const x509 = new crypto.X509Certificate(certPem);
+   // Parse the X.509 certificate using pure JavaScript (no OpenSSL)
+   const x509 = parseX509Certificate(certPem);
 
-   const subject = parseSubject(x509.subject);
-   const issuer = parseIssuer(x509.issuer);
-   const validity = parseValidity(x509);
-   const fingerprint = x509.fingerprint256.replace(/:/g, "").toLowerCase();
-   const isValid = checkValidity(validity);
-   const brazilian = extractBrazilianFields(x509.subject, x509.subjectAltName);
+   const isValid = checkValidity(x509.validity);
+   const brazilian = extractBrazilianFields(
+      x509.subject.raw,
+      x509.subjectAltName || undefined,
+   );
 
    return {
       serialNumber: x509.serialNumber,
-      subject,
-      issuer,
-      validity,
-      fingerprint,
+      subject: x509.subject,
+      issuer: x509.issuer,
+      validity: x509.validity,
+      fingerprint: x509.fingerprint,
       isValid,
       brazilian,
       certPem,
@@ -128,36 +127,6 @@ function extractPemFromPfx(
 // =============================================================================
 // X.509 Parsing Helpers
 // =============================================================================
-
-function parseSubject(subjectStr: string): CertificateSubject {
-   const fields = parseDistinguishedName(subjectStr);
-   return {
-      commonName: fields.CN ?? null,
-      organization: fields.O ?? null,
-      organizationalUnit: fields.OU ?? null,
-      country: fields.C ?? null,
-      state: fields.ST ?? null,
-      locality: fields.L ?? null,
-      raw: subjectStr,
-   };
-}
-
-function parseIssuer(issuerStr: string): CertificateIssuer {
-   const fields = parseDistinguishedName(issuerStr);
-   return {
-      commonName: fields.CN ?? null,
-      organization: fields.O ?? null,
-      country: fields.C ?? null,
-      raw: issuerStr,
-   };
-}
-
-function parseValidity(x509: crypto.X509Certificate): CertificateValidity {
-   return {
-      notBefore: new Date(x509.validFrom),
-      notAfter: new Date(x509.validTo),
-   };
-}
 
 function checkValidity(validity: CertificateValidity): boolean {
    const now = new Date();

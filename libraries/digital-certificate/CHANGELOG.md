@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.0] - 2026-02-14
+
+### Added
+- Pure JavaScript X.509 certificate parser using `@f-o-t/asn1` (no OpenSSL dependency)
+- `@f-o-t/asn1` as a runtime dependency
+
+### Changed
+- Replaced `crypto.X509Certificate` (requires OpenSSL) with ASN.1-based parsing
+- Certificate parsing now works in Bun without OpenSSL library
+- Fixes certificate info not displaying in serverless environments
+
 ## [2.1.0] - 2026-02-14
 
 ### Changed

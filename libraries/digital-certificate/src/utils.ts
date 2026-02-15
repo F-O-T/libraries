@@ -108,9 +108,9 @@ export function extractCnpj(subjectRaw: string): string | null {
    const cnpjMatch = subjectRaw.match(/CNPJ[:\s=]+(\d{14})/i);
    if (cnpjMatch?.[1]) return cnpjMatch[1];
 
-   // Pattern: 14-digit sequence that looks like CNPJ in OU field
-   const ouMatch = subjectRaw.match(/OU\s*=\s*[^,]*?(\d{14})/);
-   if (ouMatch?.[1]) return ouMatch[1];
+   // Pattern: 14-digit sequence in CN, OU, or any field
+   const fieldMatch = subjectRaw.match(/(CN|OU)\s*=\s*[^,]*?(\d{14})/);
+   if (fieldMatch?.[2]) return fieldMatch[2];
 
    return null;
 }

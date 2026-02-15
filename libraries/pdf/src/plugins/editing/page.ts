@@ -77,7 +77,9 @@ export class PdfPageImpl implements PdfPage {
 
 		this.operators.push("BT");
 		this.operators.push(`/F1 ${size} Tf`);
-		this.operators.push(`1 0 0 1 ${x} ${y} Tm`);
+		// Flip Y-axis: text glyphs are oriented top-to-bottom, but PDF coords are bottom-to-top
+		const flippedY = this.height - y;
+		this.operators.push(`1 0 0 -1 ${x} ${flippedY} Tm`);
 		this.operators.push(`(${escaped}) Tj`);
 		this.operators.push("ET");
 	}
