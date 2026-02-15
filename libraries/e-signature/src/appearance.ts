@@ -28,9 +28,14 @@ export function drawSignatureAppearance(
 		pdfData: Uint8Array;
 	},
 ): void {
-	const { x, y, width, height } = appearance;
+	const { x, width, height } = appearance;
 	const showQrCode = appearance.showQrCode !== false;
 	const showCertInfo = appearance.showCertInfo !== false;
+
+	// Convert from top-left origin (user-facing) to PDF bottom-left origin.
+	// Users specify y as distance from the top of the page, but PDF coordinates
+	// have y=0 at the bottom.
+	const y = page.height - appearance.y - height;
 
 	let qrSize = 0;
 
