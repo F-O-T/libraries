@@ -10,7 +10,7 @@ import {
 
 const GITHUB_API = "https://api.github.com";
 const LIBRARIES_DIR = "libraries";
-const FOT_BIN = path.resolve(LIBRARIES_DIR, "cli", "dist", "index.js");
+const FOT_BIN = path.join(LIBRARIES_DIR, "cli", "dist", "index.js");
 
 interface Library {
    name: string;
