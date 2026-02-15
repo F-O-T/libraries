@@ -154,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. Update CHANGELOG.md with entry in appropriate section (Added/Changed/Fixed/etc.)
 2. If releasing, move [Unreleased] items to new version section with date
 3. Update package.json version
-4. Commit both files together
+4. **Update downstream `@f-o-t/*` libraries** that depend on the changed library — bump their dependency version in `package.json`, add a CHANGELOG entry, and bump their version too
+5. Commit both files together
 
 **Example commit:**
 ```bash

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3] - 2026-02-15
+
+### Fixed
+- Use standard PDF coordinates (bottom-up) consistently across all editing plugin draw methods (`drawText`, `drawImage`, `drawRectangle`)
+- Reverted `drawText` from mirrored `Tm` matrix back to `Td` operator to match `drawImage`/`drawRectangle` coordinate system
+- Fixed QR code and certificate text rendering at different positions in signature appearances
+
 ## [0.3.2] - 2026-02-14
 
 ### Fixed
@@ -80,6 +87,7 @@
 - Object creation utilities
 - Comprehensive error handling: PDFParseError, PDFGenerationError, InvalidPDFObjectError, FontNotFoundError, InvalidImageError, PDFSignatureError, PDFEncryptionError
 
+[0.3.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.2...@f-o-t/pdf@0.3.3
 [0.3.2]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.1...@f-o-t/pdf@0.3.2
 [0.3.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.0...@f-o-t/pdf@0.3.1
 [0.3.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.2.0...@f-o-t/pdf@0.3.0

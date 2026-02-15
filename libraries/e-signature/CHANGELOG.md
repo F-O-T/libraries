@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-02-15
+
+### Changed
+- Updated `@f-o-t/pdf` dependency from `^0.3.2` to `^0.3.3`
+
+### Fixed
+- QR code and certificate info text now render side-by-side within the same bounding box instead of at different page positions (fixed via @f-o-t/pdf@0.3.3 coordinate system fix)
+
 ## [1.0.4] - 2026-02-14
 
 ### Changed
@@ -44,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.0.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.4...@f-o-t/e-signature@1.0.5
+[1.0.4]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.3...@f-o-t/e-signature@1.0.4
 [1.0.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.2...@f-o-t/e-signature@1.0.3
 [1.0.2]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.1...@f-o-t/e-signature@1.0.2
 [1.0.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.0...@f-o-t/e-signature@1.0.1
