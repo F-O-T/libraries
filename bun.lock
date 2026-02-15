@@ -261,7 +261,7 @@
     },
     "libraries/rules-engine": {
       "name": "@f-o-t/rules-engine",
-      "version": "3.0.6",
+      "version": "4.0.0",
       "dependencies": {
         "@f-o-t/condition-evaluator": "^2.0.6",
         "zod": "^4.3.6",
@@ -1385,6 +1385,8 @@
     "@f-o-t/e-signature/@f-o-t/digital-certificate": ["@f-o-t/digital-certificate@1.0.5", "", { "dependencies": { "@f-o-t/xml": "^1.0.4", "zod": "^4.3.6" } }, "sha512-UQFNZq5jXN4BS1AHDUuu6x8WVqQTFIAz/HmW18+8+1DWzL6Pn2tG7vBrbycidCqKhVeEyzH+0V4Whn+PzwM6FA=="],
 
     "@f-o-t/e-signature/@f-o-t/pdf": ["@f-o-t/pdf@0.2.0", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-A1VFMxfmU6XgU8Bd9uonO2jwPufta4bQGE7LW0w/fb2xX/vNDLji1MAp3rPEyCavDR+ypCtsf3GEn+OWTC+9gg=="],
+
+    "@f-o-t/tax-calculator/@f-o-t/rules-engine": ["@f-o-t/rules-engine@3.0.6", "", { "dependencies": { "@f-o-t/condition-evaluator": "^2.0.6", "zod": "^4.3.6" } }, "sha512-/9AjSyqkZOYAIJmODZeE1o52LKmPBQIEuiD+PRmXarD1rNn//ejBC7qgSa6mKdgs8OsRzV1JLbzoEY3nB6bfEw=="],
 
     "@oxc-minify/binding-wasm32-wasi/@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.1", "", { "dependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1", "@tybys/wasm-util": "^0.10.1" } }, "sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A=="],
 
