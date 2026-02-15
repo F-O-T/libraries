@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-02-14
+
+### ⚠️ BREAKING CHANGES
+
+- **Removed re-exports from main index**: The main `@f-o-t/rules-engine` entry point no longer re-exports utilities from `@f-o-t/condition-evaluator`
+  - Previously, you could import `createEvaluator`, `createOperator`, etc. from `@f-o-t/rules-engine`
+  - Now, these must be imported directly from `@f-o-t/condition-evaluator`
+  - This change enforces clear separation between the rules engine and condition evaluation concerns
+
+### 🔧 Migration Guide
+
+**If you were importing condition-evaluator utilities from rules-engine:**
+
+```typescript
+// ❌ Before (v3.x) - NO LONGER WORKS
+import { createEvaluator, createOperator } from '@f-o-t/rules-engine';
+
+// ✅ After (v4.x) - Import from condition-evaluator directly
+import { createEvaluator, createOperator } from '@f-o-t/condition-evaluator';
+```
+
+**Removed exports that now require direct imports from `@f-o-t/condition-evaluator`:**
+- `createEvaluator()`
+- `createOperator()`
+- `loadOperators()`
+- `EvaluatorConfig` type
+- `Operator` type
+- `OperatorPlugin` type
+
+**If you were only using rules-engine APIs:**
+
+No changes needed! The rules engine API (`createEngine`, `rule`, builders, etc.) remains unchanged.
+
+### 📊 Impact
+
+This is a **focused breaking change** that affects only code importing condition-evaluator utilities from the rules-engine package. The actual rules engine functionality is completely unaffected.
+
+**Why this change?**
+- **Clearer dependency boundaries**: Condition evaluation is a separate concern from rule orchestration
+- **Better maintainability**: Each library has a single, well-defined purpose
+- **Reduced coupling**: Changes to condition-evaluator don't ripple through rules-engine exports
+- **Explicit dependencies**: Makes it clear which parts of your code depend on which library
+
 ## [3.0.6] - 2026-02-06
 
 ### Changed
