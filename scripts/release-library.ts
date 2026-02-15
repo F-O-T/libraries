@@ -10,7 +10,7 @@ import {
 
 const GITHUB_API = "https://api.github.com";
 const LIBRARIES_DIR = "libraries";
-const FOT_BIN = path.join(LIBRARIES_DIR, "cli", "dist", "index.js");
+const FOT_BIN = path.resolve(LIBRARIES_DIR, "cli", "dist", "index.js");
 
 interface Library {
    name: string;
@@ -107,7 +107,7 @@ async function isVersionPublished(
 
 async function discoverLibraries(): Promise<Library[]> {
    const libraries: Library[] = [];
-   const librariesPath = LIBRARIES_DIR;
+   const librariesPath = path.resolve(LIBRARIES_DIR);
 
    let entries: string[];
    try {
@@ -270,6 +270,7 @@ function buildToolchain() {
 
 function buildAllLibraries(libraries: Library[]) {
    console.log(`\n🔨 Building ${libraries.length} libraries...`);
+   console.log(`FOT_BIN path: ${FOT_BIN}`);
    const failed: string[] = [];
    for (const lib of libraries) {
       try {
@@ -278,8 +279,9 @@ function buildAllLibraries(libraries: Library[]) {
             stdio: "inherit",
          });
          console.log(`  ✓ ${lib.name} built`);
-      } catch {
+      } catch (err) {
          console.log(`  ✗ ${lib.name} build failed`);
+         console.error(`     Error: ${err instanceof Error ? err.message : String(err)}`);
          failed.push(lib.name);
       }
    }
