@@ -45,8 +45,8 @@ import { createEngine } from "@f-o-t/rules-engine";
 
 ### Import Guidelines
 
-- **Import from `@f-o-t/condition-evaluator`**: Operators, evaluators, conditions, condition builders (`createOperator`, `createEvaluator`, `Condition`, `ConditionGroup`, `num`, `str`, `bool`, `date`, `arr`, `all`, `any`, `and`, `or`, `conditions`)
-- **Import from `@f-o-t/rules-engine`**: Engine, rules, rule builders, consequences, rule management (`createEngine`, `rule`, `RuleInput`, `Rule`, `Consequence`, validation, simulation, versioning, indexing, analysis, serialization, filtering, sorting, grouping, utilities)
+- **Import from `@f-o-t/condition-evaluator`**: Operators, evaluators, condition types (`createOperator`, `createEvaluator`, `Condition`, `ConditionGroup`)
+- **Import from `@f-o-t/rules-engine`**: Engine, rules, rule builders, condition builders, consequences, rule management (`createEngine`, `rule`, `num`, `str`, `bool`, `date`, `arr`, `all`, `any`, `and`, `or`, `conditions`, `RuleInput`, `Rule`, `Consequence`, validation, simulation, versioning, indexing, analysis, serialization, filtering, sorting, grouping, utilities)
 
 ## Quick Start
 
@@ -118,7 +118,7 @@ console.log(result.consequences); // Actions to take
 ### Shorthand Helpers
 
 ```typescript
-import { num, str, bool, date, arr, all, any } from "@f-o-t/condition-evaluator";
+import { num, str, bool, date, arr, all, any } from "@f-o-t/rules-engine";
 
 // Number conditions
 num("amount", "gt", 100)      // amount > 100
@@ -150,7 +150,7 @@ any(bool("isVip", "eq", true), num("orders", "gt", 10))
 ### Fluent Condition Builder
 
 ```typescript
-import { and, or, conditions } from "@f-o-t/condition-evaluator";
+import { and, or, conditions } from "@f-o-t/rules-engine";
 
 // Using and/or with builder function
 const complexCondition = and((c) =>
