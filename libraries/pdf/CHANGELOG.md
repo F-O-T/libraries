@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2026-02-14
+
+### Fixed
+- Fixed text rendering appearing upside-down/mirrored in visual signature appearances by using `Tm` (text matrix) operator instead of `Td` (translate)
+
 ## [0.3.0] - 2026-02-14
 
 ### Added
@@ -70,6 +75,7 @@
 - Object creation utilities
 - Comprehensive error handling: PDFParseError, PDFGenerationError, InvalidPDFObjectError, FontNotFoundError, InvalidImageError, PDFSignatureError, PDFEncryptionError
 
+[0.3.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.0...@f-o-t/pdf@0.3.1
 [0.3.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.2.0...@f-o-t/pdf@0.3.0
 [0.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.5...@f-o-t/pdf@0.2.0
 [0.1.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.1.4...@f-o-t/pdf@0.1.5

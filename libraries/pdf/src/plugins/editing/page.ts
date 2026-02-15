@@ -77,7 +77,7 @@ export class PdfPageImpl implements PdfPage {
 
 		this.operators.push("BT");
 		this.operators.push(`/F1 ${size} Tf`);
-		this.operators.push(`${x} ${y} Td`);
+		this.operators.push(`1 0 0 1 ${x} ${y} Tm`);
 		this.operators.push(`(${escaped}) Tj`);
 		this.operators.push("ET");
 	}
