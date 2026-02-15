@@ -17,13 +17,42 @@ A fully type-safe, functional, rules orchestration engine for TypeScript. Built 
 ## Installation
 
 ```bash
-bun add @f-o-t/rules-engine
+bun add @f-o-t/rules-engine @f-o-t/condition-evaluator
 ```
+
+## Migrating from 3.x to 4.0.0
+
+**Breaking Change:** Re-exports of `@f-o-t/condition-evaluator` types and functions have been removed from `@f-o-t/rules-engine`.
+
+### What Changed
+
+In v3.x, `@f-o-t/rules-engine` re-exported many types and functions from `@f-o-t/condition-evaluator` for convenience. This created confusion about which package was responsible for what functionality.
+
+Starting in v4.0.0, you must import directly from the appropriate package.
+
+### Migration Guide
+
+**❌ BEFORE (v3.x - will break in v4.0.0):**
+```typescript
+import { createOperator, createEvaluator, Condition } from "@f-o-t/rules-engine";
+```
+
+**✅ AFTER (v4.0.0):**
+```typescript
+import { createOperator, createEvaluator, Condition } from "@f-o-t/condition-evaluator";
+import { createEngine } from "@f-o-t/rules-engine";
+```
+
+### Import Guidelines
+
+- **Import from `@f-o-t/condition-evaluator`**: Operators, evaluators, conditions, condition builders (`createOperator`, `createEvaluator`, `Condition`, `ConditionGroup`, `num`, `str`, `bool`, `date`, `arr`, `all`, `any`, `and`, `or`, `conditions`)
+- **Import from `@f-o-t/rules-engine`**: Engine, rules, rule builders, consequences, rule management (`createEngine`, `rule`, `RuleInput`, `Rule`, `Consequence`, validation, simulation, versioning, indexing, analysis, serialization, filtering, sorting, grouping, utilities)
 
 ## Quick Start
 
 ```typescript
-import { createEngine, createEvaluator } from "@f-o-t/rules-engine";
+import { createEvaluator } from "@f-o-t/condition-evaluator";
+import { createEngine } from "@f-o-t/rules-engine";
 import { z } from "zod";
 
 // Define your consequence types
@@ -89,7 +118,7 @@ console.log(result.consequences); // Actions to take
 ### Shorthand Helpers
 
 ```typescript
-import { num, str, bool, date, arr, all, any } from "@f-o-t/rules-engine";
+import { num, str, bool, date, arr, all, any } from "@f-o-t/condition-evaluator";
 
 // Number conditions
 num("amount", "gt", 100)      // amount > 100
@@ -121,7 +150,7 @@ any(bool("isVip", "eq", true), num("orders", "gt", 10))
 ### Fluent Condition Builder
 
 ```typescript
-import { and, or, conditions } from "@f-o-t/rules-engine";
+import { and, or, conditions } from "@f-o-t/condition-evaluator";
 
 // Using and/or with builder function
 const complexCondition = and((c) =>
@@ -191,7 +220,8 @@ engine.addRule({
 Create your own custom operators:
 
 ```typescript
-import { createEngine, createOperator } from "@f-o-t/rules-engine";
+import { createOperator } from "@f-o-t/condition-evaluator";
+import { createEngine } from "@f-o-t/rules-engine";
 
 const customOperator = createOperator({
   name: "is_valid_cpf",
