@@ -269,13 +269,15 @@ function buildToolchain() {
 }
 
 function sortLibrariesByDependencies(libraries: Library[]): Library[] {
-   const graph = new Map<string, Set<string>>();
+   const dependencies = new Map<string, Set<string>>(); // What each lib depends ON
+   const dependents = new Map<string, Set<string>>(); // What depends on each lib
    const libMap = new Map<string, Library>();
 
-   // Build dependency graph
+   // Initialize maps
    for (const lib of libraries) {
       libMap.set(lib.name, lib);
-      graph.set(lib.name, new Set());
+      dependencies.set(lib.name, new Set());
+      dependents.set(lib.name, new Set());
    }
 
    // Read dependencies from package.json for each library
@@ -291,12 +293,13 @@ function sortLibrariesByDependencies(libraries: Library[]): Library[] {
 
          for (const dep of allDeps) {
             // Only track dependencies on other @f-o-t/* libraries
-            if (dep.startsWith("@f-o-t/") && graph.has(dep)) {
-               graph.get(lib.name)?.add(dep);
+            if (dep.startsWith("@f-o-t/") && libMap.has(dep)) {
+               dependencies.get(lib.name)?.add(dep); // lib depends ON dep
+               dependents.get(dep)?.add(lib.name); // dep is depended on BY lib
             }
          }
-      } catch {
-         // If we can't read package.json, skip
+      } catch (err) {
+         console.log(`  ⚠️  Failed to read dependencies for ${lib.name}: ${err}`);
       }
    }
 
@@ -304,13 +307,8 @@ function sortLibrariesByDependencies(libraries: Library[]): Library[] {
    const sorted: Library[] = [];
    const inDegree = new Map<string, number>();
 
-   // Initialize in-degrees
-   for (const lib of libraries) {
-      inDegree.set(lib.name, 0);
-   }
-
-   // Calculate in-degrees (count how many libraries depend on each library)
-   for (const [node, deps] of graph) {
+   // Calculate in-degrees (number of dependencies each library has)
+   for (const [node, deps] of dependencies) {
       inDegree.set(node, deps.size);
    }
 
@@ -326,13 +324,13 @@ function sortLibrariesByDependencies(libraries: Library[]): Library[] {
       const lib = libMap.get(node);
       if (lib) sorted.push(lib);
 
-      // Reduce in-degree for nodes that depend on this one
-      const nodeDeps = graph.get(node) || new Set();
-      for (const dep of nodeDeps) {
-         const newDegree = (inDegree.get(dep) || 0) - 1;
-         inDegree.set(dep, newDegree);
+      // Reduce in-degree for libraries that depend on this one
+      const libs = dependents.get(node) || new Set();
+      for (const dependent of libs) {
+         const newDegree = (inDegree.get(dependent) || 0) - 1;
+         inDegree.set(dependent, newDegree);
          if (newDegree === 0) {
-            queue.push(dep);
+            queue.push(dependent);
          }
       }
    }
