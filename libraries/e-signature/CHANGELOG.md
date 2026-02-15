@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-02-15
+
+### Changed
+- Updated `@f-o-t/pdf` dependency from `^0.3.3` to `^0.3.4`
+
+### Fixed
+- Visual signature appearance no longer renders mirrored/upside-down on PDFs with transformed coordinate systems (fixed via @f-o-t/pdf@0.3.4 graphics state isolation)
+
 ## [1.0.5] - 2026-02-15
 
 ### Changed
@@ -52,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.0.6]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.5...@f-o-t/e-signature@1.0.6
 [1.0.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.4...@f-o-t/e-signature@1.0.5
 [1.0.4]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.3...@f-o-t/e-signature@1.0.4
 [1.0.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.2...@f-o-t/e-signature@1.0.3

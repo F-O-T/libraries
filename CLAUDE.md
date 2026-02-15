@@ -1,50 +1,49 @@
 # FOT Libraries
 
-Monorepo for `@f-o-t/*` packages. Uses Bun as runtime and package manager.
+Monorepo for `@f-o-t/*` packages. Uses **Bun** as runtime/package manager and **Nx** for task orchestration.
+
+## Commands
+
+```bash
+# Whole workspace
+bun run build                    # nx run-many -t build (all libraries)
+bun run test                     # nx run-many -t test
+bun run check                    # nx run-many -t check (biome format + lint)
+
+# Single library
+cd libraries/<name>
+bun x --bun fot build            # build one library
+bun x --bun fot test             # test one library
+bun x --bun fot check            # format + lint one library
+bun x --bun fot create <name>    # scaffold a new library
+bun x --bun fot generate         # regenerate config files (package.json, tsconfig.json, biome.json)
+```
+
+## Project Structure
+
+```
+libraries/          # All @f-o-t/* packages
+  cli/              # @f-o-t/cli — build toolchain CLI
+  config/           # @f-o-t/config — shared build config
+  <library>/        # Each library: src/, dist/, package.json, fot.config.ts, CHANGELOG.md
+scripts/
+  release-library.ts   # CI release script (build → GitHub release → npm publish)
+  extract-changelog.ts # Changelog parser used by release script
+nx.json             # Nx workspace config (task caching, build ordering)
+graph.json          # Library dependency graph
+```
 
 ## Building Libraries
 
-All libraries use `@f-o-t/config` and `@f-o-t/cli` for standardized builds.
-
-### Setup
-
 Each library needs:
+1. **`fot.config.ts`** — build config via `defineFotConfig()` from `@f-o-t/config`
+2. **`package.json`** — scripts use `fot build/test/lint/format`
 
-1. **`fot.config.ts`** — defines build config via `defineFotConfig()` from `@f-o-t/config`
-2. **`package.json`** — scripts use `fot build`, `fot test`, `fot lint`, `fot format`; devDependencies are `@f-o-t/cli` and `@f-o-t/config` with version numbers (NOT `workspace:*`)
-
-### How it works
-
-- `fot build` loads `fot.config.ts`, auto-generates `tsconfig.json` from it, then builds with Bun's bundler and generates TypeScript declarations.
-- `tsconfig.json` is **not manually maintained** — it's generated on every build from `generateTSConfig()` in `@f-o-t/config`. Don't edit it by hand.
-- Runtime dependencies go in `external` in `fot.config.ts` so they're not bundled.
-
-### Code Style
-
-- **Functional approach** — Public APIs export pure functions, not classes
-- **Classes only for Errors** — Custom error types extend `Error`
-- **Zod for input validation** — All input parsing and type inference via `z.infer<>`
-
-### Dependency Philosophy
-
-- **Zero external deps** — Libraries should only depend on other `@f-o-t/*` packages + `zod`
-- **No third-party runtime deps** — Use Node.js/Bun native APIs (`node:crypto`, `node:zlib`, `fetch`, etc.) instead of npm packages
-- **Zod is the only exception** — Used in every library for input validation and type inference via `z.infer<>`
-- **Build your own** — When functionality is needed, create a new `@f-o-t/*` library rather than pulling in an external package
-
-### Documentation
-
-- **README.md is required** — Every library MUST have a `README.md` as its documentation
-- README should cover: what the library does, installation, public API, usage examples
-- **Always keep README up to date** — When changing a library's API, types, exports, or behavior, update the README in the same commit. The README must always reflect the current state of the library.
-- Keep it concise and developer-focused — show don't tell
-
-### Standard Dependencies
-
-- **Zod version**: Use `^4.3.6` for all libraries
-- **Validation**: ALL input validation should be handled via Zod schemas with refinements
-- **Dependencies**: Use version numbers like `^1.0.0`, NOT `workspace:*`
-- **Initial version**: All libraries start at `1.0.0`
+How it works:
+- `fot build` loads `fot.config.ts`, auto-generates `tsconfig.json`, bundles with Bun, generates `.d.ts` declarations
+- **`tsconfig.json` is auto-generated** — never edit it by hand
+- Runtime deps go in `external` in `fot.config.ts` so they're not bundled
+- Nx handles build ordering via `dependsOn: ["^build"]` — dependencies build first
 
 ### Example `fot.config.ts`
 
@@ -52,166 +51,69 @@ Each library needs:
 import { defineFotConfig } from '@f-o-t/config';
 
 export default defineFotConfig({
-  external: ['zod'],       // runtime deps, not bundled
-  plugins: ['operators'],  // optional plugin entry points (e.g., condition-evaluator operators)
+  external: ['zod'],
+  plugins: ['operators'],  // optional: adds plugin entry points
 });
 ```
 
-### Example `package.json` dependencies
+## Code Style
+
+- **Functional** — Public APIs export pure functions, not classes
+- **Classes only for Errors** — Custom error types extend `Error`
+- **Zod for validation** — All input parsing via Zod schemas; types via `z.infer<>`
+
+## Dependencies
+
+- **Zero external deps** — Only `@f-o-t/*` packages + `zod` allowed
+- **No third-party runtime deps** — Use native APIs (`node:crypto`, `node:zlib`, `fetch`, etc.)
+- **Build your own** — Create a new `@f-o-t/*` library instead of pulling npm packages
+- **Zod version**: `^4.3.6` for all libraries
+- **Version numbers**: Use `^1.0.0`, NOT `workspace:*`
+- **Initial version**: Libraries start at `1.0.0`
+
+### Example package.json dependencies
 
 ```json
 {
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^0.1.0",
-    "@f-o-t/config": "^0.1.0"
-  }
+  "dependencies": { "zod": "^4.3.6" },
+  "devDependencies": { "@f-o-t/cli": "^0.1.0", "@f-o-t/config": "^0.1.0" }
 }
 ```
 
-### Condition-Evaluator Integration
+## Documentation
 
-When a library handles domain values that can be compared or evaluated in conditions:
-
-1. **Create operators plugin** in `src/plugins/operators/`
-2. **Export operators** that integrate with `@f-o-t/condition-evaluator` using `createOperator()`
-3. **Add plugin entry** in `fot.config.ts` plugins array
-4. **Make it optional** via `peerDependencies` and `peerDependenciesMeta`
-
-Example operator pattern:
-```ts
-import { createOperator } from "@f-o-t/condition-evaluator";
-
-export const myEqualsOperator = createOperator({
-  name: "my_eq",
-  type: "custom",
-  description: "Check if two values are equal",
-  evaluate: (actual: unknown, expected: unknown): boolean => {
-    // Validation via Zod
-    const a = MyValueSchema.parse(actual);
-    const b = MyValueSchema.parse(expected);
-    return a === b;
-  },
-  valueSchema: MyValueSchema,
-});
-```
-
-### CLI Commands
-
-- `fot build` — build library (generates tsconfig + bundles + declarations)
-- `fot test` — run tests via `bun test`
-- `fot lint` / `fot format` — linting and formatting
-- `fot generate` — regenerate all config files (package.json, tsconfig.json, biome.json)
-- `fot check` — format and lint code with Biome
-- `fot create <name>` — scaffold a new library
+- **README.md is required** for every library — covers what it does, installation, API, examples
+- **Always update README** when changing API, types, exports, or behavior — same commit
 
 ## CHANGELOG Management
 
-**CRITICAL REQUIREMENT:** All libraries MUST maintain a CHANGELOG.md file following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+All libraries MUST maintain `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-### Rules
+- **Always update CHANGELOG** — every feature, fix, refactor, or breaking change
+- **Same commit** as `package.json` version bump
+- **Sections**: Added, Changed, Deprecated, Removed, Fixed, Security
+- **Semver**: PATCH (bug fixes), MINOR (new features, backward compatible), MAJOR (breaking changes)
 
-1. **Always update CHANGELOG** — Every feature, fix, refactor, or breaking change MUST be documented
-2. **Update before version bump** — CHANGELOG changes should be in the same commit as package.json version changes
-3. **Follow format strictly** — Use standard sections: Added, Changed, Deprecated, Removed, Fixed, Security
-4. **Use Semantic Versioning** — Version numbers follow [semver](https://semver.org/): MAJOR.MINOR.PATCH
-
-### Format Template
-
-```markdown
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Added
-- New features go here
-
-### Changed
-- Changes to existing functionality
-
-### Fixed
-- Bug fixes
-
-## [1.0.0] - YYYY-MM-DD
-
-### Added
-- Initial release features
-
-[Unreleased]: https://github.com/F-O-T/libraries/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/library-name@1.0.0
-```
-
-### When Making Changes
-
-**For every code change:**
-1. Update CHANGELOG.md with entry in appropriate section (Added/Changed/Fixed/etc.)
-2. If releasing, move [Unreleased] items to new version section with date
-3. Update package.json version
-4. **Update downstream `@f-o-t/*` libraries** that depend on the changed library — bump their dependency version in `package.json`, add a CHANGELOG entry, and bump their version too
-5. Commit both files together
-
-**Example commit:**
-```bash
-git add libraries/mylib/CHANGELOG.md libraries/mylib/package.json
-git commit -m "chore(mylib): release version 1.2.0
-
-Update CHANGELOG with new features and fixes.
-Bump version to 1.2.0."
-```
-
-### Version Bumping Guidelines
-
-- **PATCH** (0.0.x) — Bug fixes, internal refactors with no API changes
-- **MINOR** (0.x.0) — New features, additions to API (backward compatible)
-- **MAJOR** (x.0.0) — Breaking changes to public API
+When making changes:
+1. Add entry to CHANGELOG.md under `[Unreleased]`
+2. If releasing: move `[Unreleased]` items to new version section with date, bump `package.json` version
+3. **Update downstream `@f-o-t/*` libraries** that depend on the changed library — bump their dep version, add CHANGELOG entry, bump their version
 
 ## Publishing Releases
 
-**CRITICAL: Libraries are ALWAYS released via GitHub CI. NEVER publish manually using `npm publish`.**
+**Libraries are ALWAYS released via GitHub CI. NEVER publish manually.**
 
-### Release Process
+1. Update CHANGELOG.md — move `[Unreleased]` entries to new version section with date
+2. Bump version in `package.json`
+3. Commit: `chore: release @f-o-t/library-name@x.y.z`
+4. Push to master — CI auto-detects version changes, builds, tests, creates GitHub release, publishes to npm
 
-1. **Prepare the release commit:**
-   - Update CHANGELOG.md: move [Unreleased] entries to new version section with date
-   - Update package.json: bump version according to semver guidelines
-   - Commit both files together with message format: `chore: release @f-o-t/library-name@x.y.z`
+## Condition-Evaluator Integration
 
-2. **Push to master:**
-   ```bash
-   git push origin master
-   ```
+Libraries that handle domain values can create operator plugins in `src/plugins/operators/` using `createOperator()` from `@f-o-t/condition-evaluator`. Add the plugin to `fot.config.ts` plugins array and make `@f-o-t/condition-evaluator` an optional `peerDependency`.
 
-3. **GitHub CI automatically:**
-   - Detects version changes in package.json files
-   - Builds the library (`bun x --bun fot build`)
-   - Runs tests (`bun test`)
-   - Creates GitHub release with tag `@f-o-t/library-name@x.y.z`
-   - Publishes to npm with `--access public`
+## Gotchas
 
-### Why GitHub CI Only?
-
-- **Consistency:** All releases go through the same build and test pipeline
-- **Audit trail:** Every release is tied to a commit and CI run
-- **No local environment issues:** Eliminates "works on my machine" problems
-- **Automatic dist/ verification:** CI ensures dist/ directory is properly built and included
-- **Tag management:** Automatically creates and pushes git tags
-
-### Example Release Commit
-
-```bash
-git add libraries/pdf/CHANGELOG.md libraries/pdf/package.json
-git commit -m "chore: release @f-o-t/pdf@0.3.0
-
-- Added parseResourcesDict() and mergeResourcesDicts() public API
-- Fixed visual signature appearances corrupting fonts"
-git push origin master
-```
-
-The CI will detect the version change and automatically publish to npm.
+- **npm publish + .gitignore**: Root `.gitignore` has `dist` which can exclude `dist/` from npm tarballs even with `"files": ["dist"]` in package.json. Every library has `.npmignore` to prevent this.
+- **Build order matters**: Libraries with `@f-o-t/*` dependencies must build after their deps. Nx handles this via `dependsOn: ["^build"]`, and the release script sorts topologically.
+- **Toolchain builds first**: The release script builds `config` + `cli` before any library, since all libraries depend on `fot` CLI for their build.

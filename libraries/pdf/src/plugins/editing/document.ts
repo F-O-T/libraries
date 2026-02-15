@@ -218,17 +218,37 @@ export class PdfDocumentImpl implements PdfDocument {
 			});
 		}
 
-		// --- 3. Content streams for dirty pages ---
+		// --- 3. Wrapper save-state streams + content streams for dirty pages ---
+		// The original page content may modify the CTM (e.g. Y-axis flip for
+		// top-left origin). We wrap the original content in q/Q so our new
+		// drawing operators run with the default PDF coordinate system.
+		const wrapperStreamMap = new Map<number, number>(); // pageObjNum -> wrapperStreamObjNum
 		const contentStreamMap = new Map<number, number>(); // pageObjNum -> contentStreamObjNum
 		for (const page of this.pages) {
 			if (!page.dirty) continue;
+
+			// "save state" stream — placed BEFORE original content
+			const wrapperObjNum = currentNextObj++;
+			wrapperStreamMap.set(page.pageObjNum, wrapperObjNum);
+			const wrapperData = latin1Encoder.encode("q");
+			objects.push({
+				objNum: wrapperObjNum,
+				content: `<< /Length ${wrapperData.length} >>`,
+				streamData: wrapperData,
+			});
+
+			// Actual content stream — prefixed with Q to restore state
 			const contentObjNum = currentNextObj++;
 			contentStreamMap.set(page.pageObjNum, contentObjNum);
-			const streamData = page.buildContentStream();
+			const pageStreamData = page.buildContentStream();
+			const prefixedData = new Uint8Array(2 + pageStreamData.length);
+			prefixedData[0] = 0x51; // 'Q'
+			prefixedData[1] = 0x0a; // '\n'
+			prefixedData.set(pageStreamData, 2);
 			objects.push({
 				objNum: contentObjNum,
-				content: `<< /Length ${streamData.length} >>`,
-				streamData,
+				content: `<< /Length ${prefixedData.length} >>`,
+				streamData: prefixedData,
 			});
 		}
 
@@ -241,12 +261,15 @@ export class PdfDocumentImpl implements PdfDocument {
 			// Add or replace Contents reference if page is dirty
 			if (page.dirty) {
 				const contentObjNum = contentStreamMap.get(page.pageObjNum)!;
+				const wrapperObjNum = wrapperStreamMap.get(page.pageObjNum)!;
 
 				if (pageContent.match(/\/Contents\s/)) {
-					// Replace existing Contents with an array: [original, new]
+					// Replace existing Contents with an array: [wrapper, original, new]
+					// The wrapper stream saves graphics state (q) before original content,
+					// and the new stream restores it (Q) before our drawing operators.
 					pageContent = pageContent.replace(
 						/\/Contents\s+(\d+\s+\d+\s+R)/,
-						`/Contents [$1 ${contentObjNum} 0 R]`,
+						`/Contents [${wrapperObjNum} 0 R $1 ${contentObjNum} 0 R]`,
 					);
 					// Also handle existing Contents arrays
 					pageContent = pageContent.replace(
@@ -254,7 +277,7 @@ export class PdfDocumentImpl implements PdfDocument {
 						(match, inner) => {
 							// If we already added our ref above, skip
 							if (inner.includes(`${contentObjNum} 0 R`)) return match;
-							return `/Contents [${inner.trim()} ${contentObjNum} 0 R]`;
+							return `/Contents [${wrapperObjNum} 0 R ${inner.trim()} ${contentObjNum} 0 R]`;
 						},
 					);
 				} else {
