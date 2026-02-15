@@ -100,9 +100,9 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
     try {
       // Configure Node memory limit if specified in config
       if (config.typescript.maxMemory) {
-        await $`cd ${cwd} && NODE_OPTIONS='--max-old-space-size=${config.typescript.maxMemory}' bun tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist --noEmit false`.quiet();
+        await $`cd ${cwd} && NODE_OPTIONS='--max-old-space-size=${config.typescript.maxMemory}' bun tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist --noEmit false`;
       } else {
-        await $`cd ${cwd} && bun tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist --noEmit false`.quiet();
+        await $`cd ${cwd} && bun tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist --noEmit false`;
       }
       console.log("✓ TypeScript declarations generated");
     } catch (error) {
