@@ -268,11 +268,96 @@ function buildToolchain() {
    }
 }
 
+function sortLibrariesByDependencies(libraries: Library[]): Library[] {
+   const graph = new Map<string, Set<string>>();
+   const libMap = new Map<string, Library>();
+
+   // Build dependency graph
+   for (const lib of libraries) {
+      libMap.set(lib.name, lib);
+      graph.set(lib.name, new Set());
+   }
+
+   // Read dependencies from package.json for each library
+   for (const lib of libraries) {
+      try {
+         const pkgJsonPath = path.join(lib.path, "package.json");
+         const pkgJson = JSON.parse(
+            execSync(`cat ${pkgJsonPath}`, { encoding: "utf8" }),
+         );
+         const deps = Object.keys(pkgJson.dependencies || {});
+         const devDeps = Object.keys(pkgJson.devDependencies || {});
+         const allDeps = [...deps, ...devDeps];
+
+         for (const dep of allDeps) {
+            // Only track dependencies on other @f-o-t/* libraries
+            if (dep.startsWith("@f-o-t/") && graph.has(dep)) {
+               graph.get(lib.name)?.add(dep);
+            }
+         }
+      } catch {
+         // If we can't read package.json, skip
+      }
+   }
+
+   // Topological sort using Kahn's algorithm
+   const sorted: Library[] = [];
+   const inDegree = new Map<string, number>();
+
+   // Initialize in-degrees
+   for (const lib of libraries) {
+      inDegree.set(lib.name, 0);
+   }
+
+   // Calculate in-degrees (count how many libraries depend on each library)
+   for (const [node, deps] of graph) {
+      inDegree.set(node, deps.size);
+   }
+
+   // Queue nodes with no dependencies
+   const queue: string[] = [];
+   for (const [node, degree] of inDegree) {
+      if (degree === 0) queue.push(node);
+   }
+
+   // Process queue
+   while (queue.length > 0) {
+      const node = queue.shift()!;
+      const lib = libMap.get(node);
+      if (lib) sorted.push(lib);
+
+      // Reduce in-degree for nodes that depend on this one
+      const nodeDeps = graph.get(node) || new Set();
+      for (const dep of nodeDeps) {
+         const newDegree = (inDegree.get(dep) || 0) - 1;
+         inDegree.set(dep, newDegree);
+         if (newDegree === 0) {
+            queue.push(dep);
+         }
+      }
+   }
+
+   // If we couldn't sort all libraries (circular dependency), return original order
+   if (sorted.length !== libraries.length) {
+      console.log(
+         "⚠️  Warning: Circular dependencies detected, using original order",
+      );
+      return libraries;
+   }
+
+   return sorted;
+}
+
 function buildAllLibraries(libraries: Library[]) {
    console.log(`\n🔨 Building ${libraries.length} libraries...`);
    console.log(`FOT_BIN path: ${FOT_BIN}`);
+
+   // Sort libraries by dependencies to ensure dependencies are built first
+   const sorted = sortLibrariesByDependencies(libraries);
+   console.log("Build order:", sorted.map(l => l.dirName).join(" → "));
+
    const failed: string[] = [];
-   for (const lib of libraries) {
+   for (const lib of sorted) {
       try {
          execSync(`bun --bun ${FOT_BIN} build`, {
             cwd: lib.path,
