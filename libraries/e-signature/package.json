@@ -1,6 +1,6 @@
 {
   "name": "@f-o-t/e-signature",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PAdES PDF signing with ICP-Brasil compliance",
   "type": "module",
   "main": "./dist/index.js",
