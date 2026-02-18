@@ -188,7 +188,11 @@ export async function signPdf(
    // 10. Optionally request timestamp
    if (opts.timestamp && opts.tsaUrl) {
       try {
-         const tsToken = await requestTimestamp(signedData, opts.tsaUrl);
+         const tsToken = await requestTimestamp(signedData, opts.tsaUrl, "sha256", {
+            tsaTimeout: opts.tsaTimeout,
+            tsaRetries: opts.tsaRetries,
+            tsaFallbackUrls: opts.tsaFallbackUrls,
+         });
          // Note: Adding the timestamp as an unauthenticated attribute
          // would require re-building the CMS structure. For now, we log
          // that timestamp was received. A future version will embed it.

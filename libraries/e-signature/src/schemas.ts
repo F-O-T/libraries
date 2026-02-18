@@ -33,6 +33,9 @@ export const pdfSignOptionsSchema = z.object({
    policy: z.enum(["pades-ades", "pades-icp-brasil"]).optional(),
    timestamp: z.boolean().optional(),
    tsaUrl: z.string().url().optional(),
+   tsaTimeout: z.number().positive().optional(),
+   tsaRetries: z.number().int().min(1).optional(),
+   tsaFallbackUrls: z.array(z.string().url()).optional(),
    appearance: z
       .union([signatureAppearanceSchema, z.literal(false)])
       .optional(),
