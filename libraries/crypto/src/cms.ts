@@ -147,6 +147,32 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
   return encodeDer(contentInfo);
 }
 
+/**
+ * Append unauthenticated attributes to an existing CMS SignedData DER without re-signing.
+ *
+ * Locates the first SignerInfo in the decoded tree and appends a [1] IMPLICIT
+ * context tag (unauthAttrs), then re-encodes. The signature bytes are never
+ * touched, so this is safe for non-deterministic algorithms (PSS, ECDSA).
+ */
+export function appendUnauthAttributes(
+  signedDataDer: Uint8Array,
+  attributes: CmsAttribute[],
+): Uint8Array {
+  if (attributes.length === 0) return signedDataDer;
+
+  const contentInfo = decodeDer(signedDataDer);
+  // ContentInfo: SEQUENCE { OID, [0] EXPLICIT { SignedData } }
+  const signedDataNode = ((contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[])[0]!;
+  // SignedData: version, digestAlgorithms, encapContentInfo, [0] certs, signerInfos
+  const signerInfosSet = (signedDataNode.value as Asn1Node[])[4]!;
+  const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
+
+  const unauthAttrs = attributes.map((attr) => buildAttribute(attr.oid, attr.values));
+  (signerInfo.value as Asn1Node[]).push(contextTag(1, [set(...unauthAttrs)], false));
+
+  return encodeDer(contentInfo);
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

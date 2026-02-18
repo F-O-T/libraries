@@ -12,8 +12,10 @@
  * 6. Embed signature into PDF
  */
 
+import { decodeDer } from "@f-o-t/asn1";
+import type { Asn1Node } from "@f-o-t/asn1";
 import type { CmsAttribute } from "@f-o-t/crypto";
-import { createSignedData, parsePkcs12 } from "@f-o-t/crypto";
+import { appendUnauthAttributes, createSignedData, parsePkcs12 } from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
 import { parseCertificate } from "@f-o-t/digital-certificate";
 import {
@@ -213,7 +215,7 @@ export async function signPdf(
    // 10. Optionally request timestamp and embed as unauthenticated attribute
    if (opts.timestamp && opts.tsaUrl) {
       try {
-         const tsToken = await requestTimestamp(signedData, opts.tsaUrl, "sha256", {
+         const tsToken = await requestTimestamp(extractSignatureValue(signedData), opts.tsaUrl, "sha256", {
             tsaTimeout: opts.tsaTimeout,
             tsaRetries: opts.tsaRetries,
             tsaFallbackUrls: opts.tsaFallbackUrls,
@@ -246,6 +248,28 @@ export async function signPdf(
 
    // 12. Embed signature into PDF
    return embedSignature(pdfWithPlaceholder, finalSignedData);
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract the raw signature value bytes from a DER-encoded CMS ContentInfo.
+ *
+ * Per CAdES (ETSI EN 319 122-1) / RFC 5126 §5.5.1, the id-smime-aa-timeStampToken
+ * attribute must be a timestamp over the SignerInfo.signature octets, not the
+ * full ContentInfo blob.
+ *
+ * ContentInfo → [0] EXPLICIT → SignedData → signerInfos[0] → signature OCTET STRING
+ */
+function extractSignatureValue(contentInfoDer: Uint8Array): Uint8Array {
+   const contentInfo = decodeDer(contentInfoDer);
+   const signedDataNode = ((contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[])[0]!;
+   const signerInfosSet = (signedDataNode.value as Asn1Node[])[4]!;
+   const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
+   const signatureNode = (signerInfo.value as Asn1Node[])[5]!;
+   return signatureNode.value as Uint8Array;
 }
 
 // ---------------------------------------------------------------------------
