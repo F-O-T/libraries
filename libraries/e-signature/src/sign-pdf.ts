@@ -219,8 +219,9 @@ export async function signPdf(
          // that timestamp was received. A future version will embed it.
          // TODO: Rebuild CMS with timestamp token as unauthenticated attribute
          void tsToken;
-      } catch {
+      } catch (err) {
          // Timestamp failure is non-fatal
+         opts.onTimestampError?.(err);
       }
    }
 

@@ -65,6 +65,8 @@ export type PdfSignOptions = {
    tsaRetries?: number;
    /** Fallback TSA server URLs tried in order after primary is exhausted */
    tsaFallbackUrls?: string[];
+   /** Called when timestamping fails (non-fatal). Receives the error for logging/metrics. */
+   onTimestampError?: (error: unknown) => void;
    /** Visual signature appearance (false to disable) */
    appearance?: SignatureAppearance | false;
    /** Multiple visual signature appearances — renders a stamp on each specified page */

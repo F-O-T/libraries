@@ -36,6 +36,7 @@ export const pdfSignOptionsSchema = z.object({
    tsaTimeout: z.number().positive().optional(),
    tsaRetries: z.number().int().min(1).optional(),
    tsaFallbackUrls: z.array(z.string().url()).optional(),
+   onTimestampError: z.function().args(z.unknown()).returns(z.void()).optional(),
    appearance: z
       .union([signatureAppearanceSchema, z.literal(false)])
       .optional(),

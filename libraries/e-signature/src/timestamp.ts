@@ -72,7 +72,7 @@ export async function requestTimestamp(
    // 3. Try primary server (tsaRetries total attempts)
    for (let attempt = 1; attempt <= tsaRetries; attempt++) {
       if (attempt > 1) {
-         await sleep((attempt - 1) * 1000);
+         await sleep(2 ** (attempt - 2) * 1000);
       }
       try {
          return await fetchTimestamp(tsaUrl, timestampReq, tsaTimeout);
