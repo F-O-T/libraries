@@ -64,13 +64,13 @@ export async function requestTimestamp(
    const timestampReq = buildTimestampRequest(messageHash, hashAlgorithm);
 
    const tsaTimeout = options?.tsaTimeout ?? 10000;
-   const tsaRetries = options?.tsaRetries ?? 1;
+   const tsaRetries = options?.tsaRetries ?? 0;
    const tsaFallbackUrls = options?.tsaFallbackUrls ?? [];
 
    let lastError: Error | undefined;
 
-   // 3. Try primary server (tsaRetries total attempts)
-   for (let attempt = 1; attempt <= tsaRetries; attempt++) {
+   // 3. Try primary server: 1 initial attempt + tsaRetries retries
+   for (let attempt = 1; attempt <= 1 + tsaRetries; attempt++) {
       if (attempt > 1) {
          await sleep(2 ** (attempt - 2) * 1000);
       }

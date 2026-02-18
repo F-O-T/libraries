@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-02-18
+## [1.2.1] - 2026-02-18
 
 ### Added
 - `tsaTimeout?: number` option on `PdfSignOptions` — configurable timeout per TSA attempt (default: 10000ms)
-- `tsaRetries?: number` option on `PdfSignOptions` — number of retry attempts on primary TSA server before falling back (default: 1)
+- `tsaRetries?: number` option on `PdfSignOptions` — number of retry attempts after the initial request fails; total attempts = `1 + tsaRetries` (default: `0`)
 - `tsaFallbackUrls?: string[]` option on `PdfSignOptions` — fallback TSA servers tried in order after primary fails; exponential backoff (1s, 2s) between primary retries only
+- `onTimestampError?: (error: unknown) => void` option on `PdfSignOptions` — optional callback invoked when timestamping fails (non-fatal); use for logging or metrics
 - `signPdf` now accepts `ReadableStream<Uint8Array>` as PDF input in addition to `Uint8Array`; internally accumulates chunks before signing
 - `signPdfBatch(files, options): AsyncGenerator<BatchSignEvent>` — sign multiple PDFs sequentially, yielding progress events per file; yields control between files to avoid blocking the event loop
 - `signPdfBatchToArray(files, options): Promise<...>` — convenience wrapper for batch signing that collects results into an array
@@ -18,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - TSA errors now include the server URL and original message in the error text instead of an opaque `fetch failed`
+- `tsaRetries` semantics corrected: now means retries *after* the initial attempt (`1 + tsaRetries` total); default changed from `1` to `0` so the default behavior (1 attempt) is unchanged
+- `batch_complete.totalFiles` now reflects the number of files actually processed (non-falsy entries) instead of the raw array length, ensuring it always equals the number of `file_start` events emitted
 
 ## [1.1.0] - 2026-02-18
 

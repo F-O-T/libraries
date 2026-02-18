@@ -37,10 +37,12 @@ export async function* signPdfBatch(
   options: PdfSignOptions,
 ): AsyncGenerator<BatchSignEvent> {
   let errorCount = 0;
+  let processedCount = 0;
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file) continue;
+    processedCount++;
 
     yield { type: "file_start", fileIndex: i, filename: file.filename };
 
@@ -65,7 +67,7 @@ export async function* signPdfBatch(
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
   }
 
-  yield { type: "batch_complete", totalFiles: files.length, errorCount };
+  yield { type: "batch_complete", totalFiles: processedCount, errorCount };
 }
 
 /**

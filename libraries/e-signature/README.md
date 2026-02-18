@@ -73,7 +73,7 @@ const signedPdf = await signPdf(pdfBytes, {
   timestamp: true,
   tsaUrl: TIMESTAMP_SERVERS.VALID,
   tsaTimeout: 5000,           // 5s per attempt (default: 10000)
-  tsaRetries: 2,              // 2 attempts on primary (default: 1)
+  tsaRetries: 2,              // 2 retries after initial attempt, 3 total (default: 0)
   tsaFallbackUrls: [          // tried in order after primary fails
     TIMESTAMP_SERVERS.SAFEWEB,
     TIMESTAMP_SERVERS.CERTISIGN,
@@ -194,10 +194,12 @@ type PdfSignOptions = {
   tsaUrl?: string;
   /** Timeout in ms per TSA attempt (default: 10000) */
   tsaTimeout?: number;
-  /** Number of retry attempts on primary TSA server before trying fallbacks (default: 1) */
+  /** Number of retry attempts after the initial TSA request fails (default: 0); total attempts = 1 + tsaRetries */
   tsaRetries?: number;
   /** Fallback TSA server URLs tried in order after primary is exhausted */
   tsaFallbackUrls?: string[];
+  /** Called when timestamping fails (non-fatal). Receives the error for logging/metrics. */
+  onTimestampError?: (error: unknown) => void;
   /** Single visual stamp (false to disable) */
   appearance?: SignatureAppearance | false;
   /** Multiple visual stamps — renders one per entry, useful for multi-page documents */

@@ -61,7 +61,7 @@ export type PdfSignOptions = {
    tsaUrl?: string;
    /** Timeout in ms per TSA attempt (default: 10000) */
    tsaTimeout?: number;
-   /** Number of retry attempts on primary TSA server before trying fallbacks (default: 1) */
+   /** Number of retry attempts after the initial TSA request fails (default: 0); total attempts = 1 + tsaRetries */
    tsaRetries?: number;
    /** Fallback TSA server URLs tried in order after primary is exhausted */
    tsaFallbackUrls?: string[];
