@@ -280,7 +280,8 @@ function extractSignatureValue(contentInfoDer: Uint8Array): Uint8Array {
    const signedDataNode = (
       (contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[]
    )[0]!;
-   const signerInfosSet = (signedDataNode.value as Asn1Node[])[4]!;
+   // signerInfos is always the last child of SignedData per RFC 5652
+   const signerInfosSet = (signedDataNode.value as Asn1Node[]).at(-1)!;
    const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
    const signatureNode = (signerInfo.value as Asn1Node[])[5]!;
    return signatureNode.value as Uint8Array;

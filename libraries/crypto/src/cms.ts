@@ -167,16 +167,26 @@ export function appendUnauthAttributes(
    const signedDataNode = (
       (contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[]
    )[0]!;
-   // SignedData: version, digestAlgorithms, encapContentInfo, [0] certs, signerInfos
-   const signerInfosSet = (signedDataNode.value as Asn1Node[])[4]!;
+   // SignedData: version, digestAlgorithms, encapContentInfo, [0] certs (OPTIONAL), [1] crls (OPTIONAL), signerInfos
+   // signerInfos is always the last child per RFC 5652 — using .at(-1) avoids assuming certificates/crls are present
+   const signerInfosSet = (signedDataNode.value as Asn1Node[]).at(-1)!;
    const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
 
    const unauthAttrs = attributes.map((attr) =>
       buildAttribute(attr.oid, attr.values),
    );
-   (signerInfo.value as Asn1Node[]).push(
-      contextTag(1, [set(...unauthAttrs)], false),
+
+   const signerInfoChildren = signerInfo.value as Asn1Node[];
+   const existingTag = signerInfoChildren.find(
+      (n) => n.class === "context" && n.tag === 1,
    );
+   if (existingTag) {
+      // Merge into existing [1] SET
+      const innerSet = (existingTag.value as Asn1Node[])[0]!;
+      (innerSet.value as Asn1Node[]).push(...unauthAttrs);
+   } else {
+      signerInfoChildren.push(contextTag(1, [set(...unauthAttrs)], false));
+   }
 
    return encodeDer(contentInfo);
 }
