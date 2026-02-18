@@ -740,7 +740,10 @@ export function extractBytesToSign(
 }
 
 /**
- * Embed a signature (as raw bytes) into the Contents placeholder
+ * Embed a signature (as raw bytes) into the Contents placeholder.
+ *
+ * **Mutates `pdfData` in-place** and returns the same buffer. Callers must not
+ * retain a reference to `pdfData` and expect it to remain unchanged after this call.
  */
 export function embedSignature(
 	pdfData: Uint8Array,
