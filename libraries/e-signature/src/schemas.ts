@@ -36,6 +36,7 @@ export const pdfSignOptionsSchema = z.object({
 	appearance: z
 		.union([signatureAppearanceSchema, z.literal(false)])
 		.optional(),
+	appearances: z.array(signatureAppearanceSchema).optional(),
 	qrCode: qrCodeConfigSchema.optional(),
 	docMdpPermission: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
 });
