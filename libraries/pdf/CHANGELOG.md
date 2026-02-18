@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.5] - 2026-02-18
+
+### Added
+- Performance benchmarks for PDF load, signature placeholder insertion, and multi-page scale tests (`__tests__/performance.test.ts`)
+
 ## [0.3.4] - 2026-02-15
 
 ### Fixed
@@ -93,6 +98,7 @@
 - Object creation utilities
 - Comprehensive error handling: PDFParseError, PDFGenerationError, InvalidPDFObjectError, FontNotFoundError, InvalidImageError, PDFSignatureError, PDFEncryptionError
 
+[0.3.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.4...@f-o-t/pdf@0.3.5
 [0.3.4]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.3...@f-o-t/pdf@0.3.4
 [0.3.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.2...@f-o-t/pdf@0.3.3
 [0.3.2]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.1...@f-o-t/pdf@0.3.2
