@@ -1,10 +1,10 @@
+import { bankersRound, roundDown, roundUp } from "./round";
 import {
-  ArithmeticInputSchema,
-  DivideInputSchema,
-  type ArithmeticInput,
-  type DivideInput,
+   type ArithmeticInput,
+   ArithmeticInputSchema,
+   type DivideInput,
+   DivideInputSchema,
 } from "./schemas";
-import { bankersRound, roundUp, roundDown } from "./round";
 
 /**
  * Add two scaled bigint values
@@ -21,8 +21,8 @@ import { bankersRound, roundUp, roundDown } from "./round";
  * // Result: 579n
  */
 export function add(input: ArithmeticInput): bigint {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a + b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a + b;
 }
 
 /**
@@ -40,8 +40,8 @@ export function add(input: ArithmeticInput): bigint {
  * // Result: 456n
  */
 export function subtract(input: ArithmeticInput): bigint {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a - b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a - b;
 }
 
 /**
@@ -63,10 +63,10 @@ export function subtract(input: ArithmeticInput): bigint {
  * // Result: 560n
  */
 export function multiply(input: ArithmeticInput): bigint {
-  const { a, b, scale } = ArithmeticInputSchema.parse(input);
-  const product = a * b;
-  const divisor = 10n ** BigInt(scale);
-  return product / divisor;
+   const { a, b, scale } = ArithmeticInputSchema.parse(input);
+   const product = a * b;
+   const divisor = 10n ** BigInt(scale);
+   return product / divisor;
 }
 
 /**
@@ -95,25 +95,30 @@ export function multiply(input: ArithmeticInput): bigint {
  * // Result: 34n
  */
 export function divide(input: DivideInput): bigint {
-  const { a, b, scale, roundingMode = "truncate" } = DivideInputSchema.parse(input);
+   const {
+      a,
+      b,
+      scale,
+      roundingMode = "truncate",
+   } = DivideInputSchema.parse(input);
 
-  // Scale up the dividend to maintain precision
-  const scaledDividend = a * (10n ** BigInt(scale));
+   // Scale up the dividend to maintain precision
+   const scaledDividend = a * 10n ** BigInt(scale);
 
-  // Apply rounding based on mode
-  switch (roundingMode) {
-    case "truncate":
-      return scaledDividend / b;
-    case "round":
-      return bankersRound(scaledDividend, b);
-    case "ceil":
-      return roundUp(scaledDividend, b);
-    case "floor":
-      return roundDown(scaledDividend, b);
-    default:
-      // This should never happen due to Zod validation
-      throw new Error(`Unknown rounding mode: ${roundingMode}`);
-  }
+   // Apply rounding based on mode
+   switch (roundingMode) {
+      case "truncate":
+         return scaledDividend / b;
+      case "round":
+         return bankersRound(scaledDividend, b);
+      case "ceil":
+         return roundUp(scaledDividend, b);
+      case "floor":
+         return roundDown(scaledDividend, b);
+      default:
+         // This should never happen due to Zod validation
+         throw new Error(`Unknown rounding mode: ${roundingMode}`);
+   }
 }
 
 /**
@@ -131,8 +136,8 @@ export function divide(input: DivideInput): bigint {
  * // Result: 123n
  */
 export function abs(input: ArithmeticInput): bigint {
-  const { a } = ArithmeticInputSchema.parse(input);
-  return a < 0n ? -a : a;
+   const { a } = ArithmeticInputSchema.parse(input);
+   return a < 0n ? -a : a;
 }
 
 /**
@@ -150,8 +155,8 @@ export function abs(input: ArithmeticInput): bigint {
  * // Result: 123n
  */
 export function min(input: ArithmeticInput): bigint {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a < b ? a : b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a < b ? a : b;
 }
 
 /**
@@ -169,6 +174,6 @@ export function min(input: ArithmeticInput): bigint {
  * // Result: 456n
  */
 export function max(input: ArithmeticInput): bigint {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a > b ? a : b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a > b ? a : b;
 }

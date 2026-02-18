@@ -38,9 +38,7 @@ export function generateTSConfig(config: ResolvedFotConfig): TSConfig {
    // (e.g., @f-o-t/condition-evaluator) don't get type-checked in the main pass.
    // Plugin declarations are handled separately by the build system.
    const enabledPlugins = config.plugins.filter((p) => p.enabled !== false);
-   const pluginExcludes = enabledPlugins.map(
-      (p) => `src/plugins/${p.name}`,
-   );
+   const pluginExcludes = enabledPlugins.map((p) => `src/plugins/${p.name}`);
 
    return {
       compilerOptions: {

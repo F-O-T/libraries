@@ -12,10 +12,14 @@
  * 6. Embed signature into PDF
  */
 
-import { decodeDer } from "@f-o-t/asn1";
 import type { Asn1Node } from "@f-o-t/asn1";
+import { decodeDer } from "@f-o-t/asn1";
 import type { CmsAttribute } from "@f-o-t/crypto";
-import { appendUnauthAttributes, createSignedData, parsePkcs12 } from "@f-o-t/crypto";
+import {
+   appendUnauthAttributes,
+   createSignedData,
+   parsePkcs12,
+} from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
 import { parseCertificate } from "@f-o-t/digital-certificate";
 import {
@@ -24,14 +28,17 @@ import {
    findByteRange,
    loadPdf,
 } from "@f-o-t/pdf/plugins/editing";
-import { drawSignatureAppearance, precomputeSharedQrImage } from "./appearance.ts";
+import {
+   drawSignatureAppearance,
+   precomputeSharedQrImage,
+} from "./appearance.ts";
 import {
    buildSignaturePolicy,
    buildSigningCertificateV2,
    ICP_BRASIL_OIDS,
 } from "./icp-brasil.ts";
 import { pdfSignOptionsSchema } from "./schemas.ts";
-import { TIMESTAMP_TOKEN_OID, requestTimestamp } from "./timestamp.ts";
+import { requestTimestamp, TIMESTAMP_TOKEN_OID } from "./timestamp.ts";
 import type { PdfSignOptions } from "./types.ts";
 
 /**
@@ -225,11 +232,16 @@ export async function signPdf(
    // 10. Optionally request timestamp and embed as unauthenticated attribute
    if (opts.timestamp && opts.tsaUrl) {
       try {
-         const tsToken = await requestTimestamp(extractSignatureValue(signedData), opts.tsaUrl, "sha256", {
-            tsaTimeout: opts.tsaTimeout,
-            tsaRetries: opts.tsaRetries,
-            tsaFallbackUrls: opts.tsaFallbackUrls,
-         });
+         const tsToken = await requestTimestamp(
+            extractSignatureValue(signedData),
+            opts.tsaUrl,
+            "sha256",
+            {
+               tsaTimeout: opts.tsaTimeout,
+               tsaRetries: opts.tsaRetries,
+               tsaFallbackUrls: opts.tsaFallbackUrls,
+            },
+         );
          unauthenticatedAttributes.push({
             oid: TIMESTAMP_TOKEN_OID,
             values: [tsToken],
@@ -241,7 +253,10 @@ export async function signPdf(
    }
 
    // 11. Patch timestamp token into SignedData as unauthenticated attribute (no re-signing)
-   const finalSignedData = appendUnauthAttributes(signedData, unauthenticatedAttributes);
+   const finalSignedData = appendUnauthAttributes(
+      signedData,
+      unauthenticatedAttributes,
+   );
 
    // 12. Embed signature into PDF
    return embedSignature(pdfWithPlaceholder, finalSignedData);
@@ -262,7 +277,9 @@ export async function signPdf(
  */
 function extractSignatureValue(contentInfoDer: Uint8Array): Uint8Array {
    const contentInfo = decodeDer(contentInfoDer);
-   const signedDataNode = ((contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[])[0]!;
+   const signedDataNode = (
+      (contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[]
+   )[0]!;
    const signerInfosSet = (signedDataNode.value as Asn1Node[])[4]!;
    const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
    const signatureNode = (signerInfo.value as Asn1Node[])[5]!;

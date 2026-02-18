@@ -3,8 +3,8 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { PDFDocument } from "@f-o-t/pdf/plugins/generation";
-import { signPdfBatch, signPdfBatchToArray } from "../src/batch.ts";
 import type { BatchSignEvent } from "../src/batch.ts";
+import { signPdfBatch, signPdfBatchToArray } from "../src/batch.ts";
 
 const fixtureDir = join(import.meta.dir, "fixtures");
 const p12Path = join(fixtureDir, "test.p12");
@@ -52,18 +52,33 @@ describe("signPdfBatch", () => {
       const pdf = createTestPdf();
 
       const events: BatchSignEvent[] = [];
-      for await (const event of signPdfBatch(
-         [{ filename: "doc.pdf", pdf }],
-         { certificate: { p12, password: "test123" }, appearance: false },
-      )) {
+      for await (const event of signPdfBatch([{ filename: "doc.pdf", pdf }], {
+         certificate: { p12, password: "test123" },
+         appearance: false,
+      })) {
          events.push(event);
       }
 
       expect(events).toHaveLength(3);
-      expect(events[0]).toEqual({ type: "file_start", fileIndex: 0, filename: "doc.pdf" });
-      expect(events[1]).toMatchObject({ type: "file_complete", fileIndex: 0, filename: "doc.pdf" });
-      expect((events[1] as Extract<BatchSignEvent, { type: "file_complete" }>).signed).toBeInstanceOf(Uint8Array);
-      expect(events[2]).toEqual({ type: "batch_complete", totalFiles: 1, errorCount: 0 });
+      expect(events[0]).toEqual({
+         type: "file_start",
+         fileIndex: 0,
+         filename: "doc.pdf",
+      });
+      expect(events[1]).toMatchObject({
+         type: "file_complete",
+         fileIndex: 0,
+         filename: "doc.pdf",
+      });
+      expect(
+         (events[1] as Extract<BatchSignEvent, { type: "file_complete" }>)
+            .signed,
+      ).toBeInstanceOf(Uint8Array);
+      expect(events[2]).toEqual({
+         type: "batch_complete",
+         totalFiles: 1,
+         errorCount: 0,
+      });
    });
 
    it("yields file_start, file_complete events for multiple files", async () => {
@@ -88,7 +103,11 @@ describe("signPdfBatch", () => {
 
       expect(starts).toHaveLength(2);
       expect(completes).toHaveLength(2);
-      expect(batchComplete).toMatchObject({ type: "batch_complete", totalFiles: 2, errorCount: 0 });
+      expect(batchComplete).toMatchObject({
+         type: "batch_complete",
+         totalFiles: 2,
+         errorCount: 0,
+      });
    });
 
    it("yields file_error for a failing file and continues processing remaining files", async () => {
@@ -99,7 +118,11 @@ describe("signPdfBatch", () => {
       const events: BatchSignEvent[] = [];
       for await (const event of signPdfBatch(
          [
-            { filename: "bad.pdf", pdf: goodPdf, options: { certificate: { p12: badP12, password: "wrong" } } },
+            {
+               filename: "bad.pdf",
+               pdf: goodPdf,
+               options: { certificate: { p12: badP12, password: "wrong" } },
+            },
             { filename: "good.pdf", pdf: goodPdf },
          ],
          { certificate: { p12, password: "test123" }, appearance: false },
@@ -109,14 +132,24 @@ describe("signPdfBatch", () => {
 
       const errorEvent = events.find((e) => e.type === "file_error");
       const completeEvent = events.find(
-         (e) => e.type === "file_complete" && (e as Extract<BatchSignEvent, { type: "file_complete" }>).filename === "good.pdf",
+         (e) =>
+            e.type === "file_complete" &&
+            (e as Extract<BatchSignEvent, { type: "file_complete" }>)
+               .filename === "good.pdf",
       );
       const batchComplete = events.find((e) => e.type === "batch_complete");
 
       expect(errorEvent).toBeDefined();
-      expect((errorEvent as Extract<BatchSignEvent, { type: "file_error" }>).filename).toBe("bad.pdf");
+      expect(
+         (errorEvent as Extract<BatchSignEvent, { type: "file_error" }>)
+            .filename,
+      ).toBe("bad.pdf");
       expect(completeEvent).toBeDefined();
-      expect(batchComplete).toMatchObject({ type: "batch_complete", totalFiles: 2, errorCount: 1 });
+      expect(batchComplete).toMatchObject({
+         type: "batch_complete",
+         totalFiles: 2,
+         errorCount: 1,
+      });
    });
 
    it("per-file options override base options", async () => {
@@ -129,10 +162,17 @@ describe("signPdfBatch", () => {
             {
                filename: "with-reason.pdf",
                pdf,
-               options: { reason: "Per-file reason", location: "Per-file location" },
+               options: {
+                  reason: "Per-file reason",
+                  location: "Per-file location",
+               },
             },
          ],
-         { certificate: { p12, password: "test123" }, appearance: false, reason: "Base reason" },
+         {
+            certificate: { p12, password: "test123" },
+            appearance: false,
+            reason: "Base reason",
+         },
       )) {
          events.push(event);
       }
@@ -154,15 +194,19 @@ describe("signPdfBatch", () => {
       const p12 = await loadP12();
 
       const events: BatchSignEvent[] = [];
-      for await (const event of signPdfBatch(
-         [],
-         { certificate: { p12, password: "test123" }, appearance: false },
-      )) {
+      for await (const event of signPdfBatch([], {
+         certificate: { p12, password: "test123" },
+         appearance: false,
+      })) {
          events.push(event);
       }
 
       expect(events).toHaveLength(1);
-      expect(events[0]).toEqual({ type: "batch_complete", totalFiles: 0, errorCount: 0 });
+      expect(events[0]).toEqual({
+         type: "batch_complete",
+         totalFiles: 0,
+         errorCount: 0,
+      });
    });
 });
 
@@ -196,7 +240,11 @@ describe("signPdfBatchToArray", () => {
 
       const results = await signPdfBatchToArray(
          [
-            { filename: "bad.pdf", pdf: goodPdf, options: { certificate: { p12: badP12, password: "wrong" } } },
+            {
+               filename: "bad.pdf",
+               pdf: goodPdf,
+               options: { certificate: { p12: badP12, password: "wrong" } },
+            },
             { filename: "good.pdf", pdf: goodPdf },
          ],
          { certificate: { p12, password: "test123" }, appearance: false },
@@ -214,10 +262,10 @@ describe("signPdfBatchToArray", () => {
    it("returns empty array for empty input", async () => {
       const p12 = await loadP12();
 
-      const results = await signPdfBatchToArray(
-         [],
-         { certificate: { p12, password: "test123" }, appearance: false },
-      );
+      const results = await signPdfBatchToArray([], {
+         certificate: { p12, password: "test123" },
+         appearance: false,
+      });
 
       expect(results).toHaveLength(0);
    });

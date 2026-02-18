@@ -1,4 +1,4 @@
-import { ArithmeticInputSchema, type ArithmeticInput } from "./schemas";
+import { type ArithmeticInput, ArithmeticInputSchema } from "./schemas";
 
 /**
  * Compare two scaled bigint values
@@ -15,10 +15,10 @@ import { ArithmeticInputSchema, type ArithmeticInput } from "./schemas";
  * // Result: -1
  */
 export function compare(input: ArithmeticInput): -1 | 0 | 1 {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   if (a < b) return -1;
+   if (a > b) return 1;
+   return 0;
 }
 
 /**
@@ -36,8 +36,8 @@ export function compare(input: ArithmeticInput): -1 | 0 | 1 {
  * // Result: true
  */
 export function equals(input: ArithmeticInput): boolean {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a === b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a === b;
 }
 
 /**
@@ -55,8 +55,8 @@ export function equals(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function greaterThan(input: ArithmeticInput): boolean {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a > b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a > b;
 }
 
 /**
@@ -74,8 +74,8 @@ export function greaterThan(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function greaterThanOrEqual(input: ArithmeticInput): boolean {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a >= b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a >= b;
 }
 
 /**
@@ -93,8 +93,8 @@ export function greaterThanOrEqual(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function lessThan(input: ArithmeticInput): boolean {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a < b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a < b;
 }
 
 /**
@@ -112,8 +112,8 @@ export function lessThan(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function lessThanOrEqual(input: ArithmeticInput): boolean {
-  const { a, b } = ArithmeticInputSchema.parse(input);
-  return a <= b;
+   const { a, b } = ArithmeticInputSchema.parse(input);
+   return a <= b;
 }
 
 /**
@@ -131,8 +131,8 @@ export function lessThanOrEqual(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function isZero(input: ArithmeticInput): boolean {
-  const { a } = ArithmeticInputSchema.parse(input);
-  return a === 0n;
+   const { a } = ArithmeticInputSchema.parse(input);
+   return a === 0n;
 }
 
 /**
@@ -150,8 +150,8 @@ export function isZero(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function isPositive(input: ArithmeticInput): boolean {
-  const { a } = ArithmeticInputSchema.parse(input);
-  return a > 0n;
+   const { a } = ArithmeticInputSchema.parse(input);
+   return a > 0n;
 }
 
 /**
@@ -169,6 +169,6 @@ export function isPositive(input: ArithmeticInput): boolean {
  * // Result: true
  */
 export function isNegative(input: ArithmeticInput): boolean {
-  const { a } = ArithmeticInputSchema.parse(input);
-  return a < 0n;
+   const { a } = ArithmeticInputSchema.parse(input);
+   return a < 0n;
 }

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { decodeDer } from "../src/decoder.ts";
-import { encodeDer } from "../src/encoder.ts";
 import {
-   sequence,
-   integer,
    boolean as asn1Boolean,
+   integer,
    nullValue,
-   oid,
    octetString,
+   oid,
+   sequence,
    utf8String,
 } from "../src/builders.ts";
+import { decodeDer } from "../src/decoder.ts";
+import { encodeDer } from "../src/encoder.ts";
 
 describe("decodeDer", () => {
    it("decodes NULL", () => {

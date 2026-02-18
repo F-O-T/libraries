@@ -1,5 +1,5 @@
-import type { Asn1Node } from "./types.ts";
 import { oidToBytes } from "./oid.ts";
+import type { Asn1Node } from "./types.ts";
 
 /**
  * Create a SEQUENCE node (tag 0x10, constructed).
@@ -161,9 +161,7 @@ export function contextTag(
 
    // Implicit: take the single child's value bytes directly
    if (children.length !== 1) {
-      throw new Error(
-         "Implicit context tag requires exactly one child node",
-      );
+      throw new Error("Implicit context tag requires exactly one child node");
    }
 
    const child = children[0]!;
@@ -211,7 +209,7 @@ function positiveToBytes(value: number): Uint8Array {
    }
 
    // If high bit is set, prepend 0x00 for positive number
-   if (bytes.length > 0 && (bytes[0]! & 0x80)) {
+   if (bytes.length > 0 && bytes[0]! & 0x80) {
       bytes.unshift(0x00);
    }
 
@@ -251,7 +249,7 @@ function bigintToTwosComplement(value: bigint): Uint8Array {
          v = v >> 8n;
       }
       // Prepend 0x00 if high bit set
-      if (bytes.length > 0 && (bytes[0]! & 0x80)) {
+      if (bytes.length > 0 && bytes[0]! & 0x80) {
          bytes.unshift(0x00);
       }
       return new Uint8Array(bytes);

@@ -217,9 +217,7 @@ describe("performance benchmarks", () => {
       const endMem = process.memoryUsage().heapUsed;
       const deltaMB = (endMem - startMem) / (1024 * 1024);
 
-      console.log(
-         `[memory scaling 5 PDFs] heap delta=${deltaMB.toFixed(2)}MB`,
-      );
+      console.log(`[memory scaling 5 PDFs] heap delta=${deltaMB.toFixed(2)}MB`);
 
       expect(deltaMB).toBeLessThan(100);
    });
@@ -243,7 +241,8 @@ describe("performance benchmarks", () => {
       // Each unique doc.embedPng() call creates one such entry.
       // Before fix: 5 entries (one per appearance). After fix: 1 entry (shared).
       const pdfText = new TextDecoder("latin1").decode(signed);
-      const imageXObjectCount = (pdfText.match(/\/Subtype\s*\/Image/g) ?? []).length;
+      const imageXObjectCount = (pdfText.match(/\/Subtype\s*\/Image/g) ?? [])
+         .length;
 
       expect(imageXObjectCount).toBe(1);
    });

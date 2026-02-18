@@ -7,7 +7,11 @@
 
 import { hash } from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
-import type { PdfDocument, PdfImage, PdfPage } from "@f-o-t/pdf/plugins/editing";
+import type {
+   PdfDocument,
+   PdfImage,
+   PdfPage,
+} from "@f-o-t/pdf/plugins/editing";
 import { generateQrCode } from "@f-o-t/qrcode";
 import type { QrCodeConfig, SignatureAppearance } from "./types.ts";
 
@@ -46,8 +50,11 @@ export function drawSignatureAppearance(
          options.preEmbeddedQr ??
          (() => {
             const qrData =
-               options.qrCode?.data ?? createVerificationData(certInfo, options.pdfData);
-            const qrPng = generateQrCode(qrData, { size: options.qrCode?.size ?? 100 });
+               options.qrCode?.data ??
+               createVerificationData(certInfo, options.pdfData);
+            const qrPng = generateQrCode(qrData, {
+               size: options.qrCode?.size ?? 100,
+            });
             return doc.embedPng(qrPng);
          })();
 

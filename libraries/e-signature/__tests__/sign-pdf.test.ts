@@ -53,10 +53,15 @@ describe("signPdf", () => {
       //   SEQUENCE {}              <- TimeStampToken (empty for test)
       // }
       const fakeTsaResponse = new Uint8Array([
-         0x30, 0x07, // SEQUENCE (7 bytes)
-         0x30, 0x03, //   SEQUENCE (PKIStatusInfo, 3 bytes)
-         0x02, 0x01, 0x00, //     INTEGER 0 (status=granted)
-         0x30, 0x00, //   SEQUENCE {} (TimeStampToken)
+         0x30,
+         0x07, // SEQUENCE (7 bytes)
+         0x30,
+         0x03, //   SEQUENCE (PKIStatusInfo, 3 bytes)
+         0x02,
+         0x01,
+         0x00, //     INTEGER 0 (status=granted)
+         0x30,
+         0x00, //   SEQUENCE {} (TimeStampToken)
       ]);
 
       const originalFetch = globalThis.fetch;
@@ -88,7 +93,6 @@ describe("signPdf", () => {
          globalThis.fetch = originalFetch;
       }
    });
-
 
    it("signs a PDF without appearance", async () => {
       const pdf = createTestPdf();

@@ -55,7 +55,11 @@ export async function requestTimestamp(
    dataToTimestamp: Uint8Array,
    tsaUrl: string,
    hashAlgorithm: "sha256" | "sha384" | "sha512" = "sha256",
-   options?: { tsaTimeout?: number; tsaRetries?: number; tsaFallbackUrls?: string[] },
+   options?: {
+      tsaTimeout?: number;
+      tsaRetries?: number;
+      tsaFallbackUrls?: string[];
+   },
 ): Promise<Uint8Array> {
    // 1. Hash the data
    const messageHash = hash(hashAlgorithm, dataToTimestamp);
@@ -91,9 +95,10 @@ export async function requestTimestamp(
    }
 
    // 5. All servers failed
-   const fallbackList = tsaFallbackUrls.length > 0
-      ? `, fallbacks: [${tsaFallbackUrls.join(", ")}]`
-      : "";
+   const fallbackList =
+      tsaFallbackUrls.length > 0
+         ? `, fallbacks: [${tsaFallbackUrls.join(", ")}]`
+         : "";
    throw new TimestampError(
       `TSA request failed: all servers unreachable (primary: ${tsaUrl}${fallbackList}). Last error: ${lastError?.message ?? "unknown"}`,
    );
