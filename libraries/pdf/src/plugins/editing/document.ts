@@ -408,7 +408,7 @@ export class PdfDocumentImpl implements PdfDocument {
 			// Defaults to page 0; callers pass `appearancePage` to match the
 			// visual appearance location so PDF readers navigate correctly.
 			const sigPageIdx = Math.min(
-				sigOptions.appearancePage ?? 0,
+				Math.max(sigOptions.appearancePage ?? 0, 0),
 				this.pages.length - 1,
 			);
 			const sigPageNum = this.structure.pageNums[sigPageIdx]!;
