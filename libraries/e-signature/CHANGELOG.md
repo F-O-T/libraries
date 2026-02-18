@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-02-18
+
+### Fixed
+- `onTimestampError` schema now uses Zod v4 `z.function({ input, output })` API instead of the removed `z.function().args().returns()` (Zod v3) — fixes `TypeError: z.function(...).args is not a function` at import time
+
 ## [1.2.1] - 2026-02-18
 
 ### Added
