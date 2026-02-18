@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/pdf",
-   "version": "0.3.7",
+   "version": "0.3.8",
    "type": "module",
    "files": [
       "dist"

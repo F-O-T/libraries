@@ -404,8 +404,16 @@ export class PdfDocumentImpl implements PdfDocument {
 
 			objects.push({ objNum: sigObjNum, content: sigParts.join("\n") });
 
+			// Resolve which page hosts the signature widget annotation.
+			// Defaults to page 0; callers pass `appearancePage` to match the
+			// visual appearance location so PDF readers navigate correctly.
+			const sigPageIdx = Math.min(
+				sigOptions.appearancePage ?? 0,
+				this.pages.length - 1,
+			);
+			const sigPageNum = this.structure.pageNums[sigPageIdx]!;
+
 			// Widget annotation
-			const firstPageNum = this.structure.pageNums[0]!;
 			objects.push({
 				objNum: widgetObjNum,
 				content: [
@@ -416,7 +424,7 @@ export class PdfDocumentImpl implements PdfDocument {
 					`/V ${sigObjNum} 0 R`,
 					`/T ${pdfString("Signature1")}`,
 					"/F 4",
-					`/P ${firstPageNum} 0 R`,
+					`/P ${sigPageNum} 0 R`,
 					">>",
 				].join("\n"),
 			});
@@ -443,17 +451,17 @@ export class PdfDocumentImpl implements PdfDocument {
 				content: `<<${rootContent}\n/AcroForm ${acroFormObjNum} 0 R\n>>`,
 			});
 
-			// Updated first page with Annots
-			const firstPage = this.pages[0]!;
+			// Updated sigPage with Annots
+			const sigPage = this.pages[sigPageIdx]!;
 			let pageContent: string;
 
 			// Check if we already have this page in objects (from dirty page update)
-			const existingPageObj = objects.find((o) => o.objNum === firstPage.pageObjNum);
+			const existingPageObj = objects.find((o) => o.objNum === sigPage.pageObjNum);
 			if (existingPageObj) {
 				// Extract content from existing updated page (strip outer << >>)
 				pageContent = existingPageObj.content.slice(2, existingPageObj.content.length - 2);
 			} else {
-				pageContent = firstPage.originalDictContent;
+				pageContent = sigPage.originalDictContent;
 			}
 
 			if (pageContent.includes("/Annots")) {
@@ -471,7 +479,7 @@ export class PdfDocumentImpl implements PdfDocument {
 				existingPageObj.content = `<<${pageContent}\n>>`;
 			} else {
 				objects.push({
-					objNum: firstPage.pageObjNum,
+					objNum: sigPage.pageObjNum,
 					content: `<<${pageContent}\n>>`,
 				});
 			}

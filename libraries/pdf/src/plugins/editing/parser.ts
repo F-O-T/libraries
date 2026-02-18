@@ -121,7 +121,11 @@ export function extractObjectDictContent(
 }
 
 /**
- * Find all page object numbers by following Root -> Pages -> Kids
+ * Find all LEAF page object numbers by following Root -> Pages -> Kids recursively.
+ *
+ * The PDF page tree can be arbitrarily deep — every ~100-200 pages, PDF tools
+ * create intermediate Pages nodes (Type=Pages) that group their children.
+ * This function recurses until it reaches actual Page leaves (Type=Page).
  */
 export function findPageObjects(pdfStr: string, rootNum: number): number[] {
 	const rootContent = extractObjectDictContent(pdfStr, rootNum);
@@ -129,9 +133,36 @@ export function findPageObjects(pdfStr: string, rootNum: number): number[] {
 	if (!pagesMatch) throw new Error("Cannot find Pages ref in Root catalog");
 	const pagesNum = parseInt(pagesMatch[1]!, 10);
 
-	const pagesContent = extractObjectDictContent(pdfStr, pagesNum);
-	const kidsMatch = pagesContent.match(/\/Kids\s*\[([^\]]+)\]/);
-	if (!kidsMatch) throw new Error("Cannot find Kids array in Pages");
+	return collectPageLeafs(pdfStr, pagesNum, new Set());
+}
+
+/**
+ * Recursively collect leaf Page object numbers from a page tree node.
+ * Handles both flat trees (all Kids are Pages) and nested trees
+ * (intermediate Pages nodes with their own Kids arrays).
+ */
+function collectPageLeafs(
+	pdfStr: string,
+	objNum: number,
+	visited: Set<number>,
+): number[] {
+	if (visited.has(objNum)) return []; // guard against malformed circular refs
+	visited.add(objNum);
+
+	const content = extractObjectDictContent(pdfStr, objNum);
+
+	// Distinguish leaf Page from intermediate Pages node via /Type
+	const typeMatch = content.match(/\/Type\s+\/(\w+)/);
+	if (typeMatch?.[1] === "Page") {
+		return [objNum];
+	}
+
+	// Intermediate Pages node — recurse into each kid
+	const kidsMatch = content.match(/\/Kids\s*\[([^\]]+)\]/);
+	if (!kidsMatch) {
+		// Malformed node: no Kids and not a leaf — treat as single page (best effort)
+		return [objNum];
+	}
 
 	const refs: number[] = [];
 	const refRegex = /(\d+)\s+\d+\s+R/g;
@@ -140,30 +171,48 @@ export function findPageObjects(pdfStr: string, rootNum: number): number[] {
 		refs.push(parseInt(m[1]!, 10));
 	}
 
-	return refs;
+	const pages: number[] = [];
+	for (const ref of refs) {
+		pages.push(...collectPageLeafs(pdfStr, ref, visited));
+	}
+	return pages;
 }
 
 /**
- * Get the MediaBox for a page object: [x1, y1, x2, y2]
+ * Get the MediaBox for a page object: [x1, y1, x2, y2].
+ *
+ * Per the PDF spec, /MediaBox is inherited: if the Page object itself does not
+ * carry the entry, we walk up the /Parent chain until we find one.
  */
 export function getMediaBox(
 	pdfStr: string,
 	pageObjNum: number,
 ): [number, number, number, number] {
-	const content = extractObjectDictContent(pdfStr, pageObjNum);
-	const mediaBoxMatch = content.match(
-		/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/,
-	);
-	if (!mediaBoxMatch) {
-		throw new Error(`Cannot find MediaBox for page object ${pageObjNum}`);
+	const visited = new Set<number>(); // guard against malformed circular refs
+	let objNum: number | null = pageObjNum;
+
+	while (objNum !== null && !visited.has(objNum)) {
+		visited.add(objNum);
+		const content = extractObjectDictContent(pdfStr, objNum);
+
+		const mediaBoxMatch = content.match(
+			/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/,
+		);
+		if (mediaBoxMatch) {
+			return [
+				parseFloat(mediaBoxMatch[1]!),
+				parseFloat(mediaBoxMatch[2]!),
+				parseFloat(mediaBoxMatch[3]!),
+				parseFloat(mediaBoxMatch[4]!),
+			];
+		}
+
+		// Walk up the parent chain
+		const parentMatch = content.match(/\/Parent\s+(\d+)\s+\d+\s+R/);
+		objNum = parentMatch ? parseInt(parentMatch[1]!, 10) : null;
 	}
 
-	return [
-		parseFloat(mediaBoxMatch[1]!),
-		parseFloat(mediaBoxMatch[2]!),
-		parseFloat(mediaBoxMatch[3]!),
-		parseFloat(mediaBoxMatch[4]!),
-	];
+	throw new Error(`Cannot find MediaBox for page object ${pageObjNum}`);
 }
 
 /**
