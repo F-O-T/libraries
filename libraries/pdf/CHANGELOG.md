@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.6] - 2026-02-18
+
+### Fixed
+- `saveWithPlaceholder` no longer allocates a full copy of the assembled output PDF to patch the ByteRange values — the update is now applied in-place, reducing peak heap by one PDF-sized buffer per signing operation
+- `findByteRange`, `embedSignature`, and the internal byte-range update no longer decode the entire PDF to a JS string to locate structure markers; byte patterns are now found via direct `Uint8Array` search, eliminating up to 3× PDF-size string allocations during a single sign call
+
 ## [0.3.5] - 2026-02-18
 
 ### Added
