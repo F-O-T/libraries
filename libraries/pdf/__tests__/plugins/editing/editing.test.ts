@@ -311,3 +311,35 @@ describe("round-trip: generate -> load -> edit -> save", () => {
 		expect(reloaded.pageCount).toBe(1);
 	});
 });
+
+describe("binary byte search helpers (internal — tested via findByteRange)", () => {
+	it("findByteRange: works correctly on PDF with binary (non-ASCII) bytes in content", () => {
+		// Create a PDF and save with placeholder — the output binary contains
+		// non-ASCII bytes in the compressed content streams.
+		const doc = new PDFDocument();
+		const page = doc.addPage({ size: "Letter" });
+		// Write text that forces multi-byte content streams
+		for (let i = 0; i < 20; i++) {
+			page.drawText(`Line ${i} — lorem ipsum content here`, { x: 50, y: 700 - i * 20, size: 11 });
+		}
+		const pdfBytes = doc.save();
+
+		const editDoc = loadPdf(pdfBytes);
+		const { pdf: withPlaceholder } = editDoc.saveWithPlaceholder({ reason: "Test" });
+
+		// findByteRange must return a structurally valid result
+		const { byteRange, contentsStart, contentsEnd, placeholderLength } = findByteRange(withPlaceholder);
+
+		expect(byteRange[0]).toBe(0);
+		expect(byteRange[1]).toBeGreaterThan(0);
+		expect(byteRange[2]).toBeGreaterThan(byteRange[1]);
+		expect(byteRange[3]).toBeGreaterThan(0);
+		expect(contentsStart).toBeGreaterThan(0);
+		expect(contentsEnd).toBeGreaterThan(contentsStart);
+		expect(placeholderLength).toBeGreaterThan(0);
+		// contentsStart - 1 should be the '<' before the hex placeholder
+		expect(withPlaceholder[contentsStart - 1]).toBe(0x3c); // '<'
+		// byte at contentsEnd should be '>'
+		expect(withPlaceholder[contentsEnd]).toBe(0x3e); // '>'
+	});
+});

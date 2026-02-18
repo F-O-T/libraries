@@ -27,6 +27,24 @@ const DEFAULT_SIGNATURE_LENGTH = 16384;
 const latin1Encoder = new TextEncoder(); // UTF-8 but we only feed ASCII/latin1-safe chars
 const latin1Decoder = new TextDecoder("latin1");
 
+// Pre-encoded byte patterns for PDF structure search (avoids per-call allocation)
+const CONTENTS_MARKER = new TextEncoder().encode("/Contents <");
+const BYTE_RANGE_MARKER = new TextEncoder().encode("/ByteRange [");
+
+/**
+ * Search for the last occurrence of `pattern` inside `data`.
+ * Returns the byte offset of the first byte of the match, or -1.
+ */
+function findLastBytes(data: Uint8Array, pattern: Uint8Array): number {
+	outer: for (let i = data.length - pattern.length; i >= 0; i--) {
+		for (let j = 0; j < pattern.length; j++) {
+			if (data[i + j] !== pattern[j]) continue outer;
+		}
+		return i;
+	}
+	return -1;
+}
+
 /**
  * Parse PNG IHDR to extract width, height, bit depth, and colour type.
  */
