@@ -46,6 +46,23 @@ const signedPdf = await signPdf(pdfBytes, {
 await Bun.write("signed.pdf", signedPdf);
 ```
 
+To stamp multiple pages with the same visual appearance:
+
+```ts
+const signedPdf = await signPdf(pdfBytes, {
+  certificate: { p12, password: "secret" },
+  reason: "Document approval",
+  appearances: [
+    { x: 50, y: 730, width: 200, height: 80, page: 0, showCertInfo: true },
+    { x: 50, y: 730, width: 200, height: 80, page: 1, showCertInfo: true },
+    { x: 50, y: 730, width: 200, height: 80, page: 2, showCertInfo: true },
+  ],
+  qrCode: { data: "https://validar.iti.gov.br", size: 128 },
+});
+```
+
+`appearance` and `appearances` can be used simultaneously — both stamps are rendered. An empty `appearances: []` is a no-op.
+
 ### `buildSigningCertificateV2(certDer: Uint8Array): Uint8Array`
 
 Build the `id-aa-signingCertificateV2` attribute value (RFC 5035). Links the signature to the specific certificate used, preventing substitution attacks.
@@ -102,7 +119,10 @@ type PdfSignOptions = {
   policy?: "pades-ades" | "pades-icp-brasil";
   timestamp?: boolean;
   tsaUrl?: string;
+  /** Single visual stamp (false to disable) */
   appearance?: SignatureAppearance | false;
+  /** Multiple visual stamps — renders one per entry, useful for multi-page documents */
+  appearances?: SignatureAppearance[];
   qrCode?: QrCodeConfig;
   docMdpPermission?: 1 | 2 | 3;
 };
