@@ -104,7 +104,7 @@ Build the `id-aa-ets-sigPolicyId` attribute value. Downloads the ICP-Brasil PAdE
 
 Clear the cached signature policy data, forcing a re-download on the next call.
 
-### `requestTimestamp(data: Uint8Array, tsaUrl: string, hashAlgorithm?: "sha256" | "sha384" | "sha512"): Promise<Uint8Array>`
+### `requestTimestamp(data: Uint8Array, tsaUrl: string, hashAlgorithm?: "sha256" | "sha384" | "sha512", options?: { tsaTimeout?: number; tsaRetries?: number; tsaFallbackUrls?: string[] }): Promise<Uint8Array>`
 
 Request an RFC 3161 timestamp from a TSA server. Returns the DER-encoded TimeStampToken.
 
