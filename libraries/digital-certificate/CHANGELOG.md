@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.2.1] - 2026-02-18
+
+### Added
+- Performance benchmarks for certificate parsing, PEM pair extraction, validity check, and expiry calculation (`__tests__/performance.test.ts`)
+
 ## [2.2.0] - 2026-02-14
 
 ### Added

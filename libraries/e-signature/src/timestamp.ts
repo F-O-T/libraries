@@ -43,17 +43,19 @@ export const TIMESTAMP_TOKEN_OID = "1.2.840.113549.1.9.16.2.14";
 // ---------------------------------------------------------------------------
 
 /**
- * Request a timestamp from a TSA server.
+ * Request a timestamp from a TSA server with retry and fallback support.
  *
  * @param dataToTimestamp - The data to timestamp (usually the signature value)
- * @param tsaUrl - URL of the timestamp server
+ * @param tsaUrl - URL of the primary timestamp server
  * @param hashAlgorithm - Hash algorithm to use (default: "sha256")
+ * @param options - Resilience options (timeout, retries, fallback URLs)
  * @returns DER-encoded TimeStampToken
  */
 export async function requestTimestamp(
    dataToTimestamp: Uint8Array,
    tsaUrl: string,
    hashAlgorithm: "sha256" | "sha384" | "sha512" = "sha256",
+   options?: { tsaTimeout?: number; tsaRetries?: number; tsaFallbackUrls?: string[] },
 ): Promise<Uint8Array> {
    // 1. Hash the data
    const messageHash = hash(hashAlgorithm, dataToTimestamp);
@@ -61,29 +63,80 @@ export async function requestTimestamp(
    // 2. Build TimeStampReq
    const timestampReq = buildTimestampRequest(messageHash, hashAlgorithm);
 
-   // 3. Send to TSA
-   const response = await fetch(tsaUrl, {
-      method: "POST",
-      headers: {
-         "Content-Type": "application/timestamp-query",
-      },
-      body: timestampReq as unknown as BodyInit,
-      signal: AbortSignal.timeout(10000),
-   });
+   const tsaTimeout = options?.tsaTimeout ?? 10000;
+   const tsaRetries = options?.tsaRetries ?? 1;
+   const tsaFallbackUrls = options?.tsaFallbackUrls ?? [];
+
+   let lastError: Error | undefined;
+
+   // 3. Try primary server (tsaRetries total attempts)
+   for (let attempt = 1; attempt <= tsaRetries; attempt++) {
+      if (attempt > 1) {
+         await sleep(2 ** (attempt - 2) * 1000);
+      }
+      try {
+         return await fetchTimestamp(tsaUrl, timestampReq, tsaTimeout);
+      } catch (err) {
+         lastError = err instanceof Error ? err : new Error(String(err));
+      }
+   }
+
+   // 4. Try fallback servers (one attempt each, no delay)
+   for (const fallbackUrl of tsaFallbackUrls) {
+      try {
+         return await fetchTimestamp(fallbackUrl, timestampReq, tsaTimeout);
+      } catch (err) {
+         lastError = err instanceof Error ? err : new Error(String(err));
+      }
+   }
+
+   // 5. All servers failed
+   const fallbackList = tsaFallbackUrls.length > 0
+      ? `, fallbacks: [${tsaFallbackUrls.join(", ")}]`
+      : "";
+   throw new TimestampError(
+      `TSA request failed: all servers unreachable (primary: ${tsaUrl}${fallbackList}). Last error: ${lastError?.message ?? "unknown"}`,
+   );
+}
+
+// ---------------------------------------------------------------------------
+// Internal
+// ---------------------------------------------------------------------------
+
+function sleep(ms: number): Promise<void> {
+   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Perform a single TSA fetch attempt, wrapping network errors with a descriptive message.
+ */
+async function fetchTimestamp(
+   url: string,
+   timestampReq: Uint8Array,
+   timeoutMs: number,
+): Promise<Uint8Array> {
+   let response: Response;
+   try {
+      response = await fetch(url, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/timestamp-query",
+         },
+         body: timestampReq as unknown as BodyInit,
+         signal: AbortSignal.timeout(timeoutMs),
+      });
+   } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`TSA server unreachable: ${url} — ${msg}`);
+   }
 
    if (!response.ok) {
       throw new TimestampError(`TSA returned HTTP ${response.status}`);
    }
 
    const respBuffer = new Uint8Array(await response.arrayBuffer());
-
-   // 4. Validate and extract token
    return extractTimestampToken(respBuffer);
 }
-
-// ---------------------------------------------------------------------------
-// Internal
-// ---------------------------------------------------------------------------
 
 /**
  * Build a TimeStampReq (RFC 3161) as DER bytes.

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-18
+
+### Added
+- `tsaTimeout?: number` option on `PdfSignOptions` — configurable timeout per TSA attempt (default: 10000ms)
+- `tsaRetries?: number` option on `PdfSignOptions` — number of retry attempts on primary TSA server before falling back (default: 1)
+- `tsaFallbackUrls?: string[]` option on `PdfSignOptions` — fallback TSA servers tried in order after primary fails; exponential backoff (1s, 2s) between primary retries only
+- `signPdf` now accepts `ReadableStream<Uint8Array>` as PDF input in addition to `Uint8Array`; internally accumulates chunks before signing
+- `signPdfBatch(files, options): AsyncGenerator<BatchSignEvent>` — sign multiple PDFs sequentially, yielding progress events per file; yields control between files to avoid blocking the event loop
+- `signPdfBatchToArray(files, options): Promise<...>` — convenience wrapper for batch signing that collects results into an array
+- `BatchSignInput` and `BatchSignEvent` types exported from the package
+
+### Fixed
+- TSA errors now include the server URL and original message in the error text instead of an opaque `fetch failed`
+
 ## [1.1.0] - 2026-02-18
 
 ### Added
@@ -70,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.1.0...@f-o-t/e-signature@1.2.0
 [1.1.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.7...@f-o-t/e-signature@1.1.0
 [1.0.7]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.6...@f-o-t/e-signature@1.0.7
 [1.0.6]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.5...@f-o-t/e-signature@1.0.6

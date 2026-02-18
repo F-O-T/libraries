@@ -1,6 +1,6 @@
 {
   "name": "@f-o-t/crypto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PKCS#12 parsing, CMS signing, and cryptographic utilities",
   "type": "module",
   "main": "./dist/index.js",
