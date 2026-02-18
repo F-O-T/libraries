@@ -38,7 +38,7 @@ import type { PdfSignOptions } from "./types.ts";
  * Supports PAdES-BES and PAdES with ICP-Brasil compliance
  * (signing-certificate-v2 and signature-policy attributes).
  *
- * @param pdf - The PDF document as a Uint8Array
+ * @param pdf - The PDF document as a Uint8Array or ReadableStream<Uint8Array>
  * @param options - Signing options
  * @returns The signed PDF as a Uint8Array
  *
@@ -53,9 +53,30 @@ import type { PdfSignOptions } from "./types.ts";
  * ```
  */
 export async function signPdf(
-   pdf: Uint8Array,
+   pdf: Uint8Array | ReadableStream<Uint8Array>,
    options: PdfSignOptions,
 ): Promise<Uint8Array> {
+   // Accumulate ReadableStream into Uint8Array if needed
+   let pdfBytes: Uint8Array;
+   if (pdf instanceof ReadableStream) {
+      const chunks: Uint8Array[] = [];
+      const reader = pdf.getReader();
+      while (true) {
+         const { done, value } = await reader.read();
+         if (done) break;
+         if (value) chunks.push(value);
+      }
+      const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+      pdfBytes = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+         pdfBytes.set(chunk, offset);
+         offset += chunk.length;
+      }
+   } else {
+      pdfBytes = pdf;
+   }
+
    // Validate input
    const opts = pdfSignOptionsSchema.parse(options);
 
@@ -71,7 +92,7 @@ export async function signPdf(
    }
 
    // 2. Load PDF via editing plugin
-   const doc = loadPdf(pdf);
+   const doc = loadPdf(pdfBytes);
 
    // 3. Draw visual signature appearance if requested
    if (opts.appearance !== false && opts.appearance) {
@@ -89,7 +110,7 @@ export async function signPdf(
          reason: opts.reason,
          location: opts.location,
          qrCode: opts.qrCode,
-         pdfData: pdf,
+         pdfData: pdfBytes,
       });
    }
 
@@ -110,7 +131,7 @@ export async function signPdf(
             reason: opts.reason,
             location: opts.location,
             qrCode: opts.qrCode,
-            pdfData: pdf,
+            pdfData: pdfBytes,
          });
       }
    }
