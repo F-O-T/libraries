@@ -7,19 +7,23 @@
  * @packageDocumentation
  */
 
-export { signPdf, PdfSignError } from "./sign-pdf.ts";
 export {
-	buildSigningCertificateV2,
-	buildSignaturePolicy,
-	clearPolicyCache,
-	SignaturePolicyError,
-	ICP_BRASIL_OIDS,
+   buildSignaturePolicy,
+   buildSigningCertificateV2,
+   clearPolicyCache,
+   ICP_BRASIL_OIDS,
+   SignaturePolicyError,
 } from "./icp-brasil.ts";
-export {
-	requestTimestamp,
-	TimestampError,
-	TIMESTAMP_SERVERS,
-	TIMESTAMP_TOKEN_OID,
-} from "./timestamp.ts";
-export type { PdfSignOptions, SignatureAppearance, QrCodeConfig } from "./types.ts";
 export { pdfSignOptionsSchema } from "./schemas.ts";
+export { PdfSignError, signPdf } from "./sign-pdf.ts";
+export {
+   requestTimestamp,
+   TIMESTAMP_SERVERS,
+   TIMESTAMP_TOKEN_OID,
+   TimestampError,
+} from "./timestamp.ts";
+export type {
+   PdfSignOptions,
+   QrCodeConfig,
+   SignatureAppearance,
+} from "./types.ts";

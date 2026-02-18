@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { PDFDocument } from "@f-o-t/pdf/plugins/generation";
-import { signPdf, PdfSignError } from "../src/sign-pdf.ts";
+import { PdfSignError, signPdf } from "../src/sign-pdf.ts";
 
 const fixtureDir = join(import.meta.dir, "fixtures");
 const p12Path = join(fixtureDir, "test.p12");

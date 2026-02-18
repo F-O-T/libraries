@@ -93,7 +93,6 @@ export async function signPdf(
       });
    }
 
-
    // 3b. Draw multiple visual signature appearances if provided
    if (opts.appearances && opts.appearances.length > 0) {
       for (const app of opts.appearances) {
