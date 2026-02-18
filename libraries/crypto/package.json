@@ -1,38 +1,38 @@
 {
-  "name": "@f-o-t/crypto",
-  "version": "1.0.1",
-  "description": "PKCS#12 parsing, CMS signing, and cryptographic utilities",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "bun x --bun fot build",
-    "test": "bun x --bun fot test",
-    "lint": "bun x --bun fot lint",
-    "format": "bun x --bun fot format",
-    "check": "bun x --bun fot check"
-  },
-  "dependencies": {
-    "@f-o-t/asn1": "^1.0.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "^1.0.1",
-    "@f-o-t/config": "^1.0.3",
-    "@types/bun": "latest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/crypto"
-  }
+   "name": "@f-o-t/crypto",
+   "version": "1.1.0",
+   "description": "PKCS#12 parsing, CMS signing, and cryptographic utilities",
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "default": "./dist/index.js"
+      }
+   },
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "bun x --bun fot build",
+      "test": "bun x --bun fot test",
+      "lint": "bun x --bun fot lint",
+      "format": "bun x --bun fot format",
+      "check": "bun x --bun fot check"
+   },
+   "dependencies": {
+      "@f-o-t/asn1": "^1.0.0",
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "^1.0.1",
+      "@f-o-t/config": "^1.0.3",
+      "@types/bun": "latest"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/crypto"
+   }
 }

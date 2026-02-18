@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-export { signPdfBatch, signPdfBatchToArray } from "./batch.ts";
 export type { BatchSignEvent, BatchSignInput } from "./batch.ts";
+export { signPdfBatch, signPdfBatchToArray } from "./batch.ts";
 export {
    buildSignaturePolicy,
    buildSigningCertificateV2,

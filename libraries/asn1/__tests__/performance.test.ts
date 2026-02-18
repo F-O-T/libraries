@@ -3,18 +3,18 @@ import { expect, setDefaultTimeout, test } from "bun:test";
 setDefaultTimeout(120000);
 
 import {
-   encodeDer,
+   bitString,
+   contextTag,
    decodeDer,
+   encodeDer,
+   integer,
+   nullValue,
+   octetString,
+   oid,
    sequence,
    set,
-   integer,
-   oid,
-   octetString,
-   bitString,
-   utf8String,
-   nullValue,
    utcTime,
-   contextTag,
+   utf8String,
 } from "../src/index.ts";
 
 interface BenchmarkResult {
@@ -87,28 +87,25 @@ function buildTbsCertificate() {
 function buildCmsSignedData() {
    return sequence(
       oid("1.2.840.113549.1.7.2"),
-      contextTag(
-         0,
-         [
-            sequence(
-               integer(1),
-               set(sequence(oid("2.16.840.1.101.3.4.2.1"), nullValue())),
-               sequence(oid("1.2.840.113549.1.7.1")),
-               set(
+      contextTag(0, [
+         sequence(
+            integer(1),
+            set(sequence(oid("2.16.840.1.101.3.4.2.1"), nullValue())),
+            sequence(oid("1.2.840.113549.1.7.1")),
+            set(
+               sequence(
+                  integer(1),
                   sequence(
-                     integer(1),
-                     sequence(
-                        sequence(oid("2.5.4.3"), utf8String("JOSE DA SILVA")),
-                        integer(12345),
-                     ),
-                     sequence(oid("2.16.840.1.101.3.4.2.1"), nullValue()),
-                     octetString(new Uint8Array(32).fill(0xde)),
-                     bitString(new Uint8Array(256).fill(0xbb)),
+                     sequence(oid("2.5.4.3"), utf8String("JOSE DA SILVA")),
+                     integer(12345),
                   ),
+                  sequence(oid("2.16.840.1.101.3.4.2.1"), nullValue()),
+                  octetString(new Uint8Array(32).fill(0xde)),
+                  bitString(new Uint8Array(256).fill(0xbb)),
                ),
             ),
-         ],
-      ),
+         ),
+      ]),
    );
 }
 

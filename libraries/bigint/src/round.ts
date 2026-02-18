@@ -1,4 +1,4 @@
-import { ConvertScaleInputSchema, type ConvertScaleInput } from "./schemas";
+import { type ConvertScaleInput, ConvertScaleInputSchema } from "./schemas";
 
 /**
  * Round using banker's rounding (round half to even)
@@ -17,55 +17,55 @@ import { ConvertScaleInputSchema, type ConvertScaleInput } from "./schemas";
  * bankersRound(35n, 10n) // 4n (3.5 → 4, even)
  */
 export function bankersRound(value: bigint, divisor: bigint): bigint {
-  if (divisor === 0n) {
-    throw new Error("Division by zero");
-  }
+   if (divisor === 0n) {
+      throw new Error("Division by zero");
+   }
 
-  const quotient = value / divisor;
-  const remainder = value % divisor;
+   const quotient = value / divisor;
+   const remainder = value % divisor;
 
-  // No remainder - exact division
-  if (remainder === 0n) {
-    return quotient;
-  }
-
-  // Get absolute remainder for comparison
-  const absRemainder = remainder < 0n ? -remainder : remainder;
-  const absDivisor = divisor < 0n ? -divisor : divisor;
-
-  // Check if exactly halfway
-  const isHalfway = absRemainder * 2n === absDivisor;
-
-  if (isHalfway) {
-    // Round to even
-    const absQuotient = quotient < 0n ? -quotient : quotient;
-    const isQuotientEven = absQuotient % 2n === 0n;
-
-    if (isQuotientEven) {
-      // Already even, round toward zero
+   // No remainder - exact division
+   if (remainder === 0n) {
       return quotient;
-    } else {
-      // Odd, round away from zero to make even
-      if (value < 0n) {
-        return quotient - 1n;
+   }
+
+   // Get absolute remainder for comparison
+   const absRemainder = remainder < 0n ? -remainder : remainder;
+   const absDivisor = divisor < 0n ? -divisor : divisor;
+
+   // Check if exactly halfway
+   const isHalfway = absRemainder * 2n === absDivisor;
+
+   if (isHalfway) {
+      // Round to even
+      const absQuotient = quotient < 0n ? -quotient : quotient;
+      const isQuotientEven = absQuotient % 2n === 0n;
+
+      if (isQuotientEven) {
+         // Already even, round toward zero
+         return quotient;
       } else {
-        return quotient + 1n;
+         // Odd, round away from zero to make even
+         if (value < 0n) {
+            return quotient - 1n;
+         } else {
+            return quotient + 1n;
+         }
       }
-    }
-  }
+   }
 
-  // Not halfway - standard rounding
-  // If abs(remainder) > divisor/2, round away from zero
-  if (absRemainder * 2n > absDivisor) {
-    if (value < 0n) {
-      return quotient - 1n;
-    } else {
-      return quotient + 1n;
-    }
-  }
+   // Not halfway - standard rounding
+   // If abs(remainder) > divisor/2, round away from zero
+   if (absRemainder * 2n > absDivisor) {
+      if (value < 0n) {
+         return quotient - 1n;
+      } else {
+         return quotient + 1n;
+      }
+   }
 
-  // Otherwise round toward zero
-  return quotient;
+   // Otherwise round toward zero
+   return quotient;
 }
 
 /**
@@ -85,26 +85,26 @@ export function bankersRound(value: bigint, divisor: bigint): bigint {
  * roundUp(-11n, 10n)  // -1n (ceiling of -1.1)
  */
 export function roundUp(value: bigint, divisor: bigint): bigint {
-  if (divisor === 0n) {
-    throw new Error("Division by zero");
-  }
+   if (divisor === 0n) {
+      throw new Error("Division by zero");
+   }
 
-  const quotient = value / divisor;
-  const remainder = value % divisor;
+   const quotient = value / divisor;
+   const remainder = value % divisor;
 
-  // No remainder - exact division
-  if (remainder === 0n) {
-    return quotient;
-  }
+   // No remainder - exact division
+   if (remainder === 0n) {
+      return quotient;
+   }
 
-  // For ceiling, we round up (toward positive infinity)
-  // If positive and has remainder, add 1 to quotient
-  // If negative and has remainder, quotient is already correct (truncates toward zero which is toward +inf)
-  if (value > 0n) {
-    return quotient + 1n;
-  } else {
-    return quotient;
-  }
+   // For ceiling, we round up (toward positive infinity)
+   // If positive and has remainder, add 1 to quotient
+   // If negative and has remainder, quotient is already correct (truncates toward zero which is toward +inf)
+   if (value > 0n) {
+      return quotient + 1n;
+   } else {
+      return quotient;
+   }
 }
 
 /**
@@ -124,26 +124,26 @@ export function roundUp(value: bigint, divisor: bigint): bigint {
  * roundDown(-11n, 10n)  // -2n (floor of -1.1)
  */
 export function roundDown(value: bigint, divisor: bigint): bigint {
-  if (divisor === 0n) {
-    throw new Error("Division by zero");
-  }
+   if (divisor === 0n) {
+      throw new Error("Division by zero");
+   }
 
-  const quotient = value / divisor;
-  const remainder = value % divisor;
+   const quotient = value / divisor;
+   const remainder = value % divisor;
 
-  // No remainder - exact division
-  if (remainder === 0n) {
-    return quotient;
-  }
+   // No remainder - exact division
+   if (remainder === 0n) {
+      return quotient;
+   }
 
-  // For floor, we round down (toward negative infinity)
-  // If positive and has remainder, quotient is already correct (truncates toward zero which is toward -inf)
-  // If negative and has remainder, subtract 1 from quotient
-  if (value < 0n) {
-    return quotient - 1n;
-  } else {
-    return quotient;
-  }
+   // For floor, we round down (toward negative infinity)
+   // If positive and has remainder, quotient is already correct (truncates toward zero which is toward -inf)
+   // If negative and has remainder, subtract 1 from quotient
+   if (value < 0n) {
+      return quotient - 1n;
+   } else {
+      return quotient;
+   }
 }
 
 /**
@@ -173,37 +173,41 @@ export function roundDown(value: bigint, divisor: bigint): bigint {
  * // Result: 124n (banker's rounding: 123.50 → 124, even)
  */
 export function convertScale(input: ConvertScaleInput): bigint {
-  // Validate input
-  const { value, fromScale, toScale, roundingMode = "truncate" } =
-    ConvertScaleInputSchema.parse(input);
+   // Validate input
+   const {
+      value,
+      fromScale,
+      toScale,
+      roundingMode = "truncate",
+   } = ConvertScaleInputSchema.parse(input);
 
-  // Same scale - no conversion needed
-  if (fromScale === toScale) {
-    return value;
-  }
+   // Same scale - no conversion needed
+   if (fromScale === toScale) {
+      return value;
+   }
 
-  // Scaling up - multiply by power of 10
-  if (toScale > fromScale) {
-    const scaleDiff = toScale - fromScale;
-    const multiplier = 10n ** BigInt(scaleDiff);
-    return value * multiplier;
-  }
+   // Scaling up - multiply by power of 10
+   if (toScale > fromScale) {
+      const scaleDiff = toScale - fromScale;
+      const multiplier = 10n ** BigInt(scaleDiff);
+      return value * multiplier;
+   }
 
-  // Scaling down - divide with rounding
-  const scaleDiff = fromScale - toScale;
-  const divisor = 10n ** BigInt(scaleDiff);
+   // Scaling down - divide with rounding
+   const scaleDiff = fromScale - toScale;
+   const divisor = 10n ** BigInt(scaleDiff);
 
-  switch (roundingMode) {
-    case "truncate":
-      return value / divisor;
-    case "round":
-      return bankersRound(value, divisor);
-    case "ceil":
-      return roundUp(value, divisor);
-    case "floor":
-      return roundDown(value, divisor);
-    default:
-      // This should never happen due to Zod validation
-      throw new Error(`Unknown rounding mode: ${roundingMode}`);
-  }
+   switch (roundingMode) {
+      case "truncate":
+         return value / divisor;
+      case "round":
+         return bankersRound(value, divisor);
+      case "ceil":
+         return roundUp(value, divisor);
+      case "floor":
+         return roundDown(value, divisor);
+      default:
+         // This should never happen due to Zod validation
+         throw new Error(`Unknown rounding mode: ${roundingMode}`);
+   }
 }

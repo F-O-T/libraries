@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
-import { encodeDer } from "../src/encoder.ts";
 import {
-   sequence,
-   integer,
    boolean as asn1Boolean,
+   integer,
    nullValue,
    octetString,
    oid,
+   sequence,
 } from "../src/builders.ts";
+import { encodeDer } from "../src/encoder.ts";
 
 describe("encodeDer", () => {
    it("encodes NULL", () => {

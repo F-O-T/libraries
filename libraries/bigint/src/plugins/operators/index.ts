@@ -24,18 +24,18 @@
 
 // Re-export comparison operators
 export {
-  bigintEqualsOperator,
-  bigintNotEqualsOperator,
-  bigintGreaterThanOperator,
-  bigintGreaterThanOrEqualOperator,
-  bigintLessThanOperator,
-  bigintLessThanOrEqualOperator,
+   bigintEqualsOperator,
+   bigintGreaterThanOperator,
+   bigintGreaterThanOrEqualOperator,
+   bigintLessThanOperator,
+   bigintLessThanOrEqualOperator,
+   bigintNotEqualsOperator,
 } from "./comparison";
 
 // Re-export range operators
 export {
-  bigintBetweenOperator,
-  bigintIsZeroOperator,
-  bigintIsPositiveOperator,
-  bigintIsNegativeOperator,
+   bigintBetweenOperator,
+   bigintIsNegativeOperator,
+   bigintIsPositiveOperator,
+   bigintIsZeroOperator,
 } from "./range";

@@ -27,6 +27,24 @@ const DEFAULT_SIGNATURE_LENGTH = 16384;
 const latin1Encoder = new TextEncoder(); // UTF-8 but we only feed ASCII/latin1-safe chars
 const latin1Decoder = new TextDecoder("latin1");
 
+// Pre-encoded byte patterns for PDF structure search (avoids per-call allocation)
+const CONTENTS_MARKER = latin1Encoder.encode("/Contents <");
+const BYTE_RANGE_MARKER = latin1Encoder.encode("/ByteRange [");
+
+/**
+ * Search for the last occurrence of `pattern` inside `data`.
+ * Returns the byte offset of the first byte of the match, or -1.
+ */
+function findLastBytes(data: Uint8Array, pattern: Uint8Array): number {
+	outer: for (let i = data.length - pattern.length; i >= 0; i--) {
+		for (let j = 0; j < pattern.length; j++) {
+			if (data[i + j] !== pattern[j]) continue outer;
+		}
+		return i;
+	}
+	return -1;
+}
+
 /**
  * Parse PNG IHDR to extract width, height, bit depth, and colour type.
  */
@@ -525,9 +543,8 @@ export class PdfDocumentImpl implements PdfDocument {
 		let byteRange: [number, number, number, number] = [0, 0, 0, 0];
 
 		if (withSignature) {
-			const { br, updatedPdf } = updateByteRange(result);
-			byteRange = br;
-			return { pdf: updatedPdf, byteRange };
+			const br = updateByteRangeInPlace(result);
+			return { pdf: result, byteRange: br };
 		}
 
 		return { pdf: result, byteRange };
@@ -586,54 +603,38 @@ function pdfString(str: string): string {
 }
 
 /**
- * Find and update the ByteRange placeholder in the PDF, returning the
- * actual byte range values and the updated PDF bytes.
+ * Find and overwrite the ByteRange placeholder in an assembled PDF buffer.
+ * Modifies `pdf` in-place. Returns the final byte range values.
  */
-function updateByteRange(pdf: Uint8Array): {
-	br: [number, number, number, number];
-	updatedPdf: Uint8Array;
-} {
-	const pdfStr = new TextDecoder("latin1").decode(pdf);
-
-	// Find /Contents < ... > in the signature object
-	const contentsMarker = "/Contents <";
-	const contentsIdx = pdfStr.lastIndexOf(contentsMarker);
+function updateByteRangeInPlace(pdf: Uint8Array): [number, number, number, number] {
+	// Locate /Contents < ... >
+	const contentsIdx = findLastBytes(pdf, CONTENTS_MARKER);
 	if (contentsIdx === -1) throw new Error("Cannot find Contents in signature");
-	const contentsStart = contentsIdx + contentsMarker.length;
-	const contentsEnd = pdfStr.indexOf(">", contentsStart);
-	if (contentsEnd === -1) throw new Error("Cannot find end of Contents hex");
+	const contentsStart = contentsIdx + CONTENTS_MARKER.length;
+	let contentsEnd = contentsStart;
+	while (contentsEnd < pdf.length && pdf[contentsEnd] !== 0x3e) contentsEnd++;
+	if (contentsEnd >= pdf.length) throw new Error("Cannot find end of Contents hex");
 
-	// The byte range: [0, before-sig-hex, after-sig-hex, rest]
-	// contentsStart - 1 is the position of '<'
-	// contentsEnd + 1 is the position after '>'
 	const br: [number, number, number, number] = [
 		0,
-		contentsStart - 1, // length1: everything before '<'
-		contentsEnd + 1, // offset2: after '>'
-		pdf.length - (contentsEnd + 1), // length2: rest of PDF
+		contentsStart - 1,
+		contentsEnd + 1,
+		pdf.length - (contentsEnd + 1),
 	];
 
-	// Now update the ByteRange placeholder with actual values
-	const byteRangeMarker = "/ByteRange [";
-	const brIdx = pdfStr.lastIndexOf(byteRangeMarker);
+	// Locate /ByteRange [ ... ]
+	const brIdx = findLastBytes(pdf, BYTE_RANGE_MARKER);
 	if (brIdx === -1) throw new Error("Cannot find ByteRange in PDF");
-	const brStart = brIdx + byteRangeMarker.length;
-	const brEnd = pdfStr.indexOf("]", brStart);
-	if (brEnd === -1) throw new Error("Cannot find end of ByteRange");
+	const brStart = brIdx + BYTE_RANGE_MARKER.length;
+	let brEnd = brStart;
+	while (brEnd < pdf.length && pdf[brEnd] !== 0x5d) brEnd++;
+	if (brEnd >= pdf.length) throw new Error("Cannot find end of ByteRange");
 
 	const placeholderLen = brEnd - brStart;
-	const brValueStr = `${br[0]} ${br[1]} ${br[2]} ${br[3]}`;
-	const paddedBr = brValueStr.padEnd(placeholderLen, " ");
+	const brValueStr = `${br[0]} ${br[1]} ${br[2]} ${br[3]}`.padEnd(placeholderLen, " ");
+	pdf.set(latin1Encoder.encode(brValueStr), brStart);
 
-	// Build updated PDF
-	const updatedPdf = new Uint8Array(pdf.length);
-	updatedPdf.set(pdf);
-
-	// Write the byte range values
-	const brBytes = new TextEncoder().encode(paddedBr);
-	updatedPdf.set(brBytes, brStart);
-
-	return { br, updatedPdf };
+	return br;
 }
 
 /**
@@ -679,18 +680,15 @@ export function findByteRange(pdfData: Uint8Array): {
 	contentsEnd: number;
 	placeholderLength: number;
 } {
-	const pdf = new TextDecoder("latin1").decode(pdfData);
-
-	const contentsMarker = "/Contents <";
-	const contentsIdx = pdf.lastIndexOf(contentsMarker);
+	const contentsIdx = findLastBytes(pdfData, CONTENTS_MARKER);
 	if (contentsIdx === -1) throw new Error("Could not find Contents in PDF");
 
-	const contentsStart = contentsIdx + contentsMarker.length;
-	const contentsEnd = pdf.indexOf(">", contentsStart);
-	if (contentsEnd === -1) throw new Error("Could not find end of Contents field");
+	const contentsStart = contentsIdx + CONTENTS_MARKER.length;
+	let contentsEnd = contentsStart;
+	while (contentsEnd < pdfData.length && pdfData[contentsEnd] !== 0x3e) contentsEnd++;
+	if (contentsEnd >= pdfData.length) throw new Error("Could not find end of Contents field");
 
 	const placeholderLength = contentsEnd - contentsStart;
-
 	const byteRange: [number, number, number, number] = [
 		0,
 		contentsStart - 1,

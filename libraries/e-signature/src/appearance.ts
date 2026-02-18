@@ -7,7 +7,11 @@
 
 import { hash } from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
-import type { PdfDocument, PdfPage } from "@f-o-t/pdf/plugins/editing";
+import type {
+   PdfDocument,
+   PdfImage,
+   PdfPage,
+} from "@f-o-t/pdf/plugins/editing";
 import { generateQrCode } from "@f-o-t/qrcode";
 import type { QrCodeConfig, SignatureAppearance } from "./types.ts";
 
@@ -26,6 +30,7 @@ export function drawSignatureAppearance(
       location?: string;
       qrCode?: QrCodeConfig;
       pdfData: Uint8Array;
+      preEmbeddedQr?: PdfImage;
    },
 ): void {
    const { x, width, height } = appearance;
@@ -41,15 +46,18 @@ export function drawSignatureAppearance(
 
    // Draw QR code if requested (enabled by default)
    if (showQrCode) {
-      const qrData =
-         options.qrCode?.data ||
-         createVerificationData(certInfo, options.pdfData);
+      const qrImage =
+         options.preEmbeddedQr ??
+         (() => {
+            const qrData =
+               options.qrCode?.data ??
+               createVerificationData(certInfo, options.pdfData);
+            const qrPng = generateQrCode(qrData, {
+               size: options.qrCode?.size ?? 100,
+            });
+            return doc.embedPng(qrPng);
+         })();
 
-      const qrPng = generateQrCode(qrData, {
-         size: options.qrCode?.size || 100,
-      });
-
-      const qrImage = doc.embedPng(qrPng);
       qrSize = Math.min(100, height - 20);
 
       page.drawImage(qrImage, {
@@ -168,6 +176,21 @@ function drawCertInfo(
          });
       }
    }
+}
+
+/**
+ * Pre-compute the QR code image and embed it once into the PDF document.
+ * Call this before an appearances loop so all appearances share a single XObject.
+ */
+export function precomputeSharedQrImage(
+   doc: PdfDocument,
+   certInfo: CertificateInfo | null,
+   pdfData: Uint8Array,
+   qrConfig?: QrCodeConfig,
+): PdfImage {
+   const qrData = qrConfig?.data ?? createVerificationData(certInfo, pdfData);
+   const qrPng = generateQrCode(qrData, { size: qrConfig?.size ?? 100 });
+   return doc.embedPng(qrPng);
 }
 
 /**

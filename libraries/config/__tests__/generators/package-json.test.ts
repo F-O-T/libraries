@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import type { ResolvedFotConfig } from "../../src/types";
 import { generatePackageJson } from "../../src/generators/package-json";
+import type { ResolvedFotConfig } from "../../src/types";
 
 describe("generatePackageJson", () => {
    it("should generate basic package.json structure", () => {

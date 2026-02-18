@@ -21,9 +21,7 @@ export function oidToBytes(dotNotation: string): Uint8Array {
    const second = components[1]!;
 
    if (first > 2) {
-      throw new Error(
-         `Invalid first OID arc: ${first} (must be 0, 1, or 2)`,
-      );
+      throw new Error(`Invalid first OID arc: ${first} (must be 0, 1, or 2)`);
    }
 
    const result: number[] = [];

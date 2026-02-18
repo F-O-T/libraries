@@ -12,8 +12,14 @@
  * 6. Embed signature into PDF
  */
 
+import type { Asn1Node } from "@f-o-t/asn1";
+import { decodeDer } from "@f-o-t/asn1";
 import type { CmsAttribute } from "@f-o-t/crypto";
-import { createSignedData, parsePkcs12 } from "@f-o-t/crypto";
+import {
+   appendUnauthAttributes,
+   createSignedData,
+   parsePkcs12,
+} from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
 import { parseCertificate } from "@f-o-t/digital-certificate";
 import {
@@ -22,14 +28,17 @@ import {
    findByteRange,
    loadPdf,
 } from "@f-o-t/pdf/plugins/editing";
-import { drawSignatureAppearance } from "./appearance.ts";
+import {
+   drawSignatureAppearance,
+   precomputeSharedQrImage,
+} from "./appearance.ts";
 import {
    buildSignaturePolicy,
    buildSigningCertificateV2,
    ICP_BRASIL_OIDS,
 } from "./icp-brasil.ts";
 import { pdfSignOptionsSchema } from "./schemas.ts";
-import { requestTimestamp } from "./timestamp.ts";
+import { requestTimestamp, TIMESTAMP_TOKEN_OID } from "./timestamp.ts";
 import type { PdfSignOptions } from "./types.ts";
 
 /**
@@ -120,6 +129,15 @@ export async function signPdf(
 
    // 3b. Draw multiple visual signature appearances if provided
    if (opts.appearances && opts.appearances.length > 0) {
+      // Pre-embed the QR image once so all appearances share a single PDF XObject.
+      // This collapses N embedPng calls (and N IDAT buffer allocations) into 1.
+      const needsQr = opts.appearances.some((a) => a.showQrCode !== false);
+      // Pre-embed the QR once. Safe to pass to all appearances — drawSignatureAppearance
+      // ignores it when showQrCode is false (inner guard in appearance.ts).
+      const sharedQrImage = needsQr
+         ? precomputeSharedQrImage(doc, certInfo, pdfBytes, opts.qrCode)
+         : undefined;
+
       for (const app of opts.appearances) {
          const pageIndex = app.page ?? 0;
 
@@ -136,6 +154,7 @@ export async function signPdf(
             location: opts.location,
             qrCode: opts.qrCode,
             pdfData: pdfBytes,
+            preEmbeddedQr: sharedQrImage,
          });
       }
    }
@@ -210,27 +229,62 @@ export async function signPdf(
       detached: true,
    });
 
-   // 10. Optionally request timestamp
+   // 10. Optionally request timestamp and embed as unauthenticated attribute
    if (opts.timestamp && opts.tsaUrl) {
       try {
-         const tsToken = await requestTimestamp(signedData, opts.tsaUrl, "sha256", {
-            tsaTimeout: opts.tsaTimeout,
-            tsaRetries: opts.tsaRetries,
-            tsaFallbackUrls: opts.tsaFallbackUrls,
+         const tsToken = await requestTimestamp(
+            extractSignatureValue(signedData),
+            opts.tsaUrl,
+            "sha256",
+            {
+               tsaTimeout: opts.tsaTimeout,
+               tsaRetries: opts.tsaRetries,
+               tsaFallbackUrls: opts.tsaFallbackUrls,
+            },
+         );
+         unauthenticatedAttributes.push({
+            oid: TIMESTAMP_TOKEN_OID,
+            values: [tsToken],
          });
-         // Note: Adding the timestamp as an unauthenticated attribute
-         // would require re-building the CMS structure. For now, we log
-         // that timestamp was received. A future version will embed it.
-         // TODO: Rebuild CMS with timestamp token as unauthenticated attribute
-         void tsToken;
       } catch (err) {
          // Timestamp failure is non-fatal
          opts.onTimestampError?.(err);
       }
    }
 
-   // 11. Embed signature into PDF
-   return embedSignature(pdfWithPlaceholder, signedData);
+   // 11. Patch timestamp token into SignedData as unauthenticated attribute (no re-signing)
+   const finalSignedData = appendUnauthAttributes(
+      signedData,
+      unauthenticatedAttributes,
+   );
+
+   // 12. Embed signature into PDF
+   return embedSignature(pdfWithPlaceholder, finalSignedData);
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract the raw signature value bytes from a DER-encoded CMS ContentInfo.
+ *
+ * Per CAdES (ETSI EN 319 122-1) / RFC 5126 §5.5.1, the id-smime-aa-timeStampToken
+ * attribute must be a timestamp over the SignerInfo.signature octets, not the
+ * full ContentInfo blob.
+ *
+ * ContentInfo → [0] EXPLICIT → SignedData → signerInfos[0] → signature OCTET STRING
+ */
+function extractSignatureValue(contentInfoDer: Uint8Array): Uint8Array {
+   const contentInfo = decodeDer(contentInfoDer);
+   const signedDataNode = (
+      (contentInfo.value as Asn1Node[])[1]!.value as Asn1Node[]
+   )[0]!;
+   // signerInfos is always the last child of SignedData per RFC 5652
+   const signerInfosSet = (signedDataNode.value as Asn1Node[]).at(-1)!;
+   const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
+   const signatureNode = (signerInfo.value as Asn1Node[])[5]!;
+   return signatureNode.value as Uint8Array;
 }
 
 // ---------------------------------------------------------------------------

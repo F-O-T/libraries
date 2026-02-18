@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import type { ResolvedFotConfig } from "../../src/types";
 import { generateTSConfig } from "../../src/generators/tsconfig";
+import type { ResolvedFotConfig } from "../../src/types";
 
 describe("generateTSConfig", () => {
    const baseConfig: ResolvedFotConfig = {
@@ -94,7 +94,9 @@ describe("generateTSConfig", () => {
    it("should disable noPropertyAccessFromIndexSignature for flexibility", () => {
       const tsconfig = generateTSConfig(baseConfig);
 
-      expect(tsconfig.compilerOptions.noPropertyAccessFromIndexSignature).toBe(false);
+      expect(tsconfig.compilerOptions.noPropertyAccessFromIndexSignature).toBe(
+         false,
+      );
    });
 
    it("should enable noUncheckedIndexedAccess for safety", () => {

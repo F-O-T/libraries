@@ -1,21 +1,21 @@
 import { describe, expect, it } from "bun:test";
-import { encodeDer } from "../src/encoder.ts";
 import {
+   boolean as asn1Boolean,
+   bitString,
+   contextTag,
+   generalizedTime,
+   ia5String,
+   integer,
+   nullValue,
+   octetString,
+   oid,
+   printableString,
    sequence,
    set,
-   integer,
-   oid,
-   octetString,
-   bitString,
-   utf8String,
-   ia5String,
-   printableString,
-   boolean as asn1Boolean,
-   nullValue,
    utcTime,
-   generalizedTime,
-   contextTag,
+   utf8String,
 } from "../src/builders.ts";
+import { encodeDer } from "../src/encoder.ts";
 
 describe("builders", () => {
    it("integer handles BigInt", () => {

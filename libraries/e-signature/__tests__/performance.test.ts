@@ -217,10 +217,76 @@ describe("performance benchmarks", () => {
       const endMem = process.memoryUsage().heapUsed;
       const deltaMB = (endMem - startMem) / (1024 * 1024);
 
-      console.log(
-         `[memory scaling 5 PDFs] heap delta=${deltaMB.toFixed(2)}MB`,
-      );
+      console.log(`[memory scaling 5 PDFs] heap delta=${deltaMB.toFixed(2)}MB`);
 
       expect(deltaMB).toBeLessThan(100);
+   });
+
+   it("appearances array: QR image XObject is embedded exactly once regardless of appearance count", async () => {
+      const p12 = await loadP12();
+      const pdf = createMultiPage(5);
+
+      const signed = await signPdf(pdf, {
+         certificate: { p12, password: "test123" },
+         appearances: [
+            { x: 50, y: 50, width: 200, height: 80, page: 0 },
+            { x: 50, y: 50, width: 200, height: 80, page: 1 },
+            { x: 50, y: 50, width: 200, height: 80, page: 2 },
+            { x: 50, y: 50, width: 200, height: 80, page: 3 },
+            { x: 50, y: 50, width: 200, height: 80, page: 4 },
+         ],
+      });
+
+      // Count "/Subtype /Image" entries in the output PDF.
+      // Each unique doc.embedPng() call creates one such entry.
+      // Before fix: 5 entries (one per appearance). After fix: 1 entry (shared).
+      const pdfText = new TextDecoder("latin1").decode(signed);
+      const imageXObjectCount = (pdfText.match(/\/Subtype\s*\/Image/g) ?? [])
+         .length;
+
+      expect(imageXObjectCount).toBe(1);
+   });
+
+   it("appearances array: signing time does not scale linearly with appearance count", async () => {
+      const p12 = await loadP12();
+      const pdf1 = createMultiPage(1);
+      const pdf10 = createMultiPage(10);
+
+      const bench1 = await asyncBenchmark(
+         "appearances: 1",
+         async () => {
+            await signPdf(pdf1, {
+               certificate: { p12, password: "test123" },
+               appearances: [{ x: 50, y: 50, width: 200, height: 80, page: 0 }],
+            });
+         },
+         5,
+      );
+
+      const bench10 = await asyncBenchmark(
+         "appearances: 10",
+         async () => {
+            await signPdf(pdf10, {
+               certificate: { p12, password: "test123" },
+               appearances: Array.from({ length: 10 }, (_, i) => ({
+                  x: 50,
+                  y: 50,
+                  width: 200,
+                  height: 80,
+                  page: i,
+               })),
+            });
+         },
+         5,
+      );
+
+      const ratio = bench10.avgMs / bench1.avgMs;
+      console.log(
+         `[appearances scaling] 1 app avg=${bench1.avgMs.toFixed(1)}ms, 10 app avg=${bench10.avgMs.toFixed(1)}ms, ratio=${ratio.toFixed(1)}x`,
+      );
+
+      // After the QR-dedup fix, 10 appearances should not be 10x slower than 1.
+      // O(N) page modifications are expected; O(N) QR generation is the regression.
+      expect(ratio).toBeLessThan(6);
    });
 });

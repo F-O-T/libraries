@@ -1,14 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { oidToBytes, bytesToOid } from "../src/oid.ts";
+import { bytesToOid, oidToBytes } from "../src/oid.ts";
 
 describe("oidToBytes", () => {
    it("encodes 1.2.840.113549.1.1.11 (sha256WithRSAEncryption)", () => {
       const bytes = oidToBytes("1.2.840.113549.1.1.11");
       // Known encoding: 2a 86 48 86 f7 0d 01 01 0b
       expect(bytes).toEqual(
-         new Uint8Array([
-            0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b,
-         ]),
+         new Uint8Array([0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b]),
       );
    });
 
@@ -20,9 +18,7 @@ describe("oidToBytes", () => {
    it("encodes 1.2.840.113549.1.7.2 (signedData)", () => {
       const bytes = oidToBytes("1.2.840.113549.1.7.2");
       expect(bytes).toEqual(
-         new Uint8Array([
-            0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02,
-         ]),
+         new Uint8Array([0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02]),
       );
    });
 });
@@ -30,9 +26,7 @@ describe("oidToBytes", () => {
 describe("bytesToOid", () => {
    it("decodes sha256WithRSAEncryption", () => {
       const oid = bytesToOid(
-         new Uint8Array([
-            0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b,
-         ]),
+         new Uint8Array([0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b]),
       );
       expect(oid).toBe("1.2.840.113549.1.1.11");
    });
