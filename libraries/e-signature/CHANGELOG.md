@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2026-02-18
+
+### Fixed
+- `extractSignatureValue` now locates `signerInfos` as the last child of `SignedData` (`.at(-1)`) instead of hardcoded index `[4]`; the previous index assumed `certificates [0]` was always present and `crls [1]` always absent, which would produce a wrong timestamp over external CMS blobs with a different layout
+- Updated `@f-o-t/crypto` dependency floor to `^1.1.0` to pick up `appendUnauthAttributes` and the corresponding signerInfos fix
+
 ## [1.2.4] - 2026-02-18
 
 ### Fixed
@@ -103,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.4...@f-o-t/e-signature@1.2.5
 [1.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.1.0...@f-o-t/e-signature@1.2.0
 [1.1.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.7...@f-o-t/e-signature@1.1.0
 [1.0.7]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.6...@f-o-t/e-signature@1.0.7
