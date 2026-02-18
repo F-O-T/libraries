@@ -46,6 +46,50 @@ async function loadP12(): Promise<Uint8Array> {
 }
 
 describe("signPdf", () => {
+   it("embeds RFC 3161 timestamp token as unauthenticated attribute in CMS when timestamp:true", async () => {
+      // Minimal valid TimeStampResp DER:
+      // SEQUENCE {
+      //   SEQUENCE { INTEGER 0 }  <- PKIStatusInfo (status=granted)
+      //   SEQUENCE {}              <- TimeStampToken (empty for test)
+      // }
+      const fakeTsaResponse = new Uint8Array([
+         0x30, 0x07, // SEQUENCE (7 bytes)
+         0x30, 0x03, //   SEQUENCE (PKIStatusInfo, 3 bytes)
+         0x02, 0x01, 0x00, //     INTEGER 0 (status=granted)
+         0x30, 0x00, //   SEQUENCE {} (TimeStampToken)
+      ]);
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+         new Response(fakeTsaResponse, {
+            headers: { "Content-Type": "application/timestamp-reply" },
+         });
+
+      try {
+         const pdf = createTestPdf();
+         const p12 = await loadP12();
+
+         const result = await signPdf(pdf, {
+            certificate: { p12, password: "test123" },
+            appearance: false,
+            timestamp: true,
+            tsaUrl: "http://mock.tsa/",
+         });
+
+         // The PDF embeds the CMS signature as lowercase hex in /Contents <...>
+         // OID 1.2.840.113549.1.9.16.2.14 (id-smime-aa-timeStampToken) in DER:
+         //   06 0b 2a 86 48 86 f7 0d 01 09 10 02 0e
+         const pdfStr = new TextDecoder("latin1").decode(result);
+         const contentsMatch = pdfStr.match(/\/Contents\s*<([0-9a-fA-F]+)/);
+         expect(contentsMatch).not.toBeNull();
+         const hexStr = contentsMatch![1]!;
+         expect(hexStr).toContain("060b2a864886f70d010910020e");
+      } finally {
+         globalThis.fetch = originalFetch;
+      }
+   });
+
+
    it("signs a PDF without appearance", async () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();

@@ -29,7 +29,7 @@ import {
    ICP_BRASIL_OIDS,
 } from "./icp-brasil.ts";
 import { pdfSignOptionsSchema } from "./schemas.ts";
-import { requestTimestamp } from "./timestamp.ts";
+import { TIMESTAMP_TOKEN_OID, requestTimestamp } from "./timestamp.ts";
 import type { PdfSignOptions } from "./types.ts";
 
 /**
@@ -210,7 +210,7 @@ export async function signPdf(
       detached: true,
    });
 
-   // 10. Optionally request timestamp
+   // 10. Optionally request timestamp and embed as unauthenticated attribute
    if (opts.timestamp && opts.tsaUrl) {
       try {
          const tsToken = await requestTimestamp(signedData, opts.tsaUrl, "sha256", {
@@ -218,19 +218,34 @@ export async function signPdf(
             tsaRetries: opts.tsaRetries,
             tsaFallbackUrls: opts.tsaFallbackUrls,
          });
-         // Note: Adding the timestamp as an unauthenticated attribute
-         // would require re-building the CMS structure. For now, we log
-         // that timestamp was received. A future version will embed it.
-         // TODO: Rebuild CMS with timestamp token as unauthenticated attribute
-         void tsToken;
+         unauthenticatedAttributes.push({
+            oid: TIMESTAMP_TOKEN_OID,
+            values: [tsToken],
+         });
       } catch (err) {
          // Timestamp failure is non-fatal
          opts.onTimestampError?.(err);
       }
    }
 
-   // 11. Embed signature into PDF
-   return embedSignature(pdfWithPlaceholder, signedData);
+   // 11. Rebuild SignedData with timestamp token if one was obtained
+   const finalSignedData =
+      unauthenticatedAttributes.length > 0
+         ? createSignedData({
+              content: bytesToSign,
+              certificate,
+              privateKey,
+              chain,
+              hashAlgorithm: "sha256",
+              authenticatedAttributes:
+                 authenticatedAttributes.length > 0 ? authenticatedAttributes : undefined,
+              unauthenticatedAttributes,
+              detached: true,
+           })
+         : signedData;
+
+   // 12. Embed signature into PDF
+   return embedSignature(pdfWithPlaceholder, finalSignedData);
 }
 
 // ---------------------------------------------------------------------------
