@@ -19,7 +19,7 @@ bun add @f-o-t/e-signature
 
 ## API
 
-### `signPdf(pdf: Uint8Array, options: PdfSignOptions): Promise<Uint8Array>`
+### `signPdf(pdf: Uint8Array | ReadableStream<Uint8Array>, options: PdfSignOptions): Promise<Uint8Array>`
 
 Sign a PDF document with a digital certificate. Supports PAdES-BES and PAdES with ICP-Brasil compliance (signing-certificate-v2 and signature-policy attributes).
 
@@ -63,6 +63,35 @@ const signedPdf = await signPdf(pdfBytes, {
 
 `appearance` and `appearances` can be used simultaneously — both stamps are rendered. An empty `appearances: []` is a no-op.
 
+#### TSA Resilience
+
+Control timeout, retry, and fallback behavior for timestamp requests:
+
+```ts
+const signedPdf = await signPdf(pdfBytes, {
+  certificate: { p12, password: "secret" },
+  timestamp: true,
+  tsaUrl: TIMESTAMP_SERVERS.VALID,
+  tsaTimeout: 5000,           // 5s per attempt (default: 10000)
+  tsaRetries: 2,              // 2 attempts on primary (default: 1)
+  tsaFallbackUrls: [          // tried in order after primary fails
+    TIMESTAMP_SERVERS.SAFEWEB,
+    TIMESTAMP_SERVERS.CERTISIGN,
+  ],
+});
+```
+
+If all servers fail, a `TimestampError` is thrown with a descriptive message identifying which servers were tried and the last error.
+
+#### Signing from a ReadableStream
+
+```ts
+const stream: ReadableStream<Uint8Array> = getFileStream("document.pdf");
+const signedPdf = await signPdf(stream, {
+  certificate: { p12, password: "secret" },
+});
+```
+
 ### `buildSigningCertificateV2(certDer: Uint8Array): Uint8Array`
 
 Build the `id-aa-signingCertificateV2` attribute value (RFC 5035). Links the signature to the specific certificate used, preventing substitution attacks.
@@ -83,6 +112,50 @@ Request an RFC 3161 timestamp from a TSA server. Returns the DER-encoded TimeSta
 import { requestTimestamp, TIMESTAMP_SERVERS } from "@f-o-t/e-signature";
 
 const token = await requestTimestamp(signatureBytes, TIMESTAMP_SERVERS.VALID);
+```
+
+### `signPdfBatch(files: BatchSignInput[], options: PdfSignOptions): AsyncGenerator<BatchSignEvent>`
+
+Sign multiple PDFs sequentially, yielding progress events. Yields control between each signing to prevent blocking the event loop.
+
+```ts
+import { signPdfBatch, signPdfBatchToArray, TIMESTAMP_SERVERS } from "@f-o-t/e-signature";
+
+for await (const event of signPdfBatch(
+  [
+    { filename: "doc1.pdf", pdf: pdf1Bytes },
+    { filename: "doc2.pdf", pdf: pdf2Bytes, options: { reason: "Custom reason" } },
+  ],
+  { certificate: { p12, password: "secret" } },
+)) {
+  switch (event.type) {
+    case "file_start": console.log(`Signing ${event.filename}...`); break;
+    case "file_complete": console.log(`Signed ${event.filename}`); break;
+    case "file_error": console.error(`Failed ${event.filename}: ${event.error}`); break;
+    case "batch_complete": console.log(`Done: ${event.totalFiles} files, ${event.errorCount} errors`); break;
+  }
+}
+```
+
+Per-file `options` are merged with the base options (per-file takes priority). Error in one file emits a `file_error` event and continues with the next file.
+
+### `signPdfBatchToArray(files: BatchSignInput[], options: PdfSignOptions): Promise<...[]>`
+
+Convenience wrapper that collects all results:
+
+```ts
+const results = await signPdfBatchToArray(
+  [
+    { filename: "doc1.pdf", pdf: pdf1Bytes },
+    { filename: "doc2.pdf", pdf: pdf2Bytes },
+  ],
+  { certificate: { p12, password: "secret" } },
+);
+
+for (const r of results) {
+  if (r.signed) await Bun.write(r.filename, r.signed);
+  else console.error(`${r.filename}: ${r.error}`);
+}
 ```
 
 ## Constants
@@ -119,6 +192,12 @@ type PdfSignOptions = {
   policy?: "pades-ades" | "pades-icp-brasil";
   timestamp?: boolean;
   tsaUrl?: string;
+  /** Timeout in ms per TSA attempt (default: 10000) */
+  tsaTimeout?: number;
+  /** Number of retry attempts on primary TSA server before trying fallbacks (default: 1) */
+  tsaRetries?: number;
+  /** Fallback TSA server URLs tried in order after primary is exhausted */
+  tsaFallbackUrls?: string[];
   /** Single visual stamp (false to disable) */
   appearance?: SignatureAppearance | false;
   /** Multiple visual stamps — renders one per entry, useful for multi-page documents */
@@ -141,6 +220,21 @@ type QrCodeConfig = {
   data?: string;
   size?: number;
 };
+
+type BatchSignInput = {
+  /** Filename for identification in events */
+  filename: string;
+  /** PDF content as Uint8Array or ReadableStream */
+  pdf: Uint8Array | ReadableStream<Uint8Array>;
+  /** Per-file option overrides merged with base options */
+  options?: Partial<PdfSignOptions>;
+};
+
+type BatchSignEvent =
+  | { type: "file_start"; fileIndex: number; filename: string }
+  | { type: "file_complete"; fileIndex: number; filename: string; signed: Uint8Array }
+  | { type: "file_error"; fileIndex: number; filename: string; error: string }
+  | { type: "batch_complete"; totalFiles: number; errorCount: number };
 ```
 
 ## Error Classes
