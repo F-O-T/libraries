@@ -99,4 +99,10 @@ export type SignaturePlaceholderOptions = {
 	signatureLength?: number;
 	/** DocMDP permission level: 1 = no changes, 2 = form fill + sign, 3 = form fill + sign + annotate (default: 2) */
 	docMdpPermission?: 1 | 2 | 3;
+	/**
+	 * Zero-based page index where the signature widget annotation should be placed.
+	 * This should match the page where the visual signature appearance is drawn.
+	 * Defaults to 0 (first page) for invisible signatures.
+	 */
+	appearancePage?: number;
 };

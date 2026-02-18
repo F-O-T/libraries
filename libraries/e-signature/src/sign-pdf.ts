@@ -93,7 +93,14 @@ export async function signPdf(
    // Validate input
    const opts = pdfSignOptionsSchema.parse(options);
 
-   // 1. Parse certificate for display info (uses OpenSSL, needs Buffer)
+   // 1. Parse PKCS#12 early — needed both for display info and for sizing the
+   //    signature placeholder accurately based on the actual certificate chain length.
+   const { certificate, privateKey, chain } = parsePkcs12(
+      opts.certificate.p12,
+      opts.certificate.password,
+   );
+
+   // 1b. Parse certificate for rich display info (CPF/CNPJ, subject CN, etc.)
    let certInfo: CertificateInfo | null = null;
    try {
       certInfo = parseCertificate(
@@ -165,24 +172,38 @@ export async function signPdf(
       opts.certificate.name ||
       "Digital Signature";
 
+   // Dynamic placeholder size: base 8 KB + 2× actual cert chain + 4 KB for a
+   // timestamp token (if configured). Prevents "Signature too large" failures for
+   // certificates with long chains (5+ certs) or large RSA keys.
+   const certChainBytes =
+      certificate.length + chain.reduce((sum, c) => sum + c.length, 0);
+   const signatureLength = Math.max(
+      16384,
+      certChainBytes * 2 + (opts.tsaUrl ? 4096 : 0) + 8192,
+   );
+
+   // Which page hosts the widget annotation — must match the visual appearance
+   // page so PDF readers navigate to the right page when a signature is clicked.
+   const appearancePage =
+      opts.appearance && opts.appearance !== false
+         ? (opts.appearance.page ?? 0)
+         : (opts.appearances?.[0]?.page ?? 0);
+
    const { pdf: pdfWithPlaceholder } = doc.saveWithPlaceholder({
       reason: opts.reason || "Digitally signed",
       name: signerName,
       location: opts.location,
       contactInfo: opts.contactInfo,
-      signatureLength: 16384,
+      signatureLength,
       docMdpPermission: opts.docMdpPermission ?? 2,
+      appearancePage,
    });
 
    // 5. Find byte range and extract bytes to sign
    const { byteRange } = findByteRange(pdfWithPlaceholder);
    const bytesToSign = extractBytesToSign(pdfWithPlaceholder, byteRange);
 
-   // 6. Parse PKCS#12 for cryptographic material
-   const { certificate, privateKey, chain } = parsePkcs12(
-      opts.certificate.p12,
-      opts.certificate.password,
-   );
+   // 6. Cryptographic material already parsed in step 1
 
    // 7. Build ICP-Brasil authenticated attributes if needed
    const authenticatedAttributes: CmsAttribute[] = [];

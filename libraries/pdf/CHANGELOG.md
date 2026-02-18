@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.8] - 2026-02-18
+
+### Fixed
+- `findPageObjects` now recursively descends intermediate `/Type /Pages` nodes (non-leaf page tree nodes), correctly enumerating all leaf `/Type /Page` objects in nested page trees; previously it stopped at the first level, misreporting page count and causing `getMediaBox` failures for any PDF with a two-level (or deeper) page tree
+- `getMediaBox` now walks up the `/Parent` chain until it finds a `/MediaBox` entry, implementing the PDF spec's inherited attribute resolution; previously it only checked the leaf page object itself, throwing for any page that relied on a parent node for its MediaBox
+- Widget annotation (`/Annots`) is now attached to the page specified by the new `appearancePage` option instead of always being placed on page 0; PDF readers now navigate to the correct page when a signature field is clicked
+- Added `appearancePage?: number` to `SignaturePlaceholderOptions` — zero-based index of the page that should host the signature widget annotation (defaults to 0)
+- New OOM regression test suite (`__tests__/plugins/editing/memory-oom.test.ts`) covering reference-identity of `embedSignature`, nested page tree correctness, large-page-count survivability, heap-scaling bounds, and widget annotation page placement
+
+## [0.3.7] - 2026-02-18
+
+### Fixed
+- Parser functions (`parsePdfStructure`, `extractObjectDictContent`, `getMediaBox`, `parseResourcesDict`, etc.) now accept a pre-decoded `pdfStr: string` parameter instead of calling `toLatin1(Uint8Array)` internally on every invocation; `PdfDocumentImpl` decodes the PDF bytes to a latin1 string exactly once in its constructor and reuses it everywhere, eliminating O(pages) redundant full-PDF string allocations that were the primary cause of JS heap OOM for multi-page documents
+- `extractBytesToSign` now uses `Uint8Array.subarray()` (zero-copy views) instead of `.slice()` for the two input regions before combining them, removing two intermediate full-PDF-size allocations
+- `embedSignature` patches the signature placeholder in-place rather than allocating a full PDF-sized copy, eliminating one more N-byte buffer per signing call
+
 ## [0.3.6] - 2026-02-18
 
 ### Fixed

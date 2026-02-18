@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.7] - 2026-02-18
+
+### Fixed
+- `signPdf` now passes `appearancePage` to `saveWithPlaceholder` so the PDF widget annotation is placed on the same page as the visual signature; previously the annotation always landed on page 0 regardless of where the appearance was drawn, causing PDF readers to navigate to the wrong page when clicking the signature field
+- Signature placeholder size is now computed dynamically from the actual certificate chain byte length (`certChainBytes * 2 + 8 KB base + 4 KB for TSA`) instead of a fixed 16 KB, preventing "signature too large" failures for certificate chains with 5+ certificates or large RSA keys; the floor remains 16 KB for small chains
+- `parsePkcs12` is now called only once (step 1) and the result reused throughout `signPdf`; the previous code parsed the same PKCS#12 twice (steps 1 and 6), doubling CPU and memory cost of certificate parsing for every `signPdf` call
+- Updated `@f-o-t/pdf` dependency floor to `^0.3.8` to pick up nested page tree recursion, MediaBox inheritance fix, and correct widget annotation page placement
+
+## [1.2.6] - 2026-02-18
+
+### Fixed
+- Updated `@f-o-t/pdf` dependency floor to `^0.3.7` to pick up the parser memory fix: PDF bytes are now decoded to a latin1 string exactly once per `signPdf` call (previously decoded O(pages) times), and `embedSignature` / `extractBytesToSign` no longer allocate unnecessary full-PDF-sized copies — together these eliminate the JS heap OOM that users hit when signing PDFs with more than a few pages
+
 ## [1.2.5] - 2026-02-18
 
 ### Fixed
