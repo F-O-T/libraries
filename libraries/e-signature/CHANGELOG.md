@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2026-02-18
+
+### Fixed
+- `signPdf` with `appearances` array no longer generates and embeds a separate QR image XObject per entry; the QR image is pre-computed once and shared across all appearances, collapsing N `generateQrCode` + `doc.embedPng` calls into 1 and preventing O(N) heap growth that caused JavaScript heap OOM in Vercel Edge Runtime for PDFs with 5+ appearances
+- Updated `@f-o-t/pdf` dependency floor to `^0.3.6` to pick up in-place ByteRange patching and binary `findByteRange` (eliminates up to 3× PDF-size string allocations per sign call)
+
 ## [1.2.3] - 2026-02-18
 
 ### Fixed

@@ -24,7 +24,7 @@ import {
    findByteRange,
    loadPdf,
 } from "@f-o-t/pdf/plugins/editing";
-import { drawSignatureAppearance } from "./appearance.ts";
+import { drawSignatureAppearance, precomputeSharedQrImage } from "./appearance.ts";
 import {
    buildSignaturePolicy,
    buildSigningCertificateV2,
@@ -122,6 +122,13 @@ export async function signPdf(
 
    // 3b. Draw multiple visual signature appearances if provided
    if (opts.appearances && opts.appearances.length > 0) {
+      // Pre-embed the QR image once so all appearances share a single PDF XObject.
+      // This collapses N embedPng calls (and N IDAT buffer allocations) into 1.
+      const needsQr = opts.appearances.some((a) => a.showQrCode !== false);
+      const sharedQrImage = needsQr
+         ? precomputeSharedQrImage(doc, certInfo, pdfBytes, opts.qrCode)
+         : undefined;
+
       for (const app of opts.appearances) {
          const pageIndex = app.page ?? 0;
 
@@ -138,6 +145,7 @@ export async function signPdf(
             location: opts.location,
             qrCode: opts.qrCode,
             pdfData: pdfBytes,
+            preEmbeddedQr: sharedQrImage,
          });
       }
    }

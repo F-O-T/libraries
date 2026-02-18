@@ -223,4 +223,55 @@ describe("performance benchmarks", () => {
 
       expect(deltaMB).toBeLessThan(100);
    });
+
+   it("appearances array: QR image XObject is embedded exactly once regardless of appearance count", async () => {
+      const p12 = await loadP12();
+      const pdf = createMultiPage(5);
+
+      const signed = await signPdf(pdf, {
+         certificate: { p12, password: "test123" },
+         appearances: [
+            { x: 50, y: 50, width: 200, height: 80, page: 0 },
+            { x: 50, y: 50, width: 200, height: 80, page: 1 },
+            { x: 50, y: 50, width: 200, height: 80, page: 2 },
+            { x: 50, y: 50, width: 200, height: 80, page: 3 },
+            { x: 50, y: 50, width: 200, height: 80, page: 4 },
+         ],
+      });
+
+      // Count "/Subtype /Image" entries in the output PDF.
+      // Each unique doc.embedPng() call creates one such entry.
+      // Before fix: 5 entries (one per appearance). After fix: 1 entry (shared).
+      const pdfText = new TextDecoder("latin1").decode(signed);
+      const imageXObjectCount = (pdfText.match(/\/Subtype\s*\/Image/g) ?? []).length;
+
+      expect(imageXObjectCount).toBe(1);
+   });
+
+   it("appearances array: signing time does not scale linearly with appearance count", async () => {
+      const p12 = await loadP12();
+      const pdf1 = createMultiPage(1);
+      const pdf10 = createMultiPage(10);
+
+      const t1Start = performance.now();
+      await signPdf(pdf1, {
+         certificate: { p12, password: "test123" },
+         appearances: [{ x: 50, y: 50, width: 200, height: 80, page: 0 }],
+      });
+      const t1 = performance.now() - t1Start;
+
+      const t10Start = performance.now();
+      await signPdf(pdf10, {
+         certificate: { p12, password: "test123" },
+         appearances: Array.from({ length: 10 }, (_, i) => ({
+            x: 50, y: 50, width: 200, height: 80, page: i,
+         })),
+      });
+      const t10 = performance.now() - t10Start;
+
+      console.log(`[appearances scaling] 1 appearance: ${t1.toFixed(0)}ms, 10 appearances: ${t10.toFixed(0)}ms, ratio: ${(t10 / t1).toFixed(1)}x`);
+
+      // After fix: 10 appearances should take < 6x as long as 1.
+      expect(t10).toBeLessThan(t1 * 6);
+   });
 });
