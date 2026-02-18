@@ -230,21 +230,8 @@ export async function signPdf(
       }
    }
 
-   // 11. Rebuild SignedData with timestamp token if one was obtained
-   const finalSignedData =
-      unauthenticatedAttributes.length > 0
-         ? createSignedData({
-              content: bytesToSign,
-              certificate,
-              privateKey,
-              chain,
-              hashAlgorithm: "sha256",
-              authenticatedAttributes:
-                 authenticatedAttributes.length > 0 ? authenticatedAttributes : undefined,
-              unauthenticatedAttributes,
-              detached: true,
-           })
-         : signedData;
+   // 11. Patch timestamp token into SignedData as unauthenticated attribute (no re-signing)
+   const finalSignedData = appendUnauthAttributes(signedData, unauthenticatedAttributes);
 
    // 12. Embed signature into PDF
    return embedSignature(pdfWithPlaceholder, finalSignedData);
