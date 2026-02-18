@@ -125,6 +125,8 @@ export async function signPdf(
       // Pre-embed the QR image once so all appearances share a single PDF XObject.
       // This collapses N embedPng calls (and N IDAT buffer allocations) into 1.
       const needsQr = opts.appearances.some((a) => a.showQrCode !== false);
+      // Pre-embed the QR once. Safe to pass to all appearances — drawSignatureAppearance
+      // ignores it when showQrCode is false (inner guard in appearance.ts).
       const sharedQrImage = needsQr
          ? precomputeSharedQrImage(doc, certInfo, pdfBytes, opts.qrCode)
          : undefined;

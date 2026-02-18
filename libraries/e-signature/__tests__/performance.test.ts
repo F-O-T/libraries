@@ -253,25 +253,41 @@ describe("performance benchmarks", () => {
       const pdf1 = createMultiPage(1);
       const pdf10 = createMultiPage(10);
 
-      const t1Start = performance.now();
-      await signPdf(pdf1, {
-         certificate: { p12, password: "test123" },
-         appearances: [{ x: 50, y: 50, width: 200, height: 80, page: 0 }],
-      });
-      const t1 = performance.now() - t1Start;
+      const bench1 = await asyncBenchmark(
+         "appearances: 1",
+         async () => {
+            await signPdf(pdf1, {
+               certificate: { p12, password: "test123" },
+               appearances: [{ x: 50, y: 50, width: 200, height: 80, page: 0 }],
+            });
+         },
+         5,
+      );
 
-      const t10Start = performance.now();
-      await signPdf(pdf10, {
-         certificate: { p12, password: "test123" },
-         appearances: Array.from({ length: 10 }, (_, i) => ({
-            x: 50, y: 50, width: 200, height: 80, page: i,
-         })),
-      });
-      const t10 = performance.now() - t10Start;
+      const bench10 = await asyncBenchmark(
+         "appearances: 10",
+         async () => {
+            await signPdf(pdf10, {
+               certificate: { p12, password: "test123" },
+               appearances: Array.from({ length: 10 }, (_, i) => ({
+                  x: 50,
+                  y: 50,
+                  width: 200,
+                  height: 80,
+                  page: i,
+               })),
+            });
+         },
+         5,
+      );
 
-      console.log(`[appearances scaling] 1 appearance: ${t1.toFixed(0)}ms, 10 appearances: ${t10.toFixed(0)}ms, ratio: ${(t10 / t1).toFixed(1)}x`);
+      const ratio = bench10.avgMs / bench1.avgMs;
+      console.log(
+         `[appearances scaling] 1 app avg=${bench1.avgMs.toFixed(1)}ms, 10 app avg=${bench10.avgMs.toFixed(1)}ms, ratio=${ratio.toFixed(1)}x`,
+      );
 
-      // After fix: 10 appearances should take < 6x as long as 1.
-      expect(t10).toBeLessThan(t1 * 6);
+      // After the QR-dedup fix, 10 appearances should not be 10x slower than 1.
+      // O(N) page modifications are expected; O(N) QR generation is the regression.
+      expect(ratio).toBeLessThan(6);
    });
 });
