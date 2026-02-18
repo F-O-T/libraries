@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7] - 2026-02-18
+
+### Fixed
+- Parser functions (`parsePdfStructure`, `extractObjectDictContent`, `getMediaBox`, `parseResourcesDict`, etc.) now accept a pre-decoded `pdfStr: string` parameter instead of calling `toLatin1(Uint8Array)` internally on every invocation; `PdfDocumentImpl` decodes the PDF bytes to a latin1 string exactly once in its constructor and reuses it everywhere, eliminating O(pages) redundant full-PDF string allocations that were the primary cause of JS heap OOM for multi-page documents
+- `extractBytesToSign` now uses `Uint8Array.subarray()` (zero-copy views) instead of `.slice()` for the two input regions before combining them, removing two intermediate full-PDF-size allocations
+- `embedSignature` patches the signature placeholder in-place rather than allocating a full PDF-sized copy, eliminating one more N-byte buffer per signing call
+
 ## [0.3.6] - 2026-02-18
 
 ### Fixed

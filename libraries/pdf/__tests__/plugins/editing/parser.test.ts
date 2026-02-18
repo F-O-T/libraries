@@ -8,7 +8,7 @@ describe("parseResourcesDict", () => {
       /Resources << /Font << /F1 10 0 R /F2 11 0 R >> /ProcSet [/PDF /Text] >>
     `;
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		expect(result).toEqual({
 			"/Font": "<< /F1 10 0 R /F2 11 0 R >>",
@@ -23,9 +23,8 @@ describe("parseResourcesDict", () => {
 endobj`;
 
 		const dictContent = "/Type /Page /Resources 7 0 R";
-		const pdfData = new TextEncoder().encode(pdfContent);
 
-		const result = parseResourcesDict(dictContent, pdfData);
+		const result = parseResourcesDict(dictContent, pdfContent);
 
 		expect(result).toEqual({
 			"/Font": "<< /F1 10 0 R /F2 11 0 R >>",
@@ -36,7 +35,7 @@ endobj`;
 	test("returns empty object when no Resources present", () => {
 		const dictContent = "/Type /Page /MediaBox [0 0 612 792]";
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		expect(result).toEqual({});
 	});
@@ -47,7 +46,7 @@ endobj`;
       /Resources << /ProcSet [[/PDF] [/Text] [/ImageC]] /Font << /F1 10 0 R >> >>
     `;
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		expect(result).toEqual({
 			"/ProcSet": "[[/PDF] [/Text] [/ImageC]]",
@@ -61,7 +60,7 @@ endobj`;
       /Resources << /Font << /F1 << /Type /Font /BaseFont /Helvetica /FontFile 20 0 R >> >> >>
     `;
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		// Should extract /Font at top level, not match /FontFile inside
 		expect(result).toHaveProperty("/Font");
@@ -76,7 +75,7 @@ endobj`;
     `;
 
 		expect(() => {
-			parseResourcesDict(dictContent, new Uint8Array());
+			parseResourcesDict(dictContent, "");
 		}).toThrow("Cannot find end of Resources dictionary");
 	});
 
@@ -87,10 +86,9 @@ endobj`;
 endobj`;
 
 		const dictContent = "/Type /Page /Resources 7 0 R";
-		const pdfData = new TextEncoder().encode(pdfContent);
 
 		expect(() => {
-			parseResourcesDict(dictContent, pdfData);
+			parseResourcesDict(dictContent, pdfContent);
 		}).toThrow("Cannot find dictionary end for object 7");
 	});
 
@@ -101,7 +99,7 @@ endobj`;
     `;
 
 		expect(() => {
-			parseResourcesDict(dictContent, new Uint8Array());
+			parseResourcesDict(dictContent, "");
 		}).toThrow("Cannot find end of /ProcSet array");
 	});
 
@@ -111,7 +109,7 @@ endobj`;
       /Resources << /ExtGState << /GS1 << /Type /ExtGState /CA 0.5 >> >> >>
     `;
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		expect(result).toEqual({
 			"/ExtGState": "<< /GS1 << /Type /ExtGState /CA 0.5 >> >>",
@@ -132,7 +130,7 @@ endobj`;
       >>
     `;
 
-		const result = parseResourcesDict(dictContent, new Uint8Array());
+		const result = parseResourcesDict(dictContent, "");
 
 		// Should extract /Font correctly without matching /FontFile
 		expect(result).toHaveProperty("/Font");

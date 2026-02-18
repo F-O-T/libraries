@@ -109,6 +109,7 @@ function extractIdatData(data: Uint8Array): Uint8Array {
 
 export class PdfDocumentImpl implements PdfDocument {
 	private originalData: Uint8Array;
+	private pdfStr: string; // latin1 string decoded ONCE — reused by all parser calls
 	private structure: ReturnType<typeof parsePdfStructure>;
 	private pages: PdfPageImpl[] = [];
 	private nextObjNum: number;
@@ -124,7 +125,10 @@ export class PdfDocumentImpl implements PdfDocument {
 
 	constructor(data: Uint8Array) {
 		this.originalData = data;
-		this.structure = parsePdfStructure(data);
+		// Decode the PDF bytes to a latin1 string exactly ONCE.
+		// All parser helpers reuse this string so we never create redundant copies.
+		this.pdfStr = latin1Decoder.decode(data);
+		this.structure = parsePdfStructure(this.pdfStr);
 
 		// Allocate a font object number right away (Helvetica)
 		this.nextObjNum = this.structure.size;
@@ -133,7 +137,7 @@ export class PdfDocumentImpl implements PdfDocument {
 		// Build page objects
 		for (let i = 0; i < this.structure.pageNums.length; i++) {
 			const pageNum = this.structure.pageNums[i]!;
-			const mediaBox = getMediaBox(data, pageNum);
+			const mediaBox = getMediaBox(this.pdfStr, pageNum);
 			const width = mediaBox[2] - mediaBox[0];
 			const height = mediaBox[3] - mediaBox[1];
 			const dictContent = this.structure.pageDictContents[i]!;
@@ -325,7 +329,7 @@ export class PdfDocumentImpl implements PdfDocument {
 			}
 
 			// Parse existing Resources from page
-			const existingResources = parseResourcesDict(pageContent, this.originalData);
+			const existingResources = parseResourcesDict(pageContent, this.pdfStr);
 
 			// Merge existing with new
 			const mergedResources = mergeResourcesDicts(existingResources, newResources);
@@ -716,8 +720,10 @@ export function extractBytesToSign(
 		throw new Error("ByteRange exceeds PDF data size");
 	}
 
-	const chunk1 = pdfData.slice(offset1, offset1 + length1);
-	const chunk2 = pdfData.slice(offset2, offset2 + length2);
+	// Use subarray (zero-copy views) to avoid two intermediate allocations before
+	// writing into the final combined buffer.
+	const chunk1 = pdfData.subarray(offset1, offset1 + length1);
+	const chunk2 = pdfData.subarray(offset2, offset2 + length2);
 
 	const result = new Uint8Array(chunk1.length + chunk2.length);
 	result.set(chunk1, 0);
@@ -750,8 +756,9 @@ export function embedSignature(
 	const paddedHex = signatureHex.padEnd(placeholderLength, "0");
 	const hexBytes = new TextEncoder().encode(paddedHex);
 
-	const result = new Uint8Array(pdfData.length);
-	result.set(pdfData);
-	result.set(hexBytes, contentsStart);
-	return result;
+	// Patch the placeholder in-place — pdfData is a freshly-created buffer from
+	// saveWithPlaceholder() and not shared with any other consumer at this point,
+	// so mutating it avoids allocating a full PDF-sized copy.
+	pdfData.set(hexBytes, contentsStart);
+	return pdfData;
 }
