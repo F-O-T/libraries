@@ -8,5 +8,7 @@ export default defineFotConfig({
       "@f-o-t/qrcode",
       "@f-o-t/pdf",
       "@f-o-t/digital-certificate",
+      "react",
    ],
+   plugins: ["react"],
 });
