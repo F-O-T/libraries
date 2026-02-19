@@ -11,7 +11,6 @@ Brazilian A1 digital certificate handling with XML/PDF signing and mTLS support.
 - **Brazilian Standards**: Extract CNPJ/CPF from certificate fields
 - **Type Safety**: Full TypeScript support with Zod schema validation
 - **XML Digital Signatures**: Sign XML documents with XML-DSig (via plugin)
-- **PDF Signing**: Sign PDF documents with visual signatures and QR codes (via plugin)
 - **Mutual TLS**: Create mTLS contexts for secure HTTPS connections (via plugin)
 - **Pure JavaScript**: No system dependencies — PKCS#12 parsing via `@f-o-t/crypto`
 - **Validity Checking**: Built-in certificate expiry validation
@@ -405,84 +404,7 @@ const agent = new https.Agent({
 
 ### PDF Signing
 
-Sign PDF documents with visual signatures:
-
-```typescript
-import { parseCertificate } from "@f-o-t/digital-certificate";
-import { signPdf } from "@f-o-t/digital-certificate/plugins/pdf-signer";
-import { readFileSync, writeFileSync } from "fs";
-
-// Parse certificate
-const cert = parseCertificate(pfxBuffer, password);
-
-// Load PDF
-const pdfBuffer = readFileSync("document.pdf");
-
-// Sign PDF with visual signature
-const signedPdf = await signPdf(pdfBuffer, cert, {
-  reason: "Document approval",
-  location: "São Paulo, Brazil",
-  contactInfo: "contact@example.com",
-
-  // Visual signature options
-  appearance: {
-    page: 0,                    // First page (0-indexed)
-    x: 50,                      // X position
-    y: 50,                      // Y position
-    width: 200,                 // Signature box width
-    height: 100,                // Signature box height
-
-    // Signature content
-    signerName: "Company Name",
-    signerInfo: "CNPJ: 12.345.678/0001-90",
-    timestamp: new Date(),
-
-    // Optional QR code
-    qrCode: {
-      data: "https://verify.example.com/doc/123",
-      size: 80
-    }
-  }
-});
-
-// Save signed PDF
-writeFileSync("document-signed.pdf", signedPdf);
-```
-
-**PDF signing options:**
-
-```typescript
-interface PdfSignOptions {
-  reason?: string;           // Reason for signing
-  location?: string;         // Location where signed
-  contactInfo?: string;      // Contact information
-
-  appearance?: {
-    page: number;            // Page number (0-indexed)
-    x: number;               // X coordinate
-    y: number;               // Y coordinate
-    width: number;           // Width of signature box
-    height: number;          // Height of signature box
-
-    signerName?: string;     // Name to display
-    signerInfo?: string;     // Additional info
-    timestamp?: Date;        // Signature timestamp
-
-    qrCode?: {
-      data: string;          // QR code content
-      size?: number;         // QR code size (default: 100)
-    };
-  };
-}
-```
-
-**Features:**
-- PKCS#7 digital signatures
-- Visual signature appearance
-- QR code generation for verification
-- Multiple signature support
-- Compatible with Adobe Reader and other PDF viewers
-- Preserves existing PDF content and metadata
+> **Removed in v2.0.0.** PDF signing has moved to [`@f-o-t/e-signature`](https://www.npmjs.com/package/@f-o-t/e-signature).
 
 ## Advanced Usage
 
@@ -709,14 +631,31 @@ try {
 
 ## Performance
 
-Optimized for production use:
+Measured on modern hardware with Bun runtime (pure-TS implementation, no OpenSSL):
 
-- **Parse certificate**: < 100ms
-- **Sign XML (1KB)**: < 50ms
-- **Sign PDF (1MB)**: < 500ms
-- **Create mTLS agent**: < 10ms
+| Operation | Typical time |
+|---|---|
+| Parse certificate (`parseCertificate`) | ~30–40ms |
+| Get PEM pair (`getPemPair`) | < 0.1ms |
+| Check validity (`isCertificateValid`) | < 0.1ms |
+| Days until expiry (`daysUntilExpiry`) | < 0.1ms |
 
-All benchmarks run on modern hardware with Bun runtime.
+**Note:** `parseCertificate` includes PKCS#12 decryption (PBES2/PBKDF2-SHA256), which runs in pure TypeScript. With `@f-o-t/crypto` ≥ 1.2.0 this is ~3× faster than earlier versions (PBKDF2-SHA256 improved from ~100ms to ~13ms). A WebCrypto/native fallback for PBKDF2 is planned to improve this further.
+
+**Best practice:** Parse once and cache the result; subsequent operations are sub-millisecond.
+
+```typescript
+let cachedCert: CertificateInfo | null = null;
+
+function getCertificate(): CertificateInfo {
+  if (!cachedCert) {
+    cachedCert = parseCertificate(pfxBuffer, password); // ~30–40ms, once
+  }
+  if (!isCertificateValid(cachedCert)) throw new Error("Certificate expired");
+  return cachedCert;
+}
+```
+
 
 ## Contributing
 
