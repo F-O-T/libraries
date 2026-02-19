@@ -54,6 +54,7 @@ Builds TypeScript source files into the `dist/` directory with proper type decla
 - Generates type declaration files (.d.ts)
 - Creates source maps for debugging
 - Optimizes output for production
+- **Syncs `package.json` exports** — plugin entry points declared in `fot.config.ts` (e.g. `plugins: ["react"]`) are automatically added to the `exports` field after every build, keeping the published manifest in sync without needing to run `fot generate` separately
 
 ---
 

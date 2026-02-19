@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/cli",
-   "version": "1.0.2",
+   "version": "1.0.3",
    "description": "CLI tool for managing FOT libraries",
    "type": "module",
    "bin": {

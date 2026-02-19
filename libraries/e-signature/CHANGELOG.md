@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.11] - 2026-02-19
+
+### Fixed
+
+- Added `"./plugins/react"` to the `exports` field in `package.json`; the entry was missing from the published manifest because `fot build` did not previously sync `exports` from `fot.config.ts` — Vite/Rolldown (and any bundler respecting the `exports` map) would reject the import with *"not exported under the conditions [module, browser, …]"*
+
 ## [1.2.10] - 2026-02-19
 
 ### Fixed
@@ -140,6 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.11]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.10...@f-o-t/e-signature@1.2.11
 [1.2.10]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.9...@f-o-t/e-signature@1.2.10
 [1.2.9]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.8...@f-o-t/e-signature@1.2.9
 [1.2.8]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.7...@f-o-t/e-signature@1.2.8

@@ -5,6 +5,12 @@ All notable changes to @f-o-t/cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-02-19
+
+### Fixed
+
+- `fot build` now automatically syncs the `exports` field in `package.json` after every build, ensuring plugin entry points declared in `fot.config.ts` (e.g. `plugins: ["react"]`) are always reflected in the published package manifest — previously they were only written by `fot generate`, causing Vite/Rolldown to fail resolving `./dist/plugins/<name>/index.js` with a "not exported under the conditions" error
+
 ## [1.0.2] - 2026-02-06
 
 ### Changed
@@ -87,3 +93,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Troubleshooting guide for common issues
 - Development setup instructions
 - Project structure documentation
+
+[1.0.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/cli@1.0.2...@f-o-t/cli@1.0.3
+[1.0.2]: https://github.com/F-O-T/libraries/compare/@f-o-t/cli@1.0.1...@f-o-t/cli@1.0.2
+[1.0.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/cli@1.0.0...@f-o-t/cli@1.0.1
+[1.0.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/cli@1.0.0
+[0.1.0]: https://github.com/F-O-T/libraries/releases/tag/@f-o-t/cli@0.1.0
