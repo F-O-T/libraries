@@ -39,6 +39,14 @@
       "react": "^18.0.0",
       "react-dom": "^18.0.0"
    },
+   "peerDependencies": {
+      "react": ">=18.0.0"
+   },
+   "peerDependenciesMeta": {
+      "react": {
+         "optional": true
+      }
+   },
    "repository": {
       "type": "git",
       "url": "https://github.com/F-O-T/libraries.git",
