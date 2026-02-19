@@ -32,7 +32,12 @@
    "devDependencies": {
       "@f-o-t/cli": "^1.0.1",
       "@f-o-t/config": "^1.0.3",
-      "@types/bun": "latest"
+      "@testing-library/react": "^16.0.0",
+      "@types/bun": "latest",
+      "@types/react": "^18.0.0",
+      "@types/react-dom": "^18.0.0",
+      "react": "^18.0.0",
+      "react-dom": "^18.0.0"
    },
    "repository": {
       "type": "git",
