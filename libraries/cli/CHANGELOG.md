@@ -5,6 +5,12 @@ All notable changes to @f-o-t/cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-02-19
+
+### Fixed
+
+- Add `import` condition to all generated `exports` entries in `package.json` so bundlers and Vite (which resolves under conditions like `["module", "browser", "import"]`) can locate ESM entry points — previously only `default` was emitted, causing a "not exported under the conditions" error for plugin sub-paths (e.g. `./plugins/react`)
+
 ## [1.0.3] - 2026-02-19
 
 ### Fixed

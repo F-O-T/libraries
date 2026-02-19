@@ -8,10 +8,12 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
-      "./operators": {
+      "./plugins/operators": {
          "types": "./dist/plugins/operators/index.d.ts",
+         "import": "./dist/plugins/operators/index.js",
          "default": "./dist/plugins/operators/index.js"
       }
    },

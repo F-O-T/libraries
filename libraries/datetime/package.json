@@ -10,22 +10,27 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/timezone": {
          "types": "./dist/plugins/timezone/index.d.ts",
+         "import": "./dist/plugins/timezone/index.js",
          "default": "./dist/plugins/timezone/index.js"
       },
       "./plugins/business-days": {
          "types": "./dist/plugins/business-days/index.d.ts",
+         "import": "./dist/plugins/business-days/index.js",
          "default": "./dist/plugins/business-days/index.js"
       },
       "./plugins/format": {
          "types": "./dist/plugins/format/index.d.ts",
+         "import": "./dist/plugins/format/index.js",
          "default": "./dist/plugins/format/index.js"
       },
       "./plugins/relative-time": {
          "types": "./dist/plugins/relative-time/index.d.ts",
+         "import": "./dist/plugins/relative-time/index.js",
          "default": "./dist/plugins/relative-time/index.js"
       }
    },

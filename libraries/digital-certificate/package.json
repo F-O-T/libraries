@@ -10,14 +10,17 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/xml-signer": {
          "types": "./dist/plugins/xml-signer/index.d.ts",
+         "import": "./dist/plugins/xml-signer/index.js",
          "default": "./dist/plugins/xml-signer/index.js"
       },
       "./plugins/mtls": {
          "types": "./dist/plugins/mtls/index.d.ts",
+         "import": "./dist/plugins/mtls/index.js",
          "default": "./dist/plugins/mtls/index.js"
       }
    },

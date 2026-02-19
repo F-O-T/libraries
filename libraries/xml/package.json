@@ -10,18 +10,22 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/stream": {
          "types": "./dist/plugins/stream/index.d.ts",
+         "import": "./dist/plugins/stream/index.js",
          "default": "./dist/plugins/stream/index.js"
       },
       "./plugins/xpath": {
          "types": "./dist/plugins/xpath/index.d.ts",
+         "import": "./dist/plugins/xpath/index.js",
          "default": "./dist/plugins/xpath/index.js"
       },
       "./plugins/canonicalize": {
          "types": "./dist/plugins/canonicalize/index.d.ts",
+         "import": "./dist/plugins/canonicalize/index.js",
          "default": "./dist/plugins/canonicalize/index.js"
       }
    },

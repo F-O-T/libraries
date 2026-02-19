@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/config",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "description": "Standardized configuration for F-O-T libraries",
    "type": "module",
    "module": "./dist/index.js",

@@ -10,18 +10,22 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/generation": {
          "types": "./dist/plugins/generation/index.d.ts",
+         "import": "./dist/plugins/generation/index.js",
          "default": "./dist/plugins/generation/index.js"
       },
       "./plugins/parsing": {
          "types": "./dist/plugins/parsing/index.d.ts",
+         "import": "./dist/plugins/parsing/index.js",
          "default": "./dist/plugins/parsing/index.js"
       },
       "./plugins/editing": {
          "types": "./dist/plugins/editing/index.d.ts",
+         "import": "./dist/plugins/editing/index.js",
          "default": "./dist/plugins/editing/index.js"
       }
    },

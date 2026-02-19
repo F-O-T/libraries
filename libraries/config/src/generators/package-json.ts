@@ -1,10 +1,13 @@
 import type { ResolvedFotConfig } from "../types";
 
 /**
- * Package.json export configuration
+ * Package.json export configuration.
+ * Includes "import" condition so bundlers/Vite can resolve ESM entries
+ * under conditions like ["module", "browser", "import"].
  */
 export interface PackageExport {
    types: string;
+   import: string;
    default: string;
 }
 
@@ -47,6 +50,7 @@ export function generatePackageJson(
    const exports: Record<string, PackageExport> = {
       ".": {
          types: "./dist/index.d.ts",
+         import: "./dist/index.js",
          default: "./dist/index.js",
       },
    };
@@ -56,6 +60,7 @@ export function generatePackageJson(
       if (plugin.enabled !== false) {
          exports[`./plugins/${plugin.name}`] = {
             types: `./dist/plugins/${plugin.name}/index.d.ts`,
+            import: `./dist/plugins/${plugin.name}/index.js`,
             default: `./dist/plugins/${plugin.name}/index.js`,
          };
       }

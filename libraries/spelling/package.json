@@ -10,10 +10,12 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/browser-storage": {
          "types": "./dist/plugins/browser-storage/index.d.ts",
+         "import": "./dist/plugins/browser-storage/index.js",
          "default": "./dist/plugins/browser-storage/index.js"
       }
    },

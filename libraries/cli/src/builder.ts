@@ -40,10 +40,14 @@ function syncPackageJsonExports(
       [key: string]: unknown;
    };
 
-   // Rebuild exports: always keep the "." entry, then add plugin entries
+   // Rebuild exports: always keep the "." entry, then add plugin entries.
+   // Include "import" condition so bundlers/Vite can resolve ESM entries
+   // under conditions like ["module", "browser", "import"] without falling
+   // back to the catch-all "default".
    const exports: Record<string, unknown> = {
       ".": {
          types: "./dist/index.d.ts",
+         import: "./dist/index.js",
          default: "./dist/index.js",
       },
    };
@@ -52,6 +56,7 @@ function syncPackageJsonExports(
       if (plugin.enabled !== false) {
          exports[`./plugins/${plugin.name}`] = {
             types: `./dist/plugins/${plugin.name}/index.d.ts`,
+            import: `./dist/plugins/${plugin.name}/index.js`,
             default: `./dist/plugins/${plugin.name}/index.js`,
          };
       }

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-02-19
+
+### Fixed
+
+- Add `import` condition to all generated `exports` entries in `PackageExport` so bundlers and Vite can resolve ESM entry points under conditions like `["module", "browser", "import"]` — previously only `default` was emitted, which Vite's strict exports resolution did not match for plugin sub-paths (e.g. `./plugins/react`)
+
 ## [1.0.3] - 2026-02-06
 
 ### Fixed
