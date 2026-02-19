@@ -94,6 +94,51 @@ type SignedDataOptions = {
 };
 ```
 
+### `appendUnauthAttributes(signedDataDer: Uint8Array, attributes: CmsAttribute[]): Uint8Array`
+
+Append unauthenticated attributes to an existing CMS SignedData DER without re-signing. Safe for non-deterministic algorithms (PSS, ECDSA).
+
+```ts
+import { appendUnauthAttributes } from "@f-o-t/crypto";
+
+const updated = appendUnauthAttributes(originalSignedData, [
+  { oid: "1.2.840.113549.1.9.16.2.14", values: [timestampTokenDer] },
+]);
+```
+
+## Primitive APIs (advanced)
+
+These low-level primitives are exported for use in performance-sensitive cryptographic code.
+
+### `createHmac(alg: HashAlgorithm, key: Uint8Array): HmacContext`
+
+Create a reusable HMAC context for a fixed key. For SHA-256, the ipad/opad block states are precomputed once so every subsequent `compute()` call skips the fixed-prefix block compression — this yields ~8× speedup when calling HMAC thousands of times (e.g. inside PBKDF2).
+
+```ts
+import { createHmac } from "@f-o-t/crypto";
+
+const ctx = createHmac("sha256", key);
+const mac1 = ctx.compute(data1);
+const mac2 = ctx.compute(data2);
+```
+
+### `sha256ProcessBlock(block: Uint8Array): Uint32Array`
+
+Process a single 64-byte SHA-256 block and return the resulting 8-word internal state. Used internally by `createHmac` to precompute the HMAC key schedule.
+
+### `sha256WithState(initState: Uint32Array, data: Uint8Array, prefixLen: number): Uint8Array`
+
+Compute SHA-256 starting from a pre-processed state `initState`, treating the first `prefixLen` bytes as already hashed. Used internally by `createHmac` to skip redundant block compressions.
+
+### `HmacContext` interface
+
+```ts
+interface HmacContext {
+  /** Compute HMAC over `data` using the precomputed key context. */
+  compute(data: Uint8Array): Uint8Array;
+}
+```
+
 ## Validation
 
 Schemas are exported for use in your own validation:

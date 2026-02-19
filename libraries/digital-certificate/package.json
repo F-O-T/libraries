@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/digital-certificate",
-   "version": "2.2.1",
+   "version": "2.2.2",
    "type": "module",
    "files": [
       "dist"
@@ -30,7 +30,7 @@
    },
    "dependencies": {
       "@f-o-t/asn1": "^1.0.0",
-      "@f-o-t/crypto": "^1.0.0",
+      "@f-o-t/crypto": "^1.2.0",
       "@f-o-t/xml": "^1.0.4",
       "zod": "^4.3.6"
    },

@@ -1,4 +1,3 @@
-import { sign } from "node:crypto";
 import {
    type Asn1Node,
    contextTag,
@@ -12,6 +11,8 @@ import {
    set,
 } from "@f-o-t/asn1";
 import { hash } from "./hash.ts";
+import { ecdsaSign } from "./primitives/ecdsa.ts";
+import { parsePkcs8, rsaSign } from "./primitives/rsa.ts";
 import { signedDataOptionsSchema } from "./schemas.ts";
 import type {
    CmsAttribute,
@@ -28,10 +29,15 @@ const OID = {
    sha256: "2.16.840.1.101.3.4.2.1",
    sha384: "2.16.840.1.101.3.4.2.2",
    sha512: "2.16.840.1.101.3.4.2.3",
+   // RSA with hash
    sha256WithRSA: "1.2.840.113549.1.1.11",
    sha384WithRSA: "1.2.840.113549.1.1.12",
    sha512WithRSA: "1.2.840.113549.1.1.13",
    rsaEncryption: "1.2.840.113549.1.1.1",
+   // ECDSA with hash
+   ecdsaWithSha256: "1.2.840.10045.4.3.2",
+   ecdsaWithSha384: "1.2.840.10045.4.3.3",
+   ecdsaWithSha512: "1.2.840.10045.4.3.4",
 };
 
 export class CmsError extends Error {
@@ -59,8 +65,12 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
       detached = true,
    } = parsed;
 
+   // Detect key type to choose the right signature algorithm OID
+   const keyInfo = parsePkcs8(privateKey);
+   const isEc = keyInfo.type === "ec";
+
    const digestOid = hashAlgorithmToOid(hashAlgorithm);
-   const signatureAlgOid = hashAlgorithmToSignatureOid(hashAlgorithm);
+   const signatureAlgOid = hashAlgorithmToSignatureOid(hashAlgorithm, isEc);
 
    // 1. Compute message digest
    const messageDigest = hash(hashAlgorithm, content);
@@ -97,8 +107,8 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
       algorithmIdentifier(digestOid),
       // signedAttrs [0] IMPLICIT SET — replaces SET tag (0x31) with context [0] (0xA0)
       contextTag(0, [sortedAttrsSet], false),
-      // signatureAlgorithm
-      algorithmIdentifier(signatureAlgOid),
+      // signatureAlgorithm (ECDSA OIDs must NOT include NULL parameter per RFC 5758)
+      algorithmIdentifier(signatureAlgOid, !ECDSA_OIDS.has(signatureAlgOid)),
       // signature OCTET STRING
       octetString(signatureValue),
    ];
@@ -195,9 +205,18 @@ export function appendUnauthAttributes(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function algorithmIdentifier(algOid: string): Asn1Node {
-   return sequence(oid(algOid), nullValue());
+function algorithmIdentifier(algOid: string, includeNull = true): Asn1Node {
+   if (includeNull) {
+      return sequence(oid(algOid), nullValue());
+   }
+   return sequence(oid(algOid));
 }
+
+const ECDSA_OIDS = new Set([
+   OID.ecdsaWithSha256,
+   OID.ecdsaWithSha384,
+   OID.ecdsaWithSha512,
+]);
 
 function buildAttribute(attrOid: string, values: Uint8Array[]): Asn1Node {
    // Each value is already DER-encoded; decode it to an Asn1Node
@@ -232,20 +251,11 @@ function signData(
    privateKeyDer: Uint8Array,
    hashAlgorithm: HashAlgorithm,
 ): Uint8Array {
-   const nodeAlgorithm =
-      hashAlgorithm === "sha256"
-         ? "sha256"
-         : hashAlgorithm === "sha384"
-           ? "sha384"
-           : "sha512";
-
-   const signature = sign(nodeAlgorithm, data, {
-      key: Buffer.from(privateKeyDer),
-      format: "der",
-      type: "pkcs8",
-   });
-
-   return new Uint8Array(signature);
+   const keyInfo = parsePkcs8(privateKeyDer);
+   if (keyInfo.type === "ec") {
+      return ecdsaSign(privateKeyDer, hashAlgorithm, data);
+   }
+   return rsaSign(privateKeyDer, hashAlgorithm, data);
 }
 
 function extractIssuerAndSerial(certDer: Uint8Array): Asn1Node {
@@ -277,7 +287,20 @@ function hashAlgorithmToOid(alg: HashAlgorithm): string {
    }
 }
 
-function hashAlgorithmToSignatureOid(alg: HashAlgorithm): string {
+function hashAlgorithmToSignatureOid(
+   alg: HashAlgorithm,
+   isEc: boolean,
+): string {
+   if (isEc) {
+      switch (alg) {
+         case "sha256":
+            return OID.ecdsaWithSha256;
+         case "sha384":
+            return OID.ecdsaWithSha384;
+         case "sha512":
+            return OID.ecdsaWithSha512;
+      }
+   }
    switch (alg) {
       case "sha256":
          return OID.sha256WithRSA;

@@ -1,10 +1,12 @@
-import {
-   createDecipheriv,
-   createHash,
-   createHmac,
-   pbkdf2Sync,
-} from "node:crypto";
 import { type Asn1Node, bytesToOid, decodeDer, encodeDer } from "@f-o-t/asn1";
+import { aesCbcDecrypt } from "./primitives/aes.ts";
+import { tripleDESDecrypt } from "./primitives/des.ts";
+import { type HmacHashAlgorithm, hmac } from "./primitives/hmac.ts";
+import { pbkdf2 } from "./primitives/pbkdf2.ts";
+import { rc2CbcDecrypt } from "./primitives/rc2.ts";
+import { sha1 } from "./primitives/sha1.ts";
+import { sha256 } from "./primitives/sha256.ts";
+import { sha384, sha512 } from "./primitives/sha512.ts";
 import type { Pkcs12Result } from "./types.ts";
 
 // OIDs
@@ -179,9 +181,11 @@ function verifyMac(
    const macKey = pkcs12Kdf(password, macSalt, iterations, 3, hashLen, hashAlg);
 
    // Compute HMAC
-   const hmac = createHmac(hashAlg, Buffer.from(macKey));
-   hmac.update(Buffer.from(authSafeData));
-   const computedDigest = new Uint8Array(hmac.digest());
+   const computedDigest = hmac(
+      hashAlg as HmacHashAlgorithm,
+      macKey,
+      authSafeData,
+   );
 
    // Constant-time comparison
    if (computedDigest.length !== expectedDigest.length) {
@@ -242,12 +246,17 @@ function pkcs12Kdf(
    I.set(S, 0);
    I.set(P, S.length);
 
+   // Pre-allocate D||I scratch buffer to avoid per-iteration allocation
+   const DI = new Uint8Array(D.length + I.length);
+   DI.set(D, 0);
+   DI.set(I, D.length);
+
    const result = new Uint8Array(keyLen);
    let resultOffset = 0;
 
    while (resultOffset < keyLen) {
-      // Hash D || I
-      let A = hashBytes(hashAlgorithm, concat(D, I));
+      // Hash D || I (reuse pre-allocated buffer; update I section from DI)
+      let A = hashBytes(hashAlgorithm, DI);
 
       // Iterate
       for (let i = 1; i < iterations; i++) {
@@ -264,11 +273,13 @@ function pkcs12Kdf(
 
       // Increment I: for each v-byte block of I, add A (repeated to v bytes) + 1
       const B = padToMultiple(A, v);
+      // Update both I and the I portion of DI
       for (let j = 0; j < I.length; j += v) {
          let carry = 1;
          for (let k = v - 1; k >= 0; k--) {
             const sum = I[j + k]! + B[k]! + carry;
             I[j + k] = sum & 0xff;
+            DI[D.length + j + k] = sum & 0xff;
             carry = sum >>> 8;
          }
       }
@@ -307,9 +318,18 @@ function padToMultiple(data: Uint8Array, blockSize: number): Uint8Array {
 }
 
 function hashBytes(algorithm: string, data: Uint8Array): Uint8Array {
-   const h = createHash(algorithm);
-   h.update(data);
-   return new Uint8Array(h.digest());
+   switch (algorithm) {
+      case "sha1":
+         return sha1(data);
+      case "sha256":
+         return sha256(data);
+      case "sha384":
+         return sha384(data);
+      case "sha512":
+         return sha512(data);
+      default:
+         throw new Pkcs12Error(`Unsupported hash algorithm: ${algorithm}`);
+   }
 }
 
 function concat(...arrays: Uint8Array[]): Uint8Array {
@@ -438,8 +458,12 @@ function decryptPbes2(
    const iv = encScheme[1]!.value as Uint8Array;
 
    // Derive key using PBKDF2
-   const key = new Uint8Array(
-      pbkdf2Sync(password, Buffer.from(salt), iterations, keyLen, prfAlg),
+   const key = pbkdf2(
+      prfAlg as HmacHashAlgorithm,
+      new TextEncoder().encode(password),
+      salt,
+      iterations,
+      keyLen,
    );
 
    return decryptCipher(cipherName, key, iv, encryptedData);
@@ -451,18 +475,21 @@ function decryptCipher(
    iv: Uint8Array,
    encryptedData: Uint8Array,
 ): Uint8Array {
-   const decipher = createDecipheriv(
-      cipherName,
-      Buffer.from(key),
-      Buffer.from(iv),
-   );
-   decipher.setAutoPadding(true);
-
-   const chunks: Buffer[] = [];
-   chunks.push(decipher.update(Buffer.from(encryptedData)));
-   chunks.push(decipher.final());
-
-   return new Uint8Array(Buffer.concat(chunks));
+   switch (cipherName) {
+      case "aes-128-cbc":
+      case "aes-192-cbc":
+      case "aes-256-cbc":
+         return aesCbcDecrypt(key, iv, encryptedData);
+      case "des-ede3-cbc":
+         return tripleDESDecrypt(key, iv, encryptedData);
+      case "rc2-cbc":
+      case "rc2-128-cbc":
+         return rc2CbcDecrypt(key, 128, iv, encryptedData);
+      case "rc2-40-cbc":
+         return rc2CbcDecrypt(key, 40, iv, encryptedData);
+      default:
+         throw new Pkcs12Error(`Unsupported cipher: ${cipherName}`);
+   }
 }
 
 // ---------------------------------------------------------------------------
