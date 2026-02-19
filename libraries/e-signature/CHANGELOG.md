@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.8] - 2026-02-19
+
+### Changed
+- Updated `@f-o-t/crypto` dependency to `^1.2.0` and `@f-o-t/digital-certificate` to `^2.2.2` to pick up pure-TS PBKDF2/HMAC optimizations (~8× faster PBKDF2-SHA256, ~3× faster `parsePkcs12`); `signPdf` is now viable on the client side (browser/Edge Runtime) without OpenSSL
+
 ## [1.2.7] - 2026-02-18
 
 ### Fixed
@@ -122,6 +127,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.8]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.7...@f-o-t/e-signature@1.2.8
+[1.2.7]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.6...@f-o-t/e-signature@1.2.7
+[1.2.6]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.5...@f-o-t/e-signature@1.2.6
 [1.2.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.4...@f-o-t/e-signature@1.2.5
 [1.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.1.0...@f-o-t/e-signature@1.2.0
 [1.1.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.0.7...@f-o-t/e-signature@1.1.0
