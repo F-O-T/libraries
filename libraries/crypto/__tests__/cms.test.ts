@@ -40,16 +40,16 @@ beforeAll(async () => {
    }
 
    const p12Data = new Uint8Array(await Bun.file(p12Path).arrayBuffer());
-   const result = parsePkcs12(p12Data, "test123");
+   const result = await parsePkcs12(p12Data, "test123");
    certificate = result.certificate;
    privateKey = result.privateKey;
    chain = result.chain;
 });
 
 describe("createSignedData", () => {
-   it("creates valid CMS ContentInfo", () => {
+   it("creates valid CMS ContentInfo", async () => {
       const content = new TextEncoder().encode("Hello, World!");
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,
@@ -70,11 +70,11 @@ describe("createSignedData", () => {
       expect(oidStr).toBe("1.2.840.113549.1.7.2");
    });
 
-   it("includes custom authenticated attributes", () => {
+   it("includes custom authenticated attributes", async () => {
       const content = new TextEncoder().encode("test");
       const customAttrValue = new Uint8Array([0x04, 0x03, 0x01, 0x02, 0x03]); // OCTET STRING
 
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,
@@ -91,9 +91,9 @@ describe("createSignedData", () => {
       expect(result.length).toBeGreaterThan(0);
    });
 
-   it("supports unauthenticated attributes", () => {
+   it("supports unauthenticated attributes", async () => {
       const content = new TextEncoder().encode("test");
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,
@@ -109,9 +109,9 @@ describe("createSignedData", () => {
       expect(result).toBeInstanceOf(Uint8Array);
    });
 
-   it("supports non-detached mode", () => {
+   it("supports non-detached mode", async () => {
       const content = new TextEncoder().encode("test content");
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,
@@ -134,9 +134,9 @@ describe("createSignedData", () => {
       expect(eciChildren.length).toBe(2);
    });
 
-   it("supports SHA-384", () => {
+   it("supports SHA-384", async () => {
       const content = new TextEncoder().encode("test");
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,
@@ -148,9 +148,9 @@ describe("createSignedData", () => {
       expect(result[0]).toBe(0x30);
    });
 
-   it("supports SHA-512", () => {
+   it("supports SHA-512", async () => {
       const content = new TextEncoder().encode("test");
-      const result = createSignedData({
+      const result = await createSignedData({
          content,
          certificate,
          privateKey,

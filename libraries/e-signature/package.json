@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/e-signature",
-   "version": "1.2.16",
+   "version": "1.2.17",
    "description": "PAdES PDF signing with ICP-Brasil compliance",
    "type": "module",
    "main": "./dist/index.js",
@@ -31,7 +31,7 @@
    },
    "dependencies": {
       "@f-o-t/asn1": "^1.0.0",
-      "@f-o-t/crypto": "^1.2.0",
+      "@f-o-t/crypto": "^1.3.0",
       "@f-o-t/digital-certificate": "^2.3.0",
       "@f-o-t/pdf": "^0.3.8",
       "@f-o-t/qrcode": "^1.0.0",

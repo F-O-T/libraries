@@ -41,7 +41,10 @@ export class Pkcs12Error extends Error {
    }
 }
 
-export function parsePkcs12(data: Uint8Array, password: string): Pkcs12Result {
+export async function parsePkcs12(
+   data: Uint8Array,
+   password: string,
+): Promise<Pkcs12Result> {
    let pfx: Asn1Node;
    try {
       pfx = decodeDer(data);
@@ -101,21 +104,21 @@ export function parsePkcs12(data: Uint8Array, password: string): Pkcs12Result {
                certificates.push(bag.data);
             } else if (bag.type === "key") {
                if (!privateKey) {
-                  privateKey = decryptShroudedKeyBag(bag.data, password);
+                  privateKey = await decryptShroudedKeyBag(bag.data, password);
                }
             }
          }
       } else if (ciOid === OID_ENCRYPTED_DATA) {
          // EncryptedData — typically holds certificates
          const content = unwrapContextTag(ciChildren[1]!, 0);
-         const decryptedData = decryptEncryptedData(content, password);
+         const decryptedData = await decryptEncryptedData(content, password);
          const bags = parseSafeBags(decodeDer(decryptedData));
          for (const bag of bags) {
             if (bag.type === "cert") {
                certificates.push(bag.data);
             } else if (bag.type === "key") {
                if (!privateKey) {
-                  privateKey = decryptShroudedKeyBag(bag.data, password);
+                  privateKey = await decryptShroudedKeyBag(bag.data, password);
                }
             }
          }
@@ -347,12 +350,12 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
 // PBE Decryption
 // ---------------------------------------------------------------------------
 
-function decryptPbe(
+async function decryptPbe(
    encryptedData: Uint8Array,
    algorithmOid: string,
    algorithmParams: Asn1Node,
    password: string,
-): Uint8Array {
+): Promise<Uint8Array> {
    if (algorithmOid === OID_PBES2) {
       return decryptPbes2(encryptedData, algorithmParams, password);
    }
@@ -397,11 +400,11 @@ function decryptPbe(
    return decryptCipher(cipherName, key, iv, encryptedData);
 }
 
-function decryptPbes2(
+async function decryptPbes2(
    encryptedData: Uint8Array,
    params: Asn1Node,
    password: string,
-): Uint8Array {
+): Promise<Uint8Array> {
    // PBES2-params ::= SEQUENCE { keyDerivationFunc, encryptionScheme }
    const pbes2Params = expectSequence(params, "PBES2-params");
    const kdfInfo = expectSequence(pbes2Params[0]!, "KeyDerivationFunc");
@@ -457,16 +460,115 @@ function decryptPbes2(
 
    const iv = encScheme[1]!.value as Uint8Array;
 
-   // Derive key using PBKDF2
-   const key = pbkdf2(
-      prfAlg as HmacHashAlgorithm,
+   // Derive key — prefer SubtleCrypto PBKDF2 (native, non-blocking) with fallback
+   // to the pure-JS implementation for environments without Web Crypto.
+   const key = await derivePbkdf2Key(
+      password,
+      salt,
+      iterations,
+      keyLen,
+      prfAlg,
+   );
+
+   return decryptCipher(cipherName, key, iv, encryptedData);
+}
+
+/**
+ * Derive a key via PBKDF2.
+ *
+ * Tries SubtleCrypto first (browser / Node 18+ / Bun) for native performance.
+ * Falls back to the pure-JS implementation when Web Crypto is unavailable or
+ * the algorithm is not supported.
+ */
+async function derivePbkdf2Key(
+   password: string,
+   salt: Uint8Array,
+   iterations: number,
+   keyLen: number,
+   hashAlg: string,
+): Promise<Uint8Array> {
+   const subtle =
+      typeof globalThis.crypto?.subtle !== "undefined"
+         ? globalThis.crypto.subtle
+         : null;
+
+   if (subtle) {
+      try {
+         const hashName = pbkdf2HashName(hashAlg);
+         const passwordBytes = new TextEncoder().encode(password);
+
+         // Helper: own ArrayBuffer copy so SubtleCrypto doesn't see a shared buffer view
+         const toBuffer = (u8: Uint8Array): ArrayBuffer =>
+            u8.buffer.slice(
+               u8.byteOffset,
+               u8.byteOffset + u8.byteLength,
+            ) as ArrayBuffer;
+
+         const keyMaterial = await subtle.importKey(
+            "raw",
+            toBuffer(passwordBytes),
+            { name: "PBKDF2" },
+            false,
+            ["deriveBits"],
+         );
+
+         const bits = await subtle.deriveBits(
+            {
+               name: "PBKDF2",
+               salt: toBuffer(salt),
+               iterations,
+               hash: hashName,
+            },
+            keyMaterial,
+            keyLen * 8,
+         );
+
+         return new Uint8Array(bits);
+      } catch {
+         // Fall through to pure-JS
+      }
+   }
+
+   // Pure-JS fallback
+   return pbkdf2(
+      prfAlgToHmac(hashAlg),
       new TextEncoder().encode(password),
       salt,
       iterations,
       keyLen,
    );
+}
 
-   return decryptCipher(cipherName, key, iv, encryptedData);
+/** Map our internal hash name to a SubtleCrypto hash algorithm name. */
+function pbkdf2HashName(alg: string): string {
+   switch (alg) {
+      case "sha1":
+         return "SHA-1";
+      case "sha256":
+         return "SHA-256";
+      case "sha384":
+         return "SHA-384";
+      case "sha512":
+         return "SHA-512";
+      default:
+         return "SHA-1";
+   }
+}
+
+/** Map hash name to HmacHashAlgorithm for pure-JS PBKDF2 fallback. */
+function prfAlgToHmac(alg: string): HmacHashAlgorithm {
+   switch (alg) {
+      case "sha1":
+         return "sha1";
+      case "sha256":
+         return "sha256";
+      case "sha384":
+         return "sha384";
+      case "sha512":
+         return "sha512";
+      default:
+         return "sha1";
+   }
 }
 
 function decryptCipher(
@@ -496,10 +598,10 @@ function decryptCipher(
 // EncryptedData decryption
 // ---------------------------------------------------------------------------
 
-function decryptEncryptedData(
+async function decryptEncryptedData(
    encryptedDataNode: Asn1Node,
    password: string,
-): Uint8Array {
+): Promise<Uint8Array> {
    // EncryptedData ::= SEQUENCE { version, EncryptedContentInfo }
    const edChildren = expectSequence(encryptedDataNode, "EncryptedData");
 
@@ -582,10 +684,10 @@ function extractCertFromBag(certBagNode: Asn1Node): Uint8Array | null {
    return certValue.value as Uint8Array;
 }
 
-function decryptShroudedKeyBag(
+async function decryptShroudedKeyBag(
    encryptedKeyInfoDer: Uint8Array,
    password: string,
-): Uint8Array {
+): Promise<Uint8Array> {
    // EncryptedPrivateKeyInfo ::= SEQUENCE { encryptionAlgorithm, encryptedData }
    const node = decodeDer(encryptedKeyInfoDer);
    const fields = expectSequence(node, "EncryptedPrivateKeyInfo");
@@ -596,7 +698,7 @@ function decryptShroudedKeyBag(
 
    const encryptedData = fields[1]!.value as Uint8Array;
 
-   const decryptedPkcs8 = decryptPbe(
+   const decryptedPkcs8 = await decryptPbe(
       encryptedData,
       algOid,
       algParams,

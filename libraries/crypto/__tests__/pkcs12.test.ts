@@ -39,7 +39,7 @@ beforeAll(() => {
 describe("parsePkcs12", () => {
    it("extracts certificate from P12", async () => {
       const p12Data = new Uint8Array(await Bun.file(p12Path).arrayBuffer());
-      const result = parsePkcs12(p12Data, "test123");
+      const result = await parsePkcs12(p12Data, "test123");
 
       expect(result.certificate).toBeInstanceOf(Uint8Array);
       expect(result.certificate.length).toBeGreaterThan(0);
@@ -49,7 +49,7 @@ describe("parsePkcs12", () => {
 
    it("extracts private key from P12", async () => {
       const p12Data = new Uint8Array(await Bun.file(p12Path).arrayBuffer());
-      const result = parsePkcs12(p12Data, "test123");
+      const result = await parsePkcs12(p12Data, "test123");
 
       expect(result.privateKey).toBeInstanceOf(Uint8Array);
       expect(result.privateKey.length).toBeGreaterThan(0);
@@ -59,12 +59,12 @@ describe("parsePkcs12", () => {
 
    it("throws on wrong password", async () => {
       const p12Data = new Uint8Array(await Bun.file(p12Path).arrayBuffer());
-      expect(() => parsePkcs12(p12Data, "wrongpassword")).toThrow();
+      expect(parsePkcs12(p12Data, "wrongpassword")).rejects.toThrow();
    });
 
    it("throws on corrupted data", () => {
-      expect(() =>
+      expect(
          parsePkcs12(new Uint8Array([0x00, 0x01, 0x02]), "test"),
-      ).toThrow();
+      ).rejects.toThrow();
    });
 });

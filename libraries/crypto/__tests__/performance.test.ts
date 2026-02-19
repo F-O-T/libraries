@@ -44,6 +44,34 @@ function benchmark(
    return { avgMs, iterations, maxMs, minMs, name, opsPerSec, totalMs };
 }
 
+async function benchmarkAsync(
+   name: string,
+   fn: () => Promise<void>,
+   iterations = 10,
+): Promise<BenchmarkResult> {
+   const times: number[] = [];
+
+   // Warmup
+   for (let i = 0; i < 2; i++) {
+      await fn();
+   }
+
+   for (let i = 0; i < iterations; i++) {
+      const start = performance.now();
+      await fn();
+      const end = performance.now();
+      times.push(end - start);
+   }
+
+   const totalMs = times.reduce((a, b) => a + b, 0);
+   const avgMs = totalMs / iterations;
+   const minMs = Math.min(...times);
+   const maxMs = Math.max(...times);
+   const opsPerSec = 1000 / avgMs;
+
+   return { avgMs, iterations, maxMs, minMs, name, opsPerSec, totalMs };
+}
+
 function formatResult(result: BenchmarkResult): string {
    return `${result.name}: avg=${result.avgMs.toFixed(3)}ms, min=${result.minMs.toFixed(3)}ms, max=${result.maxMs.toFixed(3)}ms, ops/s=${result.opsPerSec.toFixed(2)}`;
 }
@@ -54,10 +82,10 @@ const p12Path = join(fixtureDir, "test.p12");
 test("performance: PKCS#12 parse", async () => {
    const p12Data = await Bun.file(p12Path).bytes();
 
-   const result = benchmark(
+   const result = await benchmarkAsync(
       "pkcs12-parse",
-      () => {
-         parsePkcs12(p12Data, "test123");
+      async () => {
+         await parsePkcs12(p12Data, "test123");
       },
       20,
    );
@@ -105,14 +133,17 @@ test("performance: SHA-512 hash of 1 MB payload", () => {
 
 test("performance: RSA-PKCS1v15 sign (digest)", async () => {
    const p12Data = await Bun.file(p12Path).bytes();
-   const { certificate, privateKey, chain } = parsePkcs12(p12Data, "test123");
+   const { certificate, privateKey, chain } = await parsePkcs12(
+      p12Data,
+      "test123",
+   );
 
    const digest = new Uint8Array(32).fill(0xcd);
 
-   const result = benchmark(
+   const result = await benchmarkAsync(
       "rsa-sign-digest",
-      () => {
-         createSignedData({
+      async () => {
+         await createSignedData({
             content: digest,
             certificate,
             privateKey,
@@ -125,5 +156,7 @@ test("performance: RSA-PKCS1v15 sign (digest)", async () => {
    );
 
    console.log(formatResult(result));
+   // SubtleCrypto-based signing should be dramatically faster than pure-JS BigInt.
+   // Threshold relaxed to 200ms to accommodate environments without native WebCrypto.
    expect(result.avgMs).toBeLessThan(200);
 });

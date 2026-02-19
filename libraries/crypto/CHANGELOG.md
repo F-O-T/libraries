@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.3.0] - 2026-02-19
+
+### Changed
+- `parsePkcs12` is now `async` and returns `Promise<Pkcs12Result>` — callers must `await` the result
+- PBES2 key derivation (PBKDF2) now uses `SubtleCrypto.deriveBits` when available (browser / Node 18+ / Bun), offloading the CPU-intensive key stretching to the platform's native implementation; pure-JS PBKDF2 is retained as a fallback for environments without Web Crypto
+- `createSignedData` (CMS) is `async` and uses `SubtleCrypto.sign` for RSA and ECDSA signing when available, with pure-JS fallback — the main thread is no longer blocked during signing
+
+### Fixed
+- Performance test `PKCS#12 parse` now uses `benchmarkAsync` to correctly await the async `parsePkcs12` call
+
 ## [1.2.0] - 2026-02-19
 
 ### Added
@@ -43,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hashing utility: `hash` (SHA-256, SHA-384, SHA-512)
 - PEM utilities: `pemToDer`, `derToPem`
 
+[1.3.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/crypto@1.2.0...@f-o-t/crypto@1.3.0
 [1.2.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/crypto@1.1.0...@f-o-t/crypto@1.2.0
 [1.1.0]: https://github.com/F-O-T/libraries/compare/@f-o-t/crypto@1.0.1...@f-o-t/crypto@1.1.0
 [1.0.1]: https://github.com/F-O-T/libraries/compare/@f-o-t/crypto@1.0.0...@f-o-t/crypto@1.0.1

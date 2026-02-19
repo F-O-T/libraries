@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.17] - 2026-02-19
+
+### Changed
+- `signPdf` now `await`s `parsePkcs12` after it was made async in `@f-o-t/crypto` — no behaviour change for consumers, but PKCS#12 decryption now uses SubtleCrypto PBKDF2 natively when available, preventing main-thread blocking on PBES2-encrypted PFX files
+- `useSignPdf` (React plugin) calls `signPdf` directly instead of spawning a `Worker` — removes the brittle `.ts` worker URL that broke in consumer bundles; the hook still exposes the same async API so UI stays responsive
+
 ## [1.2.16] - 2026-02-19
 
 ### Changed

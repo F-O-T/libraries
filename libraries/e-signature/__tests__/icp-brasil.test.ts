@@ -43,7 +43,7 @@ async function loadP12(): Promise<Uint8Array> {
 describe("buildSigningCertificateV2", () => {
    it("produces valid DER-encoded ASN.1 structure", async () => {
       const p12 = await loadP12();
-      const { certificate } = parsePkcs12(p12, "test123");
+      const { certificate } = await parsePkcs12(p12, "test123");
 
       const result = buildSigningCertificateV2(certificate);
       expect(result).toBeInstanceOf(Uint8Array);
@@ -58,7 +58,7 @@ describe("buildSigningCertificateV2", () => {
 
    it("contains certs SEQUENCE with ESSCertIDv2", async () => {
       const p12 = await loadP12();
-      const { certificate } = parsePkcs12(p12, "test123");
+      const { certificate } = await parsePkcs12(p12, "test123");
 
       const result = buildSigningCertificateV2(certificate);
       const decoded = decodeDer(result);
@@ -95,7 +95,7 @@ describe("buildSigningCertificateV2", () => {
 
    it("produces different hashes for different certificates", async () => {
       const p12 = await loadP12();
-      const { certificate } = parsePkcs12(p12, "test123");
+      const { certificate } = await parsePkcs12(p12, "test123");
 
       const result1 = buildSigningCertificateV2(certificate);
       const result2 = buildSigningCertificateV2(certificate);

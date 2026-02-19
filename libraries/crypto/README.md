@@ -1,6 +1,8 @@
 # @f-o-t/crypto
 
-PKCS#12 parsing, CMS/PKCS#7 SignedData construction, hashing, and PEM utilities. Built on `node:crypto` with zero external dependencies beyond `@f-o-t/asn1`.
+PKCS#12 parsing, CMS/PKCS#7 SignedData construction, hashing, and PEM utilities. Zero external dependencies beyond `@f-o-t/asn1`.
+
+**Performance**: Expensive operations use the native [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) (`SubtleCrypto`) when available (browsers, Node.js 18+, Bun), keeping the main thread non-blocking. Pure-JS implementations serve as automatic fallback.
 
 ## Installation
 
@@ -10,28 +12,34 @@ bun add @f-o-t/crypto
 
 ## API
 
-### `parsePkcs12(data: Uint8Array, password: string): Pkcs12Result`
+### `parsePkcs12(data: Uint8Array, password: string): Promise<Pkcs12Result>`
 
 Parse a PKCS#12/PFX file and extract the certificate, private key, and certificate chain. Supports legacy PBE (3DES, RC2) and modern PBES2 (AES-CBC, PBKDF2) encryption schemes.
+
+PBES2 key derivation uses `SubtleCrypto.deriveBits` (native, non-blocking) when available, with an automatic pure-JS fallback.
+
+> **Breaking change in v1.3.0**: `parsePkcs12` is now `async`. Callers must `await` the result.
 
 ```ts
 import { parsePkcs12 } from "@f-o-t/crypto";
 
 const p12 = await Bun.file("certificate.pfx").bytes();
-const { certificate, privateKey, chain } = parsePkcs12(p12, "password");
+const { certificate, privateKey, chain } = await parsePkcs12(p12, "password");
 // certificate: Uint8Array (DER-encoded X.509)
 // privateKey:  Uint8Array (DER-encoded PKCS#8)
 // chain:       Uint8Array[] (CA certificates)
 ```
 
-### `createSignedData(options: SignedDataOptions): Uint8Array`
+### `createSignedData(options: SignedDataOptions): Promise<Uint8Array>`
 
 Create a CMS/PKCS#7 SignedData structure wrapped in a ContentInfo. Returns DER-encoded bytes. Supports detached signatures (default) and custom authenticated/unauthenticated attributes.
+
+Signing uses `SubtleCrypto.sign` (RSASSA-PKCS1-v1_5 / ECDSA) when available, with automatic pure-JS fallback.
 
 ```ts
 import { createSignedData } from "@f-o-t/crypto";
 
-const signedData = createSignedData({
+const signedData = await createSignedData({
   content: bytesToSign,
   certificate: cert,
   privateKey: key,

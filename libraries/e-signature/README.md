@@ -17,6 +17,7 @@ bun add @f-o-t/e-signature
 - QR code generation for signature verification
 - Configurable DocMDP permissions for document modification control
 - **Browser compatible** — no `Buffer` or Node-only APIs; runs in browsers, Edge Runtime, and Cloudflare Workers
+- **Non-blocking crypto** — PBKDF2 key derivation and RSA/ECDSA signing use the native [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) (`SubtleCrypto`) when available, avoiding main-thread freezes; pure-JS implementations serve as automatic fallback
 
 ## React Hook
 

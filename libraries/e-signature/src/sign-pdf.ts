@@ -95,7 +95,7 @@ export async function signPdf(
 
    // 1. Parse PKCS#12 early — needed both for display info and for sizing the
    //    signature placeholder accurately based on the actual certificate chain length.
-   const { certificate, privateKey, chain } = parsePkcs12(
+   const { certificate, privateKey, chain } = await parsePkcs12(
       opts.certificate.p12,
       opts.certificate.password,
    );
@@ -232,7 +232,7 @@ export async function signPdf(
    const unauthenticatedAttributes: CmsAttribute[] = [];
 
    // 9. Create CMS/PKCS#7 SignedData
-   const signedData = createSignedData({
+   const signedData = await createSignedData({
       content: bytesToSign,
       certificate,
       privateKey,

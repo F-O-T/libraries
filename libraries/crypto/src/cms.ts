@@ -11,8 +11,7 @@ import {
    set,
 } from "@f-o-t/asn1";
 import { hash } from "./hash.ts";
-import { ecdsaSign } from "./primitives/ecdsa.ts";
-import { parsePkcs8, rsaSign } from "./primitives/rsa.ts";
+import { parsePkcs8 } from "./primitives/rsa.ts";
 import { signedDataOptionsSchema } from "./schemas.ts";
 import type {
    CmsAttribute,
@@ -52,7 +51,9 @@ export class CmsError extends Error {
  *
  * Returns the DER-encoded ContentInfo.
  */
-export function createSignedData(options: SignedDataOptions): Uint8Array {
+export async function createSignedData(
+   options: SignedDataOptions,
+): Promise<Uint8Array> {
    const parsed = signedDataOptionsSchema.parse(options);
    const {
       content,
@@ -85,8 +86,8 @@ export function createSignedData(options: SignedDataOptions): Uint8Array {
    //    The encoder sorts SET OF children per X.690 §11.6 (DER).
    const attrsDer = encodeDer(set(...authAttrs));
 
-   // 4. Sign the DER-encoded attributes
-   const signatureValue = signData(attrsDer, privateKey, hashAlgorithm);
+   // 4. Sign the DER-encoded attributes (using SubtleCrypto for performance)
+   const signatureValue = await signData(attrsDer, privateKey, hashAlgorithm);
 
    // 5. Decode the sorted SET back so the signerInfo stores children
    //    in the same DER-sorted order that was signed. This is critical:
@@ -202,6 +203,195 @@ export function appendUnauthAttributes(
 }
 
 // ---------------------------------------------------------------------------
+// SubtleCrypto-based signing (async, non-blocking)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the SubtleCrypto instance if available (browser / modern Node / Bun),
+ * or null in environments that don't expose it.
+ */
+function getSubtle(): SubtleCrypto | null {
+   if (typeof globalThis.crypto?.subtle !== "undefined") {
+      return globalThis.crypto.subtle;
+   }
+   return null;
+}
+
+/**
+ * Map our HashAlgorithm to the SubtleCrypto hash name.
+ */
+function subtleHashName(alg: HashAlgorithm): string {
+   switch (alg) {
+      case "sha256":
+         return "SHA-256";
+      case "sha384":
+         return "SHA-384";
+      case "sha512":
+         return "SHA-512";
+   }
+}
+
+/**
+ * Convert an IEEE P1363 ECDSA signature (raw r||s bytes) to DER SEQUENCE { r, s }.
+ * SubtleCrypto returns P1363 format; CMS requires DER.
+ */
+function p1363ToDer(p1363: Uint8Array): Uint8Array {
+   const halfLen = p1363.length / 2;
+   let r = p1363.subarray(0, halfLen);
+   let s = p1363.subarray(halfLen);
+
+   // Strip leading zeros, but ensure at most one leading 0x00 for sign
+   while (r.length > 1 && r[0] === 0x00 && (r[1]! & 0x80) === 0) {
+      r = r.subarray(1);
+   }
+   while (s.length > 1 && s[0] === 0x00 && (s[1]! & 0x80) === 0) {
+      s = s.subarray(1);
+   }
+
+   // Add leading 0x00 if high bit set (positive integer encoding)
+   const rEnc = r[0]! & 0x80 ? new Uint8Array([0x00, ...r]) : r;
+   const sEnc = s[0]! & 0x80 ? new Uint8Array([0x00, ...s]) : s;
+
+   const contentLen = 2 + rEnc.length + 2 + sEnc.length;
+   const der = new Uint8Array(2 + contentLen);
+   let off = 0;
+   der[off++] = 0x30; // SEQUENCE
+   der[off++] = contentLen;
+   der[off++] = 0x02; // INTEGER r
+   der[off++] = rEnc.length;
+   der.set(rEnc, off);
+   off += rEnc.length;
+   der[off++] = 0x02; // INTEGER s
+   der[off++] = sEnc.length;
+   der.set(sEnc, off);
+   return der;
+}
+
+/**
+ * Sign data using SubtleCrypto (preferred: runs natively, non-blocking).
+ * Falls back to pure-JS implementations when SubtleCrypto is unavailable.
+ */
+async function signData(
+   data: Uint8Array,
+   privateKeyDer: Uint8Array,
+   hashAlgorithm: HashAlgorithm,
+): Promise<Uint8Array> {
+   const subtle = getSubtle();
+
+   if (subtle) {
+      try {
+         const keyInfo = parsePkcs8(privateKeyDer);
+
+         // Helper: ensure we hand SubtleCrypto a plain ArrayBuffer (not a shared or offset view)
+         const toArrayBuffer = (u8: Uint8Array): ArrayBuffer =>
+            u8.buffer.slice(
+               u8.byteOffset,
+               u8.byteOffset + u8.byteLength,
+            ) as ArrayBuffer;
+
+         if (keyInfo.type === "rsa") {
+            // Import PKCS#8 RSA key and sign with RSASSA-PKCS1-v1_5
+            const cryptoKey = await subtle.importKey(
+               "pkcs8",
+               toArrayBuffer(privateKeyDer),
+               {
+                  name: "RSASSA-PKCS1-v1_5",
+                  hash: subtleHashName(hashAlgorithm),
+               },
+               false, // not extractable
+               ["sign"],
+            );
+            const sig = await subtle.sign(
+               "RSASSA-PKCS1-v1_5",
+               cryptoKey,
+               toArrayBuffer(data),
+            );
+            return new Uint8Array(sig);
+         }
+
+         if (keyInfo.type === "ec") {
+            // Import PKCS#8 EC key and sign with ECDSA
+            // Determine curve from the key's OID
+            const curveOid = keyInfo.ecCurveOid;
+            const namedCurve = ecCurveOidToSubtle(curveOid);
+
+            const cryptoKey = await subtle.importKey(
+               "pkcs8",
+               toArrayBuffer(privateKeyDer),
+               {
+                  name: "ECDSA",
+                  namedCurve,
+               },
+               false,
+               ["sign"],
+            );
+
+            const sigP1363 = await subtle.sign(
+               { name: "ECDSA", hash: subtleHashName(hashAlgorithm) },
+               cryptoKey,
+               toArrayBuffer(data),
+            );
+
+            // Convert IEEE P1363 → DER for CMS compatibility
+            return p1363ToDer(new Uint8Array(sigP1363));
+         }
+      } catch {
+         // Intentionally fall through to pure-JS fallback
+      }
+   }
+
+   // Pure-JS fallback (no SubtleCrypto, or unsupported key type)
+   return signDataPureJs(data, privateKeyDer, hashAlgorithm);
+}
+
+/**
+ * Pure-JS fallback signing (heavy CPU work — only used when SubtleCrypto unavailable).
+ */
+async function signDataPureJs(
+   data: Uint8Array,
+   privateKeyDer: Uint8Array,
+   hashAlgorithm: HashAlgorithm,
+): Promise<Uint8Array> {
+   const { ecdsaSign } = await import("./primitives/ecdsa.ts");
+   const { rsaSign } = await import("./primitives/rsa.ts");
+   const keyInfo = parsePkcs8(privateKeyDer);
+   if (keyInfo.type === "ec") {
+      return ecdsaSign(privateKeyDer, hashAlgorithm, data);
+   }
+   return rsaSign(privateKeyDer, hashAlgorithm, data);
+}
+
+/**
+ * Convert an EC curve OID byte array to a SubtleCrypto named curve string.
+ */
+function ecCurveOidToSubtle(oidBytes: Uint8Array | undefined): string {
+   if (!oidBytes) return "P-256";
+
+   // OID 1.2.840.10045.3.1.7 → P-256
+   const OID_P256 = new Uint8Array([
+      0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,
+   ]);
+   // OID 1.3.132.0.34 → P-384
+   const OID_P384 = new Uint8Array([0x2b, 0x81, 0x04, 0x00, 0x22]);
+
+   if (
+      oidBytes.length === OID_P384.length &&
+      oidBytes.every((b, i) => b === OID_P384[i])
+   ) {
+      return "P-384";
+   }
+   if (
+      oidBytes.length === OID_P256.length &&
+      oidBytes.every((b, i) => b === OID_P256[i])
+   ) {
+      return "P-256";
+   }
+
+   // Default: try P-256
+   return "P-256";
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -244,18 +434,6 @@ function buildAuthenticatedAttributes(
    }
 
    return attrs;
-}
-
-function signData(
-   data: Uint8Array,
-   privateKeyDer: Uint8Array,
-   hashAlgorithm: HashAlgorithm,
-): Uint8Array {
-   const keyInfo = parsePkcs8(privateKeyDer);
-   if (keyInfo.type === "ec") {
-      return ecdsaSign(privateKeyDer, hashAlgorithm, data);
-   }
-   return rsaSign(privateKeyDer, hashAlgorithm, data);
 }
 
 function extractIssuerAndSerial(certDer: Uint8Array): Asn1Node {
