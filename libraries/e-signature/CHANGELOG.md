@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.15] - 2026-02-19
+
+### Changed
+
+- Bump `@f-o-t/cli` devDependency to `^1.0.5` to pick up the `module` condition fix in `syncPackageJsonExports` — `fot build` now correctly writes `module` alongside `import` and `default` in the generated exports, ensuring Vite/rolldown can resolve entry points without a manual `node_modules` patch
+
 ## [1.2.14] - 2026-02-19
 
 ### Changed
