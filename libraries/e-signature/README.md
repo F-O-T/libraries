@@ -16,6 +16,7 @@ bun add @f-o-t/e-signature
 - RFC 3161 timestamp support
 - QR code generation for signature verification
 - Configurable DocMDP permissions for document modification control
+- **Browser compatible** — no `Buffer` or Node-only APIs; runs in browsers, Edge Runtime, and Cloudflare Workers
 
 ## API
 

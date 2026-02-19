@@ -70,7 +70,7 @@ export const certificateInfoSchema = z.object({
    brazilian: brazilianFieldsSchema,
    certPem: z.string().regex(/-----BEGIN CERTIFICATE-----/, "Invalid PEM certificate"),
    keyPem: z.string().regex(/-----BEGIN (RSA )?PRIVATE KEY-----/, "Invalid PEM private key"),
-   pfxBuffer: z.instanceof(Buffer),
+   pfxBuffer: z.instanceof(Uint8Array),
    pfxPassword: z.string(),
 });
 

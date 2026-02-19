@@ -104,7 +104,7 @@ export async function signPdf(
    let certInfo: CertificateInfo | null = null;
    try {
       certInfo = parseCertificate(
-         Buffer.from(opts.certificate.p12),
+         opts.certificate.p12,
          opts.certificate.password,
       );
    } catch {

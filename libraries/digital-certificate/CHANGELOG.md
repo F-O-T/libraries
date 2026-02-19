@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.0] - 2026-02-19
+
+### Added
+- `base64ToBytes(b64: string): Uint8Array` utility — cross-platform base64 decoder (uses `Buffer` in Node/Bun, `atob` in browsers)
+- `bytesToBase64(bytes: Uint8Array): string` utility — cross-platform base64 encoder (uses `Buffer` in Node/Bun, `btoa` in browsers)
+
+### Changed
+- `parseCertificate` now accepts `Uint8Array` instead of `Buffer` — makes the function callable in browser environments where `Buffer` is unavailable; Node/Bun callers are unaffected because `Buffer` is a `Uint8Array` subclass
+- `CertificateInfo.pfxBuffer` type changed from `Buffer` to `Uint8Array` — aligns with the new parameter type; Node code holding `Buffer` instances continues to work unchanged
+- `derToPem` internal implementation no longer uses `Buffer.toString("base64")`; uses `bytesToBase64` so PEM encoding works in browsers
+- X.509 DER decoding no longer uses `Buffer.from(b64, "base64")`; uses `base64ToBytes` so certificate parsing works in browsers
+- Zod schema `pfxBuffer: z.instanceof(Buffer)` changed to `z.instanceof(Uint8Array)` — validates both `Uint8Array` and `Buffer` objects (Node's `Buffer` passes because it extends `Uint8Array`)
+
 ## [2.2.2] - 2026-02-19
 
 ### Changed

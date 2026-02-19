@@ -23,13 +23,13 @@ import { extractCnpj, extractCpf, parseDistinguishedName } from "./utils.ts";
 /**
  * Parse a .pfx/.p12 certificate file and extract all relevant information
  *
- * @param pfx - The PFX/P12 file contents as a Buffer
+ * @param pfx - The PFX/P12 file contents as a Uint8Array
  * @param password - The password to decrypt the PFX file
  * @returns Parsed certificate information
  * @throws {Error} If the PFX cannot be parsed or the password is wrong
  */
 export function parseCertificate(
-   pfx: Buffer,
+   pfx: Uint8Array,
    password: string,
 ): CertificateInfo {
    const { certPem, keyPem } = extractPemFromPfx(pfx, password);
@@ -90,12 +90,12 @@ export function getPemPair(cert: CertificateInfo): {
 // =============================================================================
 
 function extractPemFromPfx(
-   pfx: Buffer,
+   pfx: Uint8Array,
    password: string,
 ): { certPem: string; keyPem: string } {
    let result;
    try {
-      result = parsePkcs12(new Uint8Array(pfx), password);
+      result = parsePkcs12(pfx, password);
    } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       throw new Error(

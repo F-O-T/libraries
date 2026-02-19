@@ -58,8 +58,8 @@ export interface CertificateInfo {
    certPem: string;
    /** PEM-encoded private key */
    keyPem: string;
-   /** Raw PFX buffer */
-   pfxBuffer: Buffer;
+   /** Raw PFX bytes */
+   pfxBuffer: Uint8Array;
    /** PFX password */
    pfxPassword: string;
 }

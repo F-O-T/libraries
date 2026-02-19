@@ -13,6 +13,7 @@ Brazilian A1 digital certificate handling with XML/PDF signing and mTLS support.
 - **XML Digital Signatures**: Sign XML documents with XML-DSig (via plugin)
 - **Mutual TLS**: Create mTLS contexts for secure HTTPS connections (via plugin)
 - **Pure JavaScript**: No system dependencies — PKCS#12 parsing via `@f-o-t/crypto`
+- **Browser Compatible**: All APIs use `Uint8Array`; works in browsers, Edge Runtime, and Cloudflare Workers
 - **Validity Checking**: Built-in certificate expiry validation
 - **Framework Agnostic**: Works with any JavaScript/TypeScript project
 
@@ -41,9 +42,12 @@ pnpm add @f-o-t/digital-certificate
 import { parseCertificate, isCertificateValid, daysUntilExpiry } from "@f-o-t/digital-certificate";
 import { readFileSync } from "fs";
 
-// Load certificate file
-const pfxBuffer = readFileSync("certificate.pfx");
+// Load certificate file (Node/Bun)
+const pfxBuffer = new Uint8Array(readFileSync("certificate.pfx"));
 const password = "your-certificate-password";
+
+// In a browser, read from a File input:
+// const pfxBuffer = new Uint8Array(await file.arrayBuffer());
 
 // Parse certificate
 const cert = parseCertificate(pfxBuffer, password);
@@ -227,10 +231,10 @@ const certInfo: CertificateInfo = {
     cnpj: "12345678000190",
     cpf: null
   },
-  certPem: "-----BEGIN CERTIFICATE-----...",
-  keyPem: "-----BEGIN PRIVATE KEY-----...",
-  pfxBuffer: Buffer.from([]),
-  pfxPassword: "password"
+   certPem: "-----BEGIN CERTIFICATE-----...",
+   keyPem: "-----BEGIN PRIVATE KEY-----...",
+   pfxBuffer: new Uint8Array([]),
+   pfxPassword: "password"
 };
 ```
 
@@ -261,6 +265,8 @@ import {
   extractCpf,
   parseDistinguishedName,
   pemToBase64,
+  base64ToBytes,
+  bytesToBase64,
   BRAZILIAN_OIDS,
   DIGEST_ALGORITHMS,
   SIGNATURE_ALGORITHMS,
@@ -283,6 +289,10 @@ const dn = parseDistinguishedName("CN=Company,O=Inc,C=BR");
 
 // Convert PEM to base64
 const base64 = pemToBase64(certPem);
+
+// Cross-platform base64 helpers (work in Node, Bun, browsers, Edge Runtime)
+const bytes = base64ToBytes("SGVsbG8gV29ybGQ=");    // Uint8Array
+const b64   = bytesToBase64(new Uint8Array([1, 2])); // "AQI="
 
 // Brazilian OIDs
 console.log(BRAZILIAN_OIDS.CNPJ);  // "2.16.76.1.3.3"

@@ -8,6 +8,7 @@
 
 import { decodeDer, bytesToOid, type Asn1Node } from "@f-o-t/asn1";
 import { hash } from "@f-o-t/crypto";
+import { base64ToBytes } from "./utils.ts";
 
 // X.509 OIDs
 const OID_COMMON_NAME = "2.5.4.3";
@@ -53,7 +54,7 @@ export function parseX509Certificate(certPem: string): X509Info {
 		.replace(/-----END CERTIFICATE-----/, "")
 		.replace(/\s/g, "");
 
-	const der = new Uint8Array(Buffer.from(b64, "base64"));
+	const der = base64ToBytes(b64);
 
 	// Calculate fingerprint (SHA-256 hash of DER)
 	const fingerprintBytes = hash("sha256", der);

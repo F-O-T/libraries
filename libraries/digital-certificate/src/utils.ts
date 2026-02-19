@@ -127,12 +127,43 @@ export function extractCpf(subjectRaw: string): string | null {
 }
 
 // =============================================================================
+// Cross-Platform Base64 Helpers
+// =============================================================================
+
+/**
+ * Convert a base64 string to a Uint8Array.
+ * Uses Buffer in Node/Bun for performance; falls back to atob in browsers.
+ */
+export function base64ToBytes(b64: string): Uint8Array {
+   if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
+      return new Uint8Array(Buffer.from(b64, "base64"));
+   }
+   const binary = atob(b64);
+   const bytes = new Uint8Array(binary.length);
+   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+   return bytes;
+}
+
+/**
+ * Convert a Uint8Array to a base64 string.
+ * Uses Buffer in Node/Bun for performance; falls back to btoa in browsers.
+ */
+export function bytesToBase64(bytes: Uint8Array): string {
+   if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
+      return Buffer.from(bytes).toString("base64");
+   }
+   let binary = "";
+   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+   return btoa(binary);
+}
+
+// =============================================================================
 // PEM Helpers
 // =============================================================================
 
-/** Convert DER buffer to PEM string with given label */
-export function derToPem(der: Buffer, label: string): string {
-   const b64 = der.toString("base64");
+/** Convert DER bytes to PEM string with given label */
+export function derToPem(der: Uint8Array, label: string): string {
+   const b64 = bytesToBase64(der);
    const lines: string[] = [];
    for (let i = 0; i < b64.length; i += 64) {
       lines.push(b64.slice(i, i + 64));
