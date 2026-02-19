@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/e-signature",
-   "version": "1.2.13",
+   "version": "1.2.14",
    "description": "PAdES PDF signing with ICP-Brasil compliance",
    "type": "module",
    "main": "./dist/index.js",
@@ -39,7 +39,7 @@
    },
    "devDependencies": {
       "@f-o-t/cli": "^1.0.3",
-      "@f-o-t/config": "^1.0.3",
+      "@f-o-t/config": "^1.0.5",
       "@testing-library/react": "^16.0.0",
       "@types/bun": "latest",
       "@types/react": "^19.0.0",
