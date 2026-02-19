@@ -184,10 +184,9 @@ export async function signPdf(
 
    // Which page hosts the widget annotation — must match the visual appearance
    // page so PDF readers navigate to the right page when a signature is clicked.
-   const appearancePage =
-      opts.appearance && opts.appearance !== false
-         ? (opts.appearance.page ?? 0)
-         : (opts.appearances?.[0]?.page ?? 0);
+   const appearancePage = opts.appearance
+      ? ((opts.appearance as { page?: number }).page ?? 0)
+      : (opts.appearances?.[0]?.page ?? 0);
 
    const { pdf: pdfWithPlaceholder } = doc.saveWithPlaceholder({
       reason: opts.reason || "Digitally signed",

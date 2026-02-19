@@ -55,6 +55,8 @@ declare module "@f-o-t/pdf/plugins/editing" {
       contactInfo?: string;
       signatureLength?: number;
       docMdpPermission?: 1 | 2 | 3;
+      /** Page index (0-based) where the signature widget annotation is placed */
+      appearancePage?: number;
    };
 
    export function loadPdf(data: Uint8Array): PdfDocument;
