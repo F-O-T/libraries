@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { BuildFormat } from "@f-o-t/config";
 import { generateTSConfig } from "@f-o-t/config";
@@ -101,17 +101,22 @@ export async function buildLibrary(options: BuildOptions = {}): Promise<void> {
    const mainEntry = join(cwd, "src", "index.ts");
    entryPoints.push(mainEntry);
 
-   // Plugin entry points
+   // Plugin entry points (index.ts + any *.worker.ts files in the plugin dir)
    for (const plugin of config.plugins) {
       if (plugin.enabled !== false) {
-         const pluginEntry = join(
-            cwd,
-            "src",
-            "plugins",
-            plugin.name,
-            "index.ts",
-         );
+         const pluginDir = join(cwd, "src", "plugins", plugin.name);
+         const pluginEntry = join(pluginDir, "index.ts");
          entryPoints.push(pluginEntry);
+
+         // Auto-include worker files so they are compiled and shipped in dist
+         if (existsSync(pluginDir)) {
+            const workerFiles = readdirSync(pluginDir).filter((f) =>
+               f.endsWith(".worker.ts"),
+            );
+            for (const workerFile of workerFiles) {
+               entryPoints.push(join(pluginDir, workerFile));
+            }
+         }
       }
    }
 

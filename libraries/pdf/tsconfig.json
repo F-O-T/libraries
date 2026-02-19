@@ -21,10 +21,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "bunup.config.ts",
-    "src/plugins/generation",
-    "src/plugins/parsing",
-    "src/plugins/editing"
+    "bunup.config.ts"
   ],
   "include": [
     "src/**/*"

@@ -64,12 +64,12 @@
     },
     "libraries/cli": {
       "name": "@f-o-t/cli",
-      "version": "1.0.4",
+      "version": "1.0.6",
       "bin": {
         "fot": "./dist/index.js",
       },
       "dependencies": {
-        "@f-o-t/config": "^1.0.3",
+        "@f-o-t/config": "^1.0.6",
         "commander": "^12.1.0",
       },
       "devDependencies": {
@@ -95,7 +95,7 @@
     },
     "libraries/config": {
       "name": "@f-o-t/config",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "dependencies": {
         "zod": "^4.3.6",
       },
@@ -179,7 +179,7 @@
     },
     "libraries/e-signature": {
       "name": "@f-o-t/e-signature",
-      "version": "1.2.14",
+      "version": "1.2.16",
       "dependencies": {
         "@f-o-t/asn1": "^1.0.0",
         "@f-o-t/crypto": "^1.2.0",
@@ -189,8 +189,8 @@
         "zod": "^4.3.6",
       },
       "devDependencies": {
-        "@f-o-t/cli": "^1.0.3",
-        "@f-o-t/config": "^1.0.5",
+        "@f-o-t/cli": "^1.0.6",
+        "@f-o-t/config": "^1.0.6",
         "@testing-library/react": "^16.0.0",
         "@types/bun": "latest",
         "@types/react": "^19.0.0",

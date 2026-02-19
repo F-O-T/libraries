@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.9] - 2026-02-19
+
+### Fixed
+- Plugin subdirectories (`generation`, `parsing`, `editing`) now correctly ship TypeScript declaration files (`index.d.ts` + map) in the published tarball; previously the `editing` plugin was missing its `.d.ts`, causing `TS7016` errors in downstream consumers
+- `package.json` exports now include `"module"` and `"import"` conditions for all entry points (root + plugins) so Vite/rolldown resolving under `["module","browser","import"]` conditions no longer throws "not exported" errors
+
 ## [0.3.8] - 2026-02-18
 
 ### Fixed
@@ -120,6 +126,7 @@
 - Object creation utilities
 - Comprehensive error handling: PDFParseError, PDFGenerationError, InvalidPDFObjectError, FontNotFoundError, InvalidImageError, PDFSignatureError, PDFEncryptionError
 
+[0.3.9]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.8...@f-o-t/pdf@0.3.9
 [0.3.5]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.4...@f-o-t/pdf@0.3.5
 [0.3.4]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.3...@f-o-t/pdf@0.3.4
 [0.3.3]: https://github.com/F-O-T/libraries/compare/@f-o-t/pdf@0.3.2...@f-o-t/pdf@0.3.3

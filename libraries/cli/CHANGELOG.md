@@ -5,6 +5,13 @@ All notable changes to @f-o-t/cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-02-19
+
+### Changed
+
+- `fot build` now automatically detects and compiles `*.worker.ts` files inside plugin directories (e.g. `src/plugins/react/sign-pdf.worker.ts`) as additional Bun bundle entrypoints, emitting them alongside the plugin `index.js` in `dist/plugins/<name>/` — worker files are shipped in the npm package and can be resolved at runtime via `new URL('./sign-pdf.worker.ts', import.meta.url)` in any modern bundler (Vite, webpack, Rollup)
+- Requires `@f-o-t/config@^1.0.6` — plugin directories are no longer excluded from the main tsconfig, so the single `tsc --emitDeclarationOnly` pass now correctly generates `dist/plugins/<name>/index.d.ts` for all plugin entry points
+
 ## [1.0.5] - 2026-02-19
 
 ### Fixed

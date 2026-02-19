@@ -2,28 +2,77 @@
  * useSignPdf hook tests
  *
  * Tests run with bun:test + @testing-library/react.
- * signPdf is mocked to avoid real crypto work in unit tests.
+ * Worker is mocked to avoid real Web Worker / crypto work in unit tests.
  */
 
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
+import type {
+   SignWorkerRequest,
+   SignWorkerResponse,
+} from "../../src/plugins/react/sign-pdf.worker.ts";
 
-// ── Mock signPdf before importing the hook ───────────────────────────────────
-const mockSignPdf = mock(
-   async (_pdf: Uint8Array, _opts: unknown) => new Uint8Array([1, 2, 3, 4]),
-);
+// ── Mock Worker ───────────────────────────────────────────────────────────────
 
-mock.module("../../src/sign-pdf.ts", () => ({
-   signPdf: mockSignPdf,
-   PdfSignError: class PdfSignError extends Error {
-      constructor(msg: string) {
-         super(msg);
-         this.name = "PdfSignError";
+/**
+ * A synchronous fake Worker that intercepts postMessage calls and either
+ * calls back with a success response or an error response, depending on
+ * the value of `mockWorkerError`.
+ */
+let mockWorkerError: string | null = null;
+let mockWorkerResult: Uint8Array = new Uint8Array([1, 2, 3, 4]);
+let lastWorkerRequest: SignWorkerRequest | null = null;
+let workerPostMessageCallCount = 0;
+let capturedMessageHandler: ((ev: MessageEvent) => void) | null = null;
+
+class MockWorker {
+   private _messageListeners: Array<(ev: MessageEvent) => void> = [];
+
+   addEventListener(type: string, handler: (ev: MessageEvent) => void) {
+      if (type === "message") {
+         this._messageListeners.push(handler);
+         capturedMessageHandler = handler;
       }
-   },
-}));
+   }
 
-// Import AFTER mocking
+   removeEventListener(type: string, handler: (ev: MessageEvent) => void) {
+      if (type === "message") {
+         this._messageListeners = this._messageListeners.filter(
+            (h) => h !== handler,
+         );
+      }
+   }
+
+   postMessage(data: SignWorkerRequest) {
+      workerPostMessageCallCount++;
+      lastWorkerRequest = data;
+
+      // Simulate async worker response
+      Promise.resolve().then(() => {
+         let response: SignWorkerResponse;
+         if (mockWorkerError !== null) {
+            response = { id: data.id, ok: false, message: mockWorkerError };
+         } else {
+            const buf = mockWorkerResult.buffer.slice(
+               mockWorkerResult.byteOffset,
+               mockWorkerResult.byteOffset + mockWorkerResult.byteLength,
+            ) as ArrayBuffer;
+            response = { id: data.id, ok: true, signedBuffer: buf };
+         }
+         const ev = { data: response } as MessageEvent<SignWorkerResponse>;
+         for (const listener of this._messageListeners) {
+            listener(ev);
+         }
+      });
+   }
+
+   terminate() {}
+}
+
+// Replace global Worker with our mock
+(globalThis as unknown as { Worker: unknown }).Worker = MockWorker;
+
+// Import AFTER setting up mock Worker
 import { useSignPdf } from "../../src/plugins/react/index.ts";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -39,7 +88,11 @@ function makePdf(): Uint8Array {
 
 describe("useSignPdf", () => {
    beforeEach(() => {
-      mockSignPdf.mockClear();
+      mockWorkerError = null;
+      mockWorkerResult = new Uint8Array([1, 2, 3, 4]);
+      lastWorkerRequest = null;
+      workerPostMessageCallCount = 0;
+      capturedMessageHandler = null;
    });
 
    // ── Initial state ──────────────────────────────────────────────────────────
@@ -76,10 +129,10 @@ describe("useSignPdf", () => {
       expect(result.current.result).toBeInstanceOf(Uint8Array);
       expect(result.current.result).toEqual(new Uint8Array([1, 2, 3, 4]));
       expect(signedResult).toEqual(new Uint8Array([1, 2, 3, 4]));
-      expect(mockSignPdf).toHaveBeenCalledTimes(1);
+      expect(workerPostMessageCallCount).toBe(1);
    });
 
-   it("passes pdf and p12 as Uint8Array to signPdf", async () => {
+   it("passes pdf and p12 as ArrayBuffer to worker", async () => {
       const { result } = renderHook(() => useSignPdf());
       const pdf = makePdf();
       const p12 = makeP12();
@@ -88,16 +141,13 @@ describe("useSignPdf", () => {
          await result.current.sign({ pdf, p12, password: "pw" });
       });
 
-      const [calledPdf, calledOpts] = mockSignPdf.mock.calls[0] as [
-         Uint8Array,
-         { certificate: { p12: Uint8Array; password: string } },
-      ];
-      expect(calledPdf).toEqual(pdf);
-      expect(calledOpts.certificate.p12).toEqual(p12);
-      expect(calledOpts.certificate.password).toBe("pw");
+      expect(lastWorkerRequest).not.toBeNull();
+      expect(new Uint8Array(lastWorkerRequest!.pdfBuffer)).toEqual(pdf);
+      expect(new Uint8Array(lastWorkerRequest!.p12Buffer)).toEqual(p12);
+      expect(lastWorkerRequest!.password).toBe("pw");
    });
 
-   it("converts File input to Uint8Array before calling signPdf", async () => {
+   it("converts File input to ArrayBuffer before sending to worker", async () => {
       const pdfBytes = makePdf();
       const pdfFile = new File([pdfBytes.buffer as ArrayBuffer], "doc.pdf", {
          type: "application/pdf",
@@ -115,15 +165,12 @@ describe("useSignPdf", () => {
          });
       });
 
-      const [calledPdf, calledOpts] = mockSignPdf.mock.calls[0] as [
-         Uint8Array,
-         { certificate: { p12: Uint8Array } },
-      ];
-      expect(calledPdf).toEqual(pdfBytes);
-      expect(calledOpts.certificate.p12).toEqual(p12Bytes);
+      expect(lastWorkerRequest).not.toBeNull();
+      expect(new Uint8Array(lastWorkerRequest!.pdfBuffer)).toEqual(pdfBytes);
+      expect(new Uint8Array(lastWorkerRequest!.p12Buffer)).toEqual(p12Bytes);
    });
 
-   it("converts Blob input to Uint8Array before calling signPdf", async () => {
+   it("converts Blob input to ArrayBuffer before sending to worker", async () => {
       const pdfBytes = makePdf();
       const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], {
          type: "application/pdf",
@@ -139,11 +186,11 @@ describe("useSignPdf", () => {
          });
       });
 
-      const [calledPdf] = mockSignPdf.mock.calls[0] as [Uint8Array, unknown];
-      expect(calledPdf).toEqual(pdfBytes);
+      expect(lastWorkerRequest).not.toBeNull();
+      expect(new Uint8Array(lastWorkerRequest!.pdfBuffer)).toEqual(pdfBytes);
    });
 
-   it("forwards extra PdfSignOptions to signPdf", async () => {
+   it("forwards extra PdfSignOptions to worker", async () => {
       const { result } = renderHook(() => useSignPdf());
 
       await act(async () => {
@@ -159,22 +206,15 @@ describe("useSignPdf", () => {
          });
       });
 
-      const [, calledOpts] = mockSignPdf.mock.calls[0] as [
-         unknown,
-         { reason: string; location: string; policy: string },
-      ];
-      expect(calledOpts.reason).toBe("Approval");
-      expect(calledOpts.location).toBe("São Paulo");
-      expect(calledOpts.policy).toBe("pades-icp-brasil");
+      expect(lastWorkerRequest?.options?.reason).toBe("Approval");
+      expect(lastWorkerRequest?.options?.location).toBe("São Paulo");
+      expect(lastWorkerRequest?.options?.policy).toBe("pades-icp-brasil");
    });
 
    // ── Error path ─────────────────────────────────────────────────────────────
 
    it("transitions idle → signing → error on failure", async () => {
-      const signingError = new Error("Bad certificate");
-      mockSignPdf.mockImplementationOnce(async () => {
-         throw signingError;
-      });
+      mockWorkerError = "Bad certificate";
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -193,9 +233,7 @@ describe("useSignPdf", () => {
    });
 
    it("re-throws the error so callers can handle it", async () => {
-      mockSignPdf.mockImplementationOnce(async () => {
-         throw new Error("Boom");
-      });
+      mockWorkerError = "Boom";
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -215,10 +253,9 @@ describe("useSignPdf", () => {
       expect((thrown as Error | null)?.message).toBe("Boom");
    });
 
-   it("wraps non-Error throws in a plain Error", async () => {
-      mockSignPdf.mockImplementationOnce(async () => {
-         throw "string error";
-      });
+   it("wraps non-Error worker messages in a plain Error", async () => {
+      // Worker always sends a string message for errors; the hook wraps in Error
+      mockWorkerError = "Unknown signing error";
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -255,9 +292,7 @@ describe("useSignPdf", () => {
    });
 
    it("reset() returns to idle state after error", async () => {
-      mockSignPdf.mockImplementationOnce(async () => {
-         throw new Error("fail");
-      });
+      mockWorkerError = "fail";
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -279,13 +314,49 @@ describe("useSignPdf", () => {
    // ── Concurrent call guard ──────────────────────────────────────────────────
 
    it("ignores a second sign() call while already signing", async () => {
-      let resolveFirst!: (v: Uint8Array) => void;
-      const firstPromise = new Promise<Uint8Array<ArrayBufferLike>>((res) => {
-         resolveFirst = res;
+      // Create a manually-controlled worker by intercepting postMessage
+      let resolveWorker!: (result: Uint8Array) => void;
+      const workerResultPromise = new Promise<Uint8Array>((res) => {
+         resolveWorker = res;
       });
-      mockSignPdf.mockImplementationOnce(
-         () => firstPromise as Promise<Uint8Array<ArrayBuffer>>,
-      );
+
+      // Override MockWorker to hold the response until manually resolved
+      let pendingRequest: SignWorkerRequest | null = null;
+      let pendingListeners: Array<(ev: MessageEvent) => void> = [];
+      const ControlledWorker = class {
+         addEventListener(type: string, handler: (ev: MessageEvent) => void) {
+            if (type === "message") pendingListeners.push(handler);
+         }
+         removeEventListener(
+            _type: string,
+            handler: (ev: MessageEvent) => void,
+         ) {
+            pendingListeners = pendingListeners.filter((h) => h !== handler);
+         }
+         postMessage(data: SignWorkerRequest) {
+            workerPostMessageCallCount++;
+            pendingRequest = data;
+            // Do NOT respond immediately — wait for workerResultPromise
+            workerResultPromise.then((bytes) => {
+               const buf = bytes.buffer.slice(
+                  bytes.byteOffset,
+                  bytes.byteOffset + bytes.byteLength,
+               ) as ArrayBuffer;
+               const response: SignWorkerResponse = {
+                  id: data.id,
+                  ok: true,
+                  signedBuffer: buf,
+               };
+               const ev = {
+                  data: response,
+               } as MessageEvent<SignWorkerResponse>;
+               for (const l of pendingListeners) l(ev);
+            });
+         }
+         terminate() {}
+      };
+
+      (globalThis as unknown as { Worker: unknown }).Worker = ControlledWorker;
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -309,16 +380,20 @@ describe("useSignPdf", () => {
          });
       });
 
-      // Second call should be a no-op (returns undefined, no additional signPdf call)
+      // Second call should be a no-op (returns undefined, no additional postMessage)
       expect(secondResult).toBeUndefined();
-      expect(mockSignPdf).toHaveBeenCalledTimes(1);
+      expect(workerPostMessageCallCount).toBe(1);
+      expect(pendingRequest).not.toBeNull();
 
       // Resolve the first sign
-      resolveFirst(new Uint8Array([9, 9]));
+      resolveWorker(new Uint8Array([9, 9]));
       await act(async () => {
          await firstResult;
       });
       expect(result.current.isDone).toBe(true);
+
+      // Restore MockWorker for other tests
+      (globalThis as unknown as { Worker: unknown }).Worker = MockWorker;
    });
 
    // ── download helper ────────────────────────────────────────────────────────

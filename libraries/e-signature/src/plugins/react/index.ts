@@ -12,9 +12,12 @@
  * ```
  */
 
-import { useCallback, useReducer } from "react";
-import { signPdf } from "../../sign-pdf.ts";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { PdfSignOptions } from "../../types.ts";
+import type {
+   SignWorkerRequest,
+   SignWorkerResponse,
+} from "./sign-pdf.worker.ts";
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -56,6 +59,8 @@ export type UseSignPdfReturn = {
     * Sign a PDF document.
     * - While a signing is already in progress, subsequent calls are ignored (returns undefined).
     * - Re-throws on failure after updating state to "error".
+    * - Runs entirely in a Web Worker — the main thread stays responsive during
+    *   the crypto + TSA timestamp fetch.
     */
    sign: (input: SignInput) => Promise<Uint8Array | undefined>;
    /** Trigger a browser download of the signed PDF. No-op if status is not "done". */
@@ -99,24 +104,57 @@ const initialState: State = { status: "idle" };
 
 export function useSignPdf(): UseSignPdfReturn {
    const [state, dispatch] = useReducer(reducer, initialState);
+   const workerRef = useRef<Worker | null>(null);
+
+   // Lazily create the worker once per hook instance; terminate on unmount.
+   useEffect(() => {
+      const worker = new Worker(
+         new URL("./sign-pdf.worker.ts", import.meta.url),
+         { type: "module" },
+      );
+      workerRef.current = worker;
+      return () => {
+         worker.terminate();
+         workerRef.current = null;
+      };
+   }, []);
 
    const sign = useCallback(
       async (input: SignInput): Promise<Uint8Array | undefined> => {
-         // Guard: do nothing if already signing
          if (state.status === "signing") return undefined;
+
+         const worker = workerRef.current;
+         if (!worker) throw new Error("Worker not ready");
 
          dispatch({ type: "START" });
 
          try {
-            const pdfBytes = await toUint8Array(input.pdf);
-            const p12Bytes = await toUint8Array(input.p12);
+            const pdfBuffer = await toArrayBuffer(input.pdf);
+            const p12Buffer = await toArrayBuffer(input.p12);
 
-            const signed = await signPdf(pdfBytes, {
-               ...input.options,
-               certificate: {
-                  p12: p12Bytes,
+            const id = Math.random().toString(36).slice(2);
+
+            const signed = await new Promise<Uint8Array>((resolve, reject) => {
+               const handler = (ev: MessageEvent<SignWorkerResponse>) => {
+                  if (ev.data.id !== id) return;
+                  worker.removeEventListener("message", handler);
+                  if (ev.data.ok) {
+                     resolve(new Uint8Array(ev.data.signedBuffer));
+                  } else {
+                     reject(new Error(ev.data.message));
+                  }
+               };
+               worker.addEventListener("message", handler);
+
+               const request: SignWorkerRequest = {
+                  id,
+                  pdfBuffer,
+                  p12Buffer,
                   password: input.password,
-               },
+                  options: input.options,
+               };
+               // Transfer buffers — zero-copy hand-off to worker
+               worker.postMessage(request, [pdfBuffer, p12Buffer]);
             });
 
             dispatch({ type: "SUCCESS", result: signed });
@@ -127,8 +165,9 @@ export function useSignPdf(): UseSignPdfReturn {
             dispatch({ type: "FAILURE", error });
             throw error;
          }
-         // eslint-disable-next-line react-hooks/exhaustive-deps
       },
+      // sign only needs to re-create when status changes (to enforce the signing guard)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [state.status],
    );
 
@@ -178,7 +217,13 @@ export function useSignPdf(): UseSignPdfReturn {
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
-async function toUint8Array(source: ByteSource): Promise<Uint8Array> {
-   if (source instanceof Uint8Array) return source;
-   return new Uint8Array(await source.arrayBuffer());
+async function toArrayBuffer(source: ByteSource): Promise<ArrayBuffer> {
+   if (source instanceof Uint8Array) {
+      // Return a copy of the underlying buffer slice so we can safely transfer it
+      return source.buffer.slice(
+         source.byteOffset,
+         source.byteOffset + source.byteLength,
+      ) as ArrayBuffer;
+   }
+   return source.arrayBuffer();
 }

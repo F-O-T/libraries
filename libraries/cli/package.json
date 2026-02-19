@@ -1,6 +1,6 @@
 {
    "name": "@f-o-t/cli",
-   "version": "1.0.5",
+   "version": "1.0.6",
    "description": "CLI tool for managing FOT libraries",
    "type": "module",
    "bin": {
@@ -19,7 +19,7 @@
       "typecheck": "tsc --noEmit"
    },
    "dependencies": {
-      "@f-o-t/config": "^1.0.3",
+      "@f-o-t/config": "^1.0.6",
       "commander": "^12.1.0"
    },
    "devDependencies": {

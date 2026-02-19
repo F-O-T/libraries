@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.16] - 2026-02-19
+
+### Changed
+
+- `useSignPdf` now offloads all signing work (PKCS#12 parsing, RSA crypto, ICP-Brasil policy fetch, RFC 3161 TSA timestamp) to a dedicated Web Worker — the main thread stays fully responsive during signing, eliminating the browser freeze that occurred with large PDFs or slow TSA servers
+- TSA timestamp fetch is preserved inside the worker, so ICP-Brasil signatures remain fully valid
+- Bump `@f-o-t/cli` devDependency to `^1.0.6` to pick up automatic worker file compilation and plugin declaration generation — `dist/plugins/react/` now ships `sign-pdf.worker.js`, `index.d.ts`, and `sign-pdf.worker.d.ts`
+
 ## [1.2.15] - 2026-02-19
 
 ### Changed
@@ -170,8 +178,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.16]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.15...@f-o-t/e-signature@1.2.16
+[1.2.15]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.14...@f-o-t/e-signature@1.2.15
+[1.2.14]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.13...@f-o-t/e-signature@1.2.14
+[1.2.13]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.12...@f-o-t/e-signature@1.2.13
+[1.2.12]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.11...@f-o-t/e-signature@1.2.12
 [1.2.11]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.10...@f-o-t/e-signature@1.2.11
-[1.2.10]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.9...@f-o-t/e-signature@1.2.10
 [1.2.9]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.8...@f-o-t/e-signature@1.2.9
 [1.2.8]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.7...@f-o-t/e-signature@1.2.8
 [1.2.7]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.6...@f-o-t/e-signature@1.2.7
