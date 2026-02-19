@@ -45,6 +45,8 @@ describe("generatePackageJson", () => {
       expect(pkg.exports["."]).toBeDefined();
       expect(pkg.exports["."]).toEqual({
          types: "./dist/index.d.ts",
+         module: "./dist/index.js",
+         import: "./dist/index.js",
          default: "./dist/index.js",
       });
    });
@@ -66,12 +68,16 @@ describe("generatePackageJson", () => {
       expect(pkg.exports["./plugins/auth"]).toBeDefined();
       expect(pkg.exports["./plugins/auth"]).toEqual({
          types: "./dist/plugins/auth/index.d.ts",
+         module: "./dist/plugins/auth/index.js",
+         import: "./dist/plugins/auth/index.js",
          default: "./dist/plugins/auth/index.js",
       });
 
       expect(pkg.exports["./plugins/validation"]).toBeDefined();
       expect(pkg.exports["./plugins/validation"]).toEqual({
          types: "./dist/plugins/validation/index.d.ts",
+         module: "./dist/plugins/validation/index.js",
+         import: "./dist/plugins/validation/index.js",
          default: "./dist/plugins/validation/index.js",
       });
    });
