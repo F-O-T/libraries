@@ -246,12 +246,17 @@ function pkcs12Kdf(
    I.set(S, 0);
    I.set(P, S.length);
 
+   // Pre-allocate D||I scratch buffer to avoid per-iteration allocation
+   const DI = new Uint8Array(D.length + I.length);
+   DI.set(D, 0);
+   DI.set(I, D.length);
+
    const result = new Uint8Array(keyLen);
    let resultOffset = 0;
 
    while (resultOffset < keyLen) {
-      // Hash D || I
-      let A = hashBytes(hashAlgorithm, concat(D, I));
+      // Hash D || I (reuse pre-allocated buffer; update I section from DI)
+      let A = hashBytes(hashAlgorithm, DI);
 
       // Iterate
       for (let i = 1; i < iterations; i++) {
@@ -268,11 +273,13 @@ function pkcs12Kdf(
 
       // Increment I: for each v-byte block of I, add A (repeated to v bytes) + 1
       const B = padToMultiple(A, v);
+      // Update both I and the I portion of DI
       for (let j = 0; j < I.length; j += v) {
          let carry = 1;
          for (let k = v - 1; k >= 0; k--) {
             const sum = I[j + k]! + B[k]! + carry;
             I[j + k] = sum & 0xff;
+            DI[D.length + j + k] = sum & 0xff;
             carry = sum >>> 8;
          }
       }

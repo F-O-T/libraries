@@ -5,7 +5,7 @@
  * Zero runtime dependencies. Works in any JS environment.
  */
 
-import { type HmacHashAlgorithm, hmac } from "./hmac.ts";
+import { createHmac, type HmacHashAlgorithm, hmac } from "./hmac.ts";
 
 /**
  * Derive a key of `dkLen` bytes from a password and salt using PBKDF2.
@@ -35,7 +35,11 @@ export function pbkdf2(
       passwordBytes = password;
    }
 
+   // Precompute HMAC context for this key — avoids re-deriving ipad/opad per iteration
+   const hmacCtx = createHmac(prf, passwordBytes);
+
    // hLen = output length of PRF (HMAC hash output)
+   // Compute once using the standard hmac for length detection
    const hLen = hmac(prf, passwordBytes, new Uint8Array(0)).length;
 
    // Number of blocks needed
@@ -43,7 +47,7 @@ export function pbkdf2(
    const dk = new Uint8Array(dkLen);
 
    for (let i = 1; i <= blockCount; i++) {
-      const block = f(prf, passwordBytes, salt, iterations, i, hLen);
+      const block = f(hmacCtx, salt, iterations, i, hLen);
 
       const offset = (i - 1) * hLen;
       const toCopy = Math.min(hLen, dkLen - offset);
@@ -60,8 +64,7 @@ export function pbkdf2(
  *       Uk = PRF(Password, U_{k-1})
  */
 function f(
-   prf: HmacHashAlgorithm,
-   password: Uint8Array,
+   hmacCtx: ReturnType<typeof createHmac>,
    salt: Uint8Array,
    iterations: number,
    blockIndex: number,
@@ -76,13 +79,13 @@ function f(
    saltWithIndex[salt.length + 3] = blockIndex & 0xff;
 
    // U1
-   let u = hmac(prf, password, saltWithIndex);
+   let u = hmacCtx.compute(saltWithIndex);
    const result = new Uint8Array(hLen);
    for (let j = 0; j < hLen; j++) result[j] = u[j]!;
 
    // U2 ... Uc
    for (let c = 1; c < iterations; c++) {
-      u = hmac(prf, password, u);
+      u = hmacCtx.compute(u);
       for (let j = 0; j < hLen; j++) result[j]! ^= u[j]!;
    }
 
