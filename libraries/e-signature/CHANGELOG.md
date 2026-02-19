@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.10] - 2026-02-19
+
+### Fixed
+- Corrected TypeScript errors in `react.test.tsx`: cast `mockSignPdf.mock.calls[0]` to `[Uint8Array, unknown]` to match the two-argument mock signature; added explicit cast on `thrown` to `Error | null` to resolve incorrect `never` narrowing; typed `firstPromise` as `Promise<Uint8Array<ArrayBufferLike>>` and cast at the `mockImplementationOnce` call site to satisfy the `ArrayBuffer` vs `ArrayBufferLike` assignability constraint
+
 ## [1.2.9] - 2026-02-19
 
 ### Changed
@@ -135,6 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod schema validation for all inputs
 - Support for DocMDP permissions (1, 2, 3)
 
+[1.2.10]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.9...@f-o-t/e-signature@1.2.10
 [1.2.9]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.8...@f-o-t/e-signature@1.2.9
 [1.2.8]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.7...@f-o-t/e-signature@1.2.8
 [1.2.7]: https://github.com/F-O-T/libraries/compare/@f-o-t/e-signature@1.2.6...@f-o-t/e-signature@1.2.7

@@ -99,11 +99,11 @@ describe("useSignPdf", () => {
 
    it("converts File input to Uint8Array before calling signPdf", async () => {
       const pdfBytes = makePdf();
-      const pdfFile = new File([pdfBytes], "doc.pdf", {
+      const pdfFile = new File([pdfBytes.buffer as ArrayBuffer], "doc.pdf", {
          type: "application/pdf",
       });
       const p12Bytes = makeP12();
-      const p12File = new File([p12Bytes], "cert.p12");
+      const p12File = new File([p12Bytes.buffer as ArrayBuffer], "cert.p12");
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -125,7 +125,9 @@ describe("useSignPdf", () => {
 
    it("converts Blob input to Uint8Array before calling signPdf", async () => {
       const pdfBytes = makePdf();
-      const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+      const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], {
+         type: "application/pdf",
+      });
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -137,7 +139,7 @@ describe("useSignPdf", () => {
          });
       });
 
-      const [calledPdf] = mockSignPdf.mock.calls[0] as [Uint8Array];
+      const [calledPdf] = mockSignPdf.mock.calls[0] as [Uint8Array, unknown];
       expect(calledPdf).toEqual(pdfBytes);
    });
 
@@ -210,7 +212,7 @@ describe("useSignPdf", () => {
          }
       });
 
-      expect(thrown?.message).toBe("Boom");
+      expect((thrown as Error | null)?.message).toBe("Boom");
    });
 
    it("wraps non-Error throws in a plain Error", async () => {
@@ -278,10 +280,12 @@ describe("useSignPdf", () => {
 
    it("ignores a second sign() call while already signing", async () => {
       let resolveFirst!: (v: Uint8Array) => void;
-      const firstPromise = new Promise<Uint8Array>((res) => {
+      const firstPromise = new Promise<Uint8Array<ArrayBufferLike>>((res) => {
          resolveFirst = res;
       });
-      mockSignPdf.mockImplementationOnce(() => firstPromise);
+      mockSignPdf.mockImplementationOnce(
+         () => firstPromise as Promise<Uint8Array<ArrayBuffer>>,
+      );
 
       const { result } = renderHook(() => useSignPdf());
 
@@ -334,6 +338,8 @@ describe("useSignPdf", () => {
       const mockUrl = "blob:http://localhost/fake-uuid";
       const originalCreate = URL.createObjectURL;
       const originalRevoke = URL.revokeObjectURL;
+      const originalAppend = document.body.appendChild.bind(document.body);
+      const originalRemove = document.body.removeChild.bind(document.body);
       const clickMock = mock(() => {});
 
       URL.createObjectURL = mock(() => mockUrl);
@@ -358,10 +364,14 @@ describe("useSignPdf", () => {
 
       URL.createObjectURL = originalCreate;
       URL.revokeObjectURL = originalRevoke;
+      document.body.appendChild = originalAppend;
+      document.body.removeChild = originalRemove;
    });
 
    it("download() is a no-op when status is not done", () => {
       const { result } = renderHook(() => useSignPdf());
+
+      const originalAppend = document.body.appendChild.bind(document.body);
       const appendMock = mock(() => {});
       document.body.appendChild =
          appendMock as unknown as typeof document.body.appendChild;
@@ -370,6 +380,7 @@ describe("useSignPdf", () => {
          result.current.download("output.pdf");
       });
 
+      document.body.appendChild = originalAppend;
       expect(appendMock).not.toHaveBeenCalled();
    });
 });

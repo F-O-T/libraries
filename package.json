@@ -8,6 +8,7 @@
       "@swc/core": "1.15.10",
       "@swc/helpers": "0.5.18",
       "bunup": "0.16.20",
+      "happy-dom": "^20.6.3",
       "husky": "9.1.7",
       "nx": "22.4.1",
       "typescript": "^5.9.3"

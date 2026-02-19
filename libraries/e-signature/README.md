@@ -18,6 +18,55 @@ bun add @f-o-t/e-signature
 - Configurable DocMDP permissions for document modification control
 - **Browser compatible** — no `Buffer` or Node-only APIs; runs in browsers, Edge Runtime, and Cloudflare Workers
 
+## React Hook
+
+### `useSignPdf(): UseSignPdfReturn`
+
+React hook for client-side PDF signing. Import from `@f-o-t/e-signature/plugins/react` (requires `react >= 18` as a peer dependency).
+
+```tsx
+import { useSignPdf } from "@f-o-t/e-signature/plugins/react";
+
+function SignForm() {
+  const { sign, isSigning, isDone, isError, result, error, download, reset } = useSignPdf();
+
+  async function handleSubmit(pdfFile: File, p12File: File) {
+    try {
+      await sign({
+        pdf: pdfFile,       // File, Blob, or Uint8Array
+        p12: p12File,       // File, Blob, or Uint8Array
+        password: "secret",
+        options: { reason: "Approval", location: "São Paulo", policy: "pades-icp-brasil" },
+      });
+    } catch {
+      // error state is also set on the hook
+    }
+  }
+
+  if (isSigning) return <p>Signing…</p>;
+  if (isError)   return <p>Error: {error?.message}</p>;
+  if (isDone)    return <button onClick={() => download("signed.pdf")}>Download</button>;
+  return <button onClick={() => handleSubmit(myPdf, myCert)}>Sign</button>;
+}
+```
+
+**Return value:**
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `"idle" \| "signing" \| "done" \| "error"` | Current lifecycle state |
+| `isIdle` | `boolean` | No operation in progress |
+| `isSigning` | `boolean` | Signing is running |
+| `isDone` | `boolean` | Last sign call succeeded |
+| `isError` | `boolean` | Last sign call failed |
+| `result` | `Uint8Array \| null` | Signed PDF bytes (non-null when `isDone`) |
+| `error` | `Error \| null` | Failure reason (non-null when `isError`) |
+| `sign(input)` | `(SignInput) => Promise<Uint8Array \| undefined>` | Trigger signing; concurrent calls while signing are ignored (returns `undefined`) |
+| `download(filename?)` | `(string?) => void` | Trigger browser download of signed PDF; no-op if not done |
+| `reset()` | `() => void` | Return to idle, clearing result and error |
+
+`pdf` and `p12` accept `File`, `Blob`, or `Uint8Array` — the hook converts `File`/`Blob` to `Uint8Array` automatically before calling `signPdf`.
+
 ## API
 
 ### `signPdf(pdf: Uint8Array | ReadableStream<Uint8Array>, options: PdfSignOptions): Promise<Uint8Array>`

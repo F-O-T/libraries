@@ -136,7 +136,10 @@ export function useSignPdf(): UseSignPdfReturn {
       (filename = "signed.pdf") => {
          if (state.status !== "done") return;
          const blob = new Blob(
-            [(state as { status: "done"; result: Uint8Array }).result],
+            [
+               (state as { status: "done"; result: Uint8Array }).result
+                  .buffer as ArrayBuffer,
+            ],
             { type: "application/pdf" },
          );
          const url = URL.createObjectURL(blob);
