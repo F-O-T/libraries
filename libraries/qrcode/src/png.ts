@@ -1,4 +1,4 @@
-import { deflateSync } from "node:zlib";
+import { zlibSync } from "fflate";
 
 /**
  * CRC32 lookup table for PNG chunk checksums.
@@ -78,7 +78,7 @@ export function encodePng(
   }
 
   // Compress with zlib deflate
-  const compressed = deflateSync(rawData);
+  const compressed = zlibSync(rawData);
 
   // Build PNG file
   const chunks: Uint8Array[] = [];
