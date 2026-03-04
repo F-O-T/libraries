@@ -216,11 +216,33 @@ export class PDFReader {
       const decoder = new TextDecoder();
       const content = decoder.decode(stream.data);
 
-      // Simple text extraction - look for (text) Tj patterns
       const texts: string[] = [];
-      const regex = /\(([^)]*)\)\s*Tj/g;
+
+      // Match (text) Tj — single string show
+      const tjRegex = /\(([^)]*)\)\s*Tj/g;
       let match;
-      while ((match = regex.exec(content)) !== null) {
+      while ((match = tjRegex.exec(content)) !== null) {
+         texts.push(match[1]!);
+      }
+
+      // Match [...] TJ — array show (mix of strings and kerning numbers)
+      const tjArrayRegex = /\[((?:[^[\]]*?))\]\s*TJ/gi;
+      while ((match = tjArrayRegex.exec(content)) !== null) {
+         const arrayContent = match[1]!;
+         const stringParts: string[] = [];
+         const partRegex = /\(([^)]*)\)/g;
+         let partMatch;
+         while ((partMatch = partRegex.exec(arrayContent)) !== null) {
+            stringParts.push(partMatch[1]!);
+         }
+         if (stringParts.length > 0) {
+            texts.push(stringParts.join(""));
+         }
+      }
+
+      // Match ' and " operators (move to next line and show)
+      const quoteRegex = /\(([^)]*)\)\s*['"]/g;
+      while ((match = quoteRegex.exec(content)) !== null) {
          texts.push(match[1]!);
       }
 
