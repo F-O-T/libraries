@@ -68,6 +68,38 @@ function SignForm() {
 
 `pdf` and `p12` accept `File`, `Blob`, or `Uint8Array` — the hook converts `File`/`Blob` to `Uint8Array` automatically before calling `signPdf`.
 
+## Automatic Signature Positioning
+
+### Using `appearance: "auto"`
+
+Pass `appearance: "auto"` to let `signPdf` automatically detect where to place the visual signature based on the signer's certificate information:
+
+```ts
+const signed = await signPdf(pdfBytes, {
+  certificate: { p12, password: "secret" },
+  appearance: "auto", // auto-detect signing position
+});
+```
+
+### Using `detectSigningPosition()` directly
+
+For more control, call `detectSigningPosition()` to inspect the detected position before signing:
+
+```ts
+import { detectSigningPosition } from "@f-o-t/e-signature";
+
+const position = detectSigningPosition(pdfBytes, {
+  signerName: "Lucas Furtado Barbosa",
+  organization: "VERSA SOLUCOES LTDA",
+});
+
+if (position) {
+  console.log(`Page ${position.page}, confidence: ${position.confidence}`);
+}
+```
+
+The function returns a `DetectedPosition` with `page`, `x`, `y`, `width`, `height`, and `confidence` fields, or `null` if no suitable position is found.
+
 ## API
 
 ### `signPdf(pdf: Uint8Array | ReadableStream<Uint8Array>, options: PdfSignOptions): Promise<Uint8Array>`
@@ -251,8 +283,8 @@ type PdfSignOptions = {
   tsaFallbackUrls?: string[];
   /** Called when timestamping fails (non-fatal). Receives the error for logging/metrics. */
   onTimestampError?: (error: unknown) => void;
-  /** Single visual stamp (false to disable) */
-  appearance?: SignatureAppearance | false;
+  /** Single visual stamp (false to disable, "auto" for auto-detected positioning) */
+  appearance?: SignatureAppearance | "auto" | false;
   /** Multiple visual stamps — renders one per entry, useful for multi-page documents */
   appearances?: SignatureAppearance[];
   qrCode?: QrCodeConfig;

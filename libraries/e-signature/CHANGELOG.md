@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `detectSigningPosition()` function for automatic signature placement using weighted text search
+- `appearance: "auto"` option in `signPdf()` for auto-detected positioning
+- `DetectedPosition` and `DetectPositionOptions` types
+
+### Changed
+- Visual signature appearance redesigned with bordered box, green ICP-Brasil header, and structured fields (Signatário, Empresa, CNPJ/CPF, Data, Certificado)
+- QR code now points to `https://validar.iti.gov.br`
+- Reference link "validar.iti.gov.br" displayed below signature box
+
 ## [1.2.18] - 2026-02-20
 
 ### Changed

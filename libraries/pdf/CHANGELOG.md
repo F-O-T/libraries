@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Text extraction now handles TJ arrays and quote operators (`'`, `"`) in addition to `Tj`
+
 ## [0.3.9] - 2026-02-19
 
 ### Fixed
