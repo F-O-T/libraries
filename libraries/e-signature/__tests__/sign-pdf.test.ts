@@ -233,6 +233,68 @@ describe("signPdf", () => {
       ).rejects.toThrow(PdfSignError);
    });
 
+   it("signs with appearance 'auto' and produces valid PDF", async () => {
+      const doc = new PDFDocument();
+      const page = doc.addPage({ width: 612, height: 792 });
+      page.drawText("Representante Legal", { x: 50, y: 200, size: 12 });
+      page.drawText("__________________________", {
+         x: 50,
+         y: 180,
+         size: 12,
+      });
+      const pdf = doc.save();
+      const p12 = await loadP12();
+
+      const result = await signPdf(pdf, {
+         certificate: { p12, password: "test123" },
+         appearance: "auto",
+      });
+
+      expect(result).toBeInstanceOf(Uint8Array);
+      expect(result.length).toBeGreaterThan(pdf.length);
+
+      // Should contain signature markers
+      const pdfStr = new TextDecoder("latin1").decode(result);
+      expect(pdfStr).toContain("/SubFilter /adbe.pkcs7.detached");
+   });
+
+   it("visual appearance includes bordered rectangle and green header", async () => {
+      const pdf = createTestPdf();
+      const p12 = await loadP12();
+
+      const result = await signPdf(pdf, {
+         certificate: { p12, password: "test123" },
+         appearance: {
+            x: 50,
+            y: 50,
+            width: 350,
+            height: 120,
+            page: 0,
+            showCertInfo: true,
+            showQrCode: false,
+         },
+      });
+
+      const pdfStr = new TextDecoder("latin1").decode(result);
+
+      // Bordered rectangle (stroke only, borderColor #C0C0C0 → 0.753 0.753 0.753 RG)
+      expect(pdfStr).toContain("0.753 0.753 0.753 RG");
+      // Stroke-only rectangle
+      expect(pdfStr).toContain("re\nS");
+
+      // Green header (color #008000 → 0.000 0.502 0.000 rg)
+      expect(pdfStr).toContain("0.000 0.502 0.000 rg");
+      expect(pdfStr).toContain("ASSINADO DIGITALMENTE");
+
+      // Cert info text (either structured fields or fallback)
+      const hasStructured = pdfStr.includes("Certificado:");
+      const hasFallback = pdfStr.includes("Assinatura Digital");
+      expect(hasStructured || hasFallback).toBe(true);
+
+      // Reference link
+      expect(pdfStr).toContain("validar.iti.gov.br");
+   });
+
    it("applies both appearance and appearances when both are given", async () => {
       const multiDoc = new PDFDocument();
       multiDoc.addPage({ width: 612, height: 792 });
