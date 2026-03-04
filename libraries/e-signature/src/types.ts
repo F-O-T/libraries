@@ -67,8 +67,8 @@ export type PdfSignOptions = {
    tsaFallbackUrls?: string[];
    /** Called when timestamping fails (non-fatal). Receives the error for logging/metrics. */
    onTimestampError?: (error: unknown) => void;
-   /** Visual signature appearance (false to disable) */
-   appearance?: SignatureAppearance | false;
+   /** Visual signature appearance (false to disable, "auto" for auto-detection) */
+   appearance?: SignatureAppearance | "auto" | false;
    /** Multiple visual signature appearances — renders a stamp on each specified page */
    appearances?: SignatureAppearance[];
    /** QR code configuration for the visual signature */

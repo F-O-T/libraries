@@ -32,6 +32,7 @@ import {
    drawSignatureAppearance,
    precomputeSharedQrImage,
 } from "./appearance.ts";
+import { detectSigningPosition } from "./detect-position.ts";
 import {
    buildSignaturePolicy,
    buildSigningCertificateV2,
@@ -114,9 +115,44 @@ export async function signPdf(
    // 2. Load PDF via editing plugin
    const doc = loadPdf(pdfBytes);
 
+   // Resolve "auto" appearance via position detection
+   let resolvedAppearance = opts.appearance as
+      | Exclude<typeof opts.appearance, "auto">
+      | undefined;
+   if (opts.appearance === "auto") {
+      const detected = detectSigningPosition(pdfBytes, {
+         signerName: certInfo?.subject.commonName ?? undefined,
+         organization: certInfo?.subject.organization ?? undefined,
+         preferredPage: -1,
+         width: 350,
+         height: 120,
+      });
+
+      if (detected) {
+         resolvedAppearance = {
+            x: detected.x,
+            y: detected.y,
+            width: 350,
+            height: 120,
+            page: detected.page,
+         };
+      } else {
+         // Fallback: bottom of first page
+         resolvedAppearance = {
+            x: 50,
+            y: 700,
+            width: 350,
+            height: 120,
+            page: 0,
+         };
+      }
+   } else {
+      resolvedAppearance = opts.appearance === false ? false : opts.appearance;
+   }
+
    // 3. Draw visual signature appearance if requested
-   if (opts.appearance !== false && opts.appearance) {
-      const pageIndex = opts.appearance.page ?? 0;
+   if (resolvedAppearance !== false && resolvedAppearance) {
+      const pageIndex = resolvedAppearance.page ?? 0;
 
       if (pageIndex < 0 || pageIndex >= doc.pageCount) {
          throw new PdfSignError(
@@ -126,7 +162,7 @@ export async function signPdf(
 
       const page = doc.getPage(pageIndex);
 
-      drawSignatureAppearance(doc, page, opts.appearance, certInfo, {
+      drawSignatureAppearance(doc, page, resolvedAppearance, certInfo, {
          reason: opts.reason,
          location: opts.location,
          qrCode: opts.qrCode,
@@ -184,8 +220,8 @@ export async function signPdf(
 
    // Which page hosts the widget annotation — must match the visual appearance
    // page so PDF readers navigate to the right page when a signature is clicked.
-   const appearancePage = opts.appearance
-      ? ((opts.appearance as { page?: number }).page ?? 0)
+   const appearancePage = resolvedAppearance
+      ? ((resolvedAppearance as { page?: number }).page ?? 0)
       : (opts.appearances?.[0]?.page ?? 0);
 
    const { pdf: pdfWithPlaceholder } = doc.saveWithPlaceholder({

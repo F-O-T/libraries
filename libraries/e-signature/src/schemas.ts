@@ -40,7 +40,7 @@ export const pdfSignOptionsSchema = z.object({
       .function({ input: z.tuple([z.unknown()]), output: z.void() })
       .optional(),
    appearance: z
-      .union([signatureAppearanceSchema, z.literal(false)])
+      .union([signatureAppearanceSchema, z.literal("auto"), z.literal(false)])
       .optional(),
    appearances: z.array(signatureAppearanceSchema).optional(),
    qrCode: qrCodeConfigSchema.optional(),
