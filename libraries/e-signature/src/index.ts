@@ -24,7 +24,10 @@ export {
    TIMESTAMP_TOKEN_OID,
    TimestampError,
 } from "./timestamp.ts";
+export { detectSigningPosition } from "./detect-position.ts";
 export type {
+   DetectedPosition,
+   DetectPositionOptions,
    PdfSignOptions,
    QrCodeConfig,
    SignatureAppearance,

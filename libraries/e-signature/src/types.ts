@@ -76,3 +76,33 @@ export type PdfSignOptions = {
    /** DocMDP permission level: 1 = no changes, 2 = form fill + sign (default), 3 = form fill + sign + annotate */
    docMdpPermission?: 1 | 2 | 3;
 };
+
+/**
+ * Result of automatic signature position detection
+ */
+export type DetectedPosition = {
+   /** Page index (0-based) */
+   page: number;
+   /** X coordinate from left (in points) */
+   x: number;
+   /** Y coordinate from top (in points, user-facing) */
+   y: number;
+   /** Confidence score (0-1) */
+   confidence: number;
+};
+
+/**
+ * Options for signature position detection
+ */
+export type DetectPositionOptions = {
+   /** Signer's full name to search for (from certificate CN) */
+   signerName?: string;
+   /** Company/organization name to search for */
+   organization?: string;
+   /** Preferred page to search first (-1 = last page, default) */
+   preferredPage?: number;
+   /** Default signature box width */
+   width?: number;
+   /** Default signature box height */
+   height?: number;
+};
