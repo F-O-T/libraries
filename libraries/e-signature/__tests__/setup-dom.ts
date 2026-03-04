@@ -2,17 +2,17 @@ import { GlobalWindow } from "happy-dom";
 
 const window = new GlobalWindow();
 
-// @ts-ignore
+// @ts-expect-error
 globalThis.document = window.document;
-// @ts-ignore
+// @ts-expect-error
 globalThis.window = window;
-// @ts-ignore
+// @ts-expect-error
 globalThis.navigator = window.navigator;
-// @ts-ignore
+// @ts-expect-error
 globalThis.HTMLElement = window.HTMLElement;
-// @ts-ignore
+// @ts-expect-error
 globalThis.Element = window.Element;
-// @ts-ignore
+// @ts-expect-error
 globalThis.URL.createObjectURL = () => "blob:mock";
-// @ts-ignore
+// @ts-expect-error
 globalThis.URL.revokeObjectURL = () => {};

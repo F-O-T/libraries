@@ -21,10 +21,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "bunup.config.ts",
-    "src/plugins/stream",
-    "src/plugins/xpath",
-    "src/plugins/canonicalize"
+    "bunup.config.ts"
   ],
   "include": [
     "src/**/*"

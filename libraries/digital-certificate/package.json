@@ -10,16 +10,19 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "module": "./dist/index.js",
          "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/xml-signer": {
          "types": "./dist/plugins/xml-signer/index.d.ts",
+         "module": "./dist/plugins/xml-signer/index.js",
          "import": "./dist/plugins/xml-signer/index.js",
          "default": "./dist/plugins/xml-signer/index.js"
       },
       "./plugins/mtls": {
          "types": "./dist/plugins/mtls/index.d.ts",
+         "module": "./dist/plugins/mtls/index.js",
          "import": "./dist/plugins/mtls/index.js",
          "default": "./dist/plugins/mtls/index.js"
       }

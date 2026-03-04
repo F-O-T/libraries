@@ -9,6 +9,7 @@
 
 export type { BatchSignEvent, BatchSignInput } from "./batch.ts";
 export { signPdfBatch, signPdfBatchToArray } from "./batch.ts";
+export { detectSigningPosition } from "./detect-position.ts";
 export {
    buildSignaturePolicy,
    buildSigningCertificateV2,
@@ -24,7 +25,6 @@ export {
    TIMESTAMP_TOKEN_OID,
    TimestampError,
 } from "./timestamp.ts";
-export { detectSigningPosition } from "./detect-position.ts";
 export type {
    DetectedPosition,
    DetectPositionOptions,

@@ -10,11 +10,13 @@
    "exports": {
       ".": {
          "types": "./dist/index.d.ts",
+         "module": "./dist/index.js",
          "import": "./dist/index.js",
          "default": "./dist/index.js"
       },
       "./plugins/types": {
          "types": "./dist/plugins/types/index.d.ts",
+         "module": "./dist/plugins/types/index.js",
          "import": "./dist/plugins/types/index.js",
          "default": "./dist/plugins/types/index.js"
       }

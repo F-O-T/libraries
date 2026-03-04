@@ -21,8 +21,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "bunup.config.ts",
-    "src/plugins/operators"
+    "bunup.config.ts"
   ],
   "include": [
     "src/**/*"
