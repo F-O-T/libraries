@@ -2,10 +2,9 @@
  * Visual Signature Appearance
  *
  * Draws certificate information and QR code on the PDF page
- * for visible digital signatures.
+ * following the ICP-Brasil standard visual signature layout.
  */
 
-import { hash } from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
 import type {
    PdfDocument,
@@ -15,10 +14,13 @@ import type {
 import { generateQrCode } from "@f-o-t/qrcode";
 import type { QrCodeConfig, SignatureAppearance } from "./types.ts";
 
+const VALIDATION_URL = "https://validar.iti.gov.br";
+
 /**
  * Draw the visual signature appearance on a PDF page.
  *
- * Includes optional QR code and certificate information text.
+ * Includes optional QR code and certificate information text
+ * inside a bordered rectangle following ICP-Brasil layout.
  */
 export function drawSignatureAppearance(
    doc: PdfDocument,
@@ -38,9 +40,17 @@ export function drawSignatureAppearance(
    const showCertInfo = appearance.showCertInfo !== false;
 
    // Convert from top-left origin (user-facing) to PDF bottom-left origin.
-   // Users specify y as distance from the top of the page, but PDF coordinates
-   // have y=0 at the bottom.
    const y = page.height - appearance.y - height;
+
+   // Draw bordered rectangle around the signature area
+   page.drawRectangle({
+      x,
+      y,
+      width,
+      height,
+      borderColor: "#C0C0C0",
+      borderWidth: 1,
+   });
 
    let qrSize = 0;
 
@@ -49,9 +59,7 @@ export function drawSignatureAppearance(
       const qrImage =
          options.preEmbeddedQr ??
          (() => {
-            const qrData =
-               options.qrCode?.data ??
-               createVerificationData(certInfo, options.pdfData);
+            const qrData = options.qrCode?.data ?? VALIDATION_URL;
             const qrPng = generateQrCode(qrData, {
                size: options.qrCode?.size ?? 100,
             });
@@ -76,14 +84,22 @@ export function drawSignatureAppearance(
          width,
          height,
          qrOffset: qrSize > 0 ? qrSize + 20 : 10,
-         reason: options.reason,
-         location: options.location,
       });
    }
+
+   // Reference link below the box
+   const linkText = "validar.iti.gov.br";
+   const linkX = x + width / 2 - linkText.length * 2.5;
+   page.drawText(linkText, {
+      x: linkX,
+      y: y - 12,
+      size: 8,
+      color: "#888888",
+   });
 }
 
 /**
- * Draw certificate information text on the page
+ * Draw certificate information text on the page following ICP-Brasil layout.
  */
 function drawCertInfo(
    page: PdfPage,
@@ -94,8 +110,6 @@ function drawCertInfo(
       width: number;
       height: number;
       qrOffset: number;
-      reason?: string;
-      location?: string;
    },
 ): void {
    const textX = opts.x + opts.qrOffset;
@@ -103,23 +117,34 @@ function drawCertInfo(
    const fontSize = 10;
    const lineHeight = 14;
 
-   // Header
+   // Green header
    page.drawText("ASSINADO DIGITALMENTE", {
       x: textX,
       y: textY,
       size: 12,
+      color: "#008000",
    });
    textY -= lineHeight * 1.5;
 
    if (certInfo) {
       // Signer name
       const signerName = certInfo.subject.commonName || "N/A";
-      page.drawText(`Assinado por: ${signerName}`, {
+      page.drawText(`Signatário: ${signerName}`, {
          x: textX,
          y: textY,
          size: fontSize,
       });
       textY -= lineHeight;
+
+      // Organization (if available)
+      if (certInfo.subject.organization) {
+         page.drawText(`Empresa: ${certInfo.subject.organization}`, {
+            x: textX,
+            y: textY,
+            size: fontSize,
+         });
+         textY -= lineHeight;
+      }
 
       // CNPJ or CPF
       if (certInfo.brazilian.cnpj) {
@@ -151,30 +176,19 @@ function drawCertInfo(
       });
       textY -= lineHeight;
 
-      // Location
-      if (opts.location) {
-         page.drawText(`Local: ${opts.location}`, {
-            x: textX,
-            y: textY,
-            size: fontSize - 1,
-         });
-      }
-   } else {
-      // Fallback if cert info not available
-      page.drawText(`Signed: ${opts.reason || "Digital Signature"}`, {
+      // Certificate type
+      page.drawText("Certificado: ICP-Brasil (A1)", {
          x: textX,
          y: textY,
          size: fontSize,
       });
-      textY -= lineHeight;
-
-      if (opts.location) {
-         page.drawText(`Location: ${opts.location}`, {
-            x: textX,
-            y: textY,
-            size: fontSize,
-         });
-      }
+   } else {
+      // Fallback if cert info not available
+      page.drawText("Assinatura Digital", {
+         x: textX,
+         y: textY,
+         size: fontSize,
+      });
    }
 }
 
@@ -188,32 +202,9 @@ export function precomputeSharedQrImage(
    pdfData: Uint8Array,
    qrConfig?: QrCodeConfig,
 ): PdfImage {
-   const qrData = qrConfig?.data ?? createVerificationData(certInfo, pdfData);
+   const qrData = qrConfig?.data ?? VALIDATION_URL;
    const qrPng = generateQrCode(qrData, { size: qrConfig?.size ?? 100 });
    return doc.embedPng(qrPng);
-}
-
-/**
- * Generate verification data for the QR code
- */
-function createVerificationData(
-   certInfo: CertificateInfo | null,
-   pdfData: Uint8Array,
-): string {
-   const documentHash = toHex(hash("sha256", pdfData));
-   const timestamp = new Date().toISOString();
-
-   if (certInfo) {
-      const certFingerprint = certInfo.fingerprint;
-      return (
-         `https://validar.iti.gov.br/?` +
-         `doc=${documentHash.substring(0, 16)}&` +
-         `cert=${certFingerprint.substring(0, 16)}&` +
-         `time=${encodeURIComponent(timestamp)}`
-      );
-   }
-
-   return `https://validar.iti.gov.br/?doc=${documentHash.substring(0, 16)}&time=${encodeURIComponent(timestamp)}`;
 }
 
 /**
@@ -228,15 +219,4 @@ function formatCnpj(cnpj: string): string {
  */
 function formatCpf(cpf: string): string {
    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-}
-
-/**
- * Convert bytes to hex string
- */
-function toHex(data: Uint8Array): string {
-   const chars: string[] = [];
-   for (let i = 0; i < data.length; i++) {
-      chars.push(data[i]!.toString(16).padStart(2, "0"));
-   }
-   return chars.join("");
 }
