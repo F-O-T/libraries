@@ -95,16 +95,16 @@ All libraries MUST maintain `CHANGELOG.md` following [Keep a Changelog](https://
 - **Semver**: PATCH (bug fixes), MINOR (new features, backward compatible), MAJOR (breaking changes)
 
 When making changes:
-1. Add entry to CHANGELOG.md under `[Unreleased]`
-2. If releasing: move `[Unreleased]` items to new version section with date, bump `package.json` version
+1. **NEVER use `[Unreleased]`** — always create a versioned section immediately: `## [x.y.z] - YYYY-MM-DD`
+2. Bump `package.json` version in the same commit as the CHANGELOG entry
 3. **Update downstream `@f-o-t/*` libraries** that depend on the changed library — bump their dep version, add CHANGELOG entry, bump their version
 
 ## Publishing Releases
 
 **Libraries are ALWAYS released via GitHub CI. NEVER publish manually.**
 
-1. Update CHANGELOG.md — move `[Unreleased]` entries to new version section with date
-2. Bump version in `package.json`
+1. Update CHANGELOG.md with a new versioned section (NEVER `[Unreleased]`)
+2. Bump version in `package.json` (same commit)
 3. Commit: `chore: release @f-o-t/library-name@x.y.z`
 4. Push to master — CI auto-detects version changes, builds, tests, creates GitHub release, publishes to npm
 
