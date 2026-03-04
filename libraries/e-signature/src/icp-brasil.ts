@@ -146,7 +146,9 @@ async function downloadAndParsePolicyDocument(): Promise<{
       return cachedPolicyData;
    }
 
-   const response = await fetch(POLICY_CONFIG.URL);
+   const response = await fetch(POLICY_CONFIG.URL, {
+      signal: AbortSignal.timeout(10000),
+   });
 
    if (!response.ok) {
       throw new SignaturePolicyError(
