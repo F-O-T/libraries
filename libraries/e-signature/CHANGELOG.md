@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.1] - 2026-03-05
+## [1.6.2] - 2026-03-05
 
 ### Fixed
 
-- Restore `"files"`, `dependencies`, `peerDependencies`, and `description` to package.json — fields were lost during `fot generate` causing empty npm publish in 1.6.0
 - Remove `plugins/worker-entry` — bundled chunk imports don't resolve in Worker context; consumer now creates a worker file in their own project (bundler handles imports correctly)
+- Restore `"files"`, `dependencies`, `peerDependencies`, and `description` to package.json — fields were lost during `fot generate` causing empty npm publish in 1.6.0
 
 ## [1.6.0] - 2026-03-05
 
