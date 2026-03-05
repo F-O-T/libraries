@@ -8,6 +8,14 @@
 
 import type { PdfImage, PdfPage, TextOptions, RectOptions, ImageOptions } from "./types.ts";
 
+export type LinkAnnotation = {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	url: string;
+};
+
 /**
  * Parse a hex colour string like "#RRGGBB" into normalised [r, g, b] values (0-1).
  * Returns null for invalid/missing input so callers can fall back to defaults.
@@ -102,6 +110,9 @@ export class PdfPageImpl implements PdfPage {
 	/** Images referenced by drawImage (name -> obj num) */
 	private imageRefs: Map<string, number> = new Map();
 
+	/** Link annotations recorded by drawLink */
+	private linkAnnotations: LinkAnnotation[] = [];
+
 	/** Font object number allocated by the document (set externally) */
 	fontObjNum = 0;
 
@@ -187,6 +198,34 @@ export class PdfPageImpl implements PdfPage {
 		this.operators.push(`${width} 0 0 ${height} ${x} ${y} cm`);
 		this.operators.push(`/${imgName} Do`);
 		this.operators.push("Q");
+	}
+
+	/**
+	 * Draw text as a clickable hyperlink
+	 */
+	drawLink(text: string, url: string, options: TextOptions): void {
+		// Draw the text visually (same as drawText)
+		this.drawText(text, options);
+
+		// Estimate text width: approximate Helvetica character width as ~0.5 * fontSize
+		const fontSize = options.size ?? 12;
+		const estimatedWidth = text.length * fontSize * 0.5;
+		const { x, y } = options;
+
+		this.linkAnnotations.push({
+			x,
+			y: y - fontSize * 0.2, // slight descent
+			width: estimatedWidth,
+			height: fontSize,
+			url,
+		});
+	}
+
+	/**
+	 * Get link annotations recorded by drawLink calls
+	 */
+	getLinkAnnotations(): LinkAnnotation[] {
+		return [...this.linkAnnotations];
 	}
 
 	/**

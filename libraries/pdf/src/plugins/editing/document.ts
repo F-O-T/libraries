@@ -275,6 +275,32 @@ export class PdfDocumentImpl implements PdfDocument {
 			});
 		}
 
+		// --- 3b. Link annotation objects for dirty pages ---
+		const linkAnnotObjNums = new Map<number, number[]>(); // pageObjNum -> annotation obj nums
+		for (const page of this.pages) {
+			if (!page.dirty) continue;
+			const links = (page as PdfPageImpl).getLinkAnnotations();
+			if (links.length === 0) continue;
+			const objNums: number[] = [];
+			for (const link of links) {
+				const annotObjNum = currentNextObj++;
+				objNums.push(annotObjNum);
+				const rect = `${link.x} ${link.y} ${link.x + link.width} ${link.y + link.height}`;
+				objects.push({
+					objNum: annotObjNum,
+					content: [
+						"<< /Type /Annot",
+						"/Subtype /Link",
+						`/Rect [${rect}]`,
+						"/Border [0 0 0]",
+						`/A << /S /URI /URI ${pdfString(link.url)} >>`,
+						">>",
+					].join("\n"),
+				});
+			}
+			linkAnnotObjNums.set(page.pageObjNum, objNums);
+		}
+
 		// --- 4. Updated page dictionaries (add new content stream + font/image resources) ---
 		for (const page of this.pages) {
 			if (!page.dirty && !this.hasImagesForPage(page)) continue;
@@ -363,6 +389,21 @@ export class PdfDocumentImpl implements PdfDocument {
 			} else {
 				// No resources at all — add them
 				pageContent += `\n/Resources << ${resourceEntries} >>`;
+			}
+
+			// Add link annotations to /Annots
+			const annotRefs = linkAnnotObjNums.get(page.pageObjNum);
+			if (annotRefs && annotRefs.length > 0) {
+				const refsStr = annotRefs.map((n) => `${n} 0 R`).join(" ");
+				if (pageContent.includes("/Annots")) {
+					const bracketEnd = pageContent.indexOf("]", pageContent.indexOf("/Annots"));
+					pageContent =
+						pageContent.slice(0, bracketEnd) +
+						` ${refsStr}` +
+						pageContent.slice(bracketEnd);
+				} else {
+					pageContent += `\n/Annots [${refsStr}]`;
+				}
 			}
 
 			objects.push({

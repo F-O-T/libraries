@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.1] - 2026-03-05
+
+### Added
+- `drawLink(text, url, options)` method on `PdfPage` — draws text as a clickable URI hyperlink by creating a `/Link` annotation with the given URL; the annotation is automatically serialized into the page's `/Annots` array during incremental update
+
+## [0.5.0] - 2026-03-05
+
+### Changed
+- Rewrote `PDFReader` (parsing plugin) to use string-based regex parsing instead of formal lexer/parser — now handles cross-reference streams (PDF 1.5+), object streams, and all xref formats that react-pdf generates
+- `PDFReader` now decompresses FlateDecode content streams via `node:zlib` `inflateSync`, enabling text extraction from react-pdf PDFs whose content streams are compressed
+- `PDFReader` imports shared utilities from the editing parser (`parseTrailer`, `buildObjectIndex`, `extractObjectDictContent`, `getMediaBox`) instead of duplicating parsing logic
+
 ## [0.4.2] - 2026-03-05
 
 ### Fixed

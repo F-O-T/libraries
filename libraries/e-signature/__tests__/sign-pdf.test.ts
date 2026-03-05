@@ -258,7 +258,7 @@ describe("signPdf", () => {
       expect(pdfStr).toContain("/SubFilter /adbe.pkcs7.detached");
    });
 
-   it("visual appearance includes bordered rectangle and green header", async () => {
+   it("visual appearance includes green header and clickable link (no border)", async () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
@@ -277,10 +277,8 @@ describe("signPdf", () => {
 
       const pdfStr = new TextDecoder("latin1").decode(result);
 
-      // Bordered rectangle (stroke only, borderColor #C0C0C0 → 0.753 0.753 0.753 RG)
-      expect(pdfStr).toContain("0.753 0.753 0.753 RG");
-      // Stroke-only rectangle
-      expect(pdfStr).toContain("re\nS");
+      // No bordered rectangle (removed)
+      expect(pdfStr).not.toContain("0.753 0.753 0.753 RG");
 
       // Green header (color #008000 → 0.000 0.502 0.000 rg)
       expect(pdfStr).toContain("0.000 0.502 0.000 rg");
@@ -291,8 +289,12 @@ describe("signPdf", () => {
       const hasFallback = pdfStr.includes("Assinatura Digital");
       expect(hasStructured || hasFallback).toBe(true);
 
-      // Reference link
+      // Reference link text
       expect(pdfStr).toContain("validar.iti.gov.br");
+
+      // Clickable link annotation
+      expect(pdfStr).toContain("/Subtype /Link");
+      expect(pdfStr).toContain("/URI (https://validar.iti.gov.br)");
    });
 
    it("appearance auto stamps every page of a multi-page PDF", async () => {

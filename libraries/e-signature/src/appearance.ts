@@ -42,16 +42,6 @@ export function drawSignatureAppearance(
    // Convert from top-left origin (user-facing) to PDF bottom-left origin.
    const y = page.height - appearance.y - height;
 
-   // Draw bordered rectangle around the signature area
-   page.drawRectangle({
-      x,
-      y,
-      width,
-      height,
-      borderColor: "#C0C0C0",
-      borderWidth: 1,
-   });
-
    let qrSize = 0;
 
    // Draw QR code if requested (enabled by default)
@@ -90,9 +80,9 @@ export function drawSignatureAppearance(
    // Reference link below the box
    const linkText = "validar.iti.gov.br";
    const linkX = x + width / 2 - linkText.length * 2;
-   page.drawText(linkText, {
+   page.drawLink(linkText, VALIDATION_URL, {
       x: linkX,
-      y: y - 10,
+      y: y - 4,
       size: 5,
       color: "#888888",
    });

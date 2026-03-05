@@ -312,6 +312,105 @@ describe("round-trip: generate -> load -> edit -> save", () => {
 	});
 });
 
+describe("drawLink", () => {
+	it("produces a /Link annotation in the saved PDF", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawLink("Click here", "https://example.com", { x: 50, y: 700, size: 10 });
+
+		const saved = doc.save();
+		const pdfStr = new TextDecoder("latin1").decode(saved);
+
+		// Text is rendered
+		expect(pdfStr).toContain("Click here");
+
+		// Link annotation is present
+		expect(pdfStr).toContain("/Subtype /Link");
+		expect(pdfStr).toContain("/URI (https://example.com)");
+		expect(pdfStr).toContain("/Border [0 0 0]");
+	});
+
+	it("annotation rect has correct position", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawLink("Test", "https://test.com", { x: 100, y: 200, size: 12 });
+
+		const saved = doc.save();
+		const pdfStr = new TextDecoder("latin1").decode(saved);
+
+		// Rect should start at x=100, y is adjusted for descent
+		expect(pdfStr).toMatch(/\/Rect \[100/);
+	});
+
+	it("multiple links on the same page produce multiple annotations", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawLink("Link 1", "https://one.com", { x: 50, y: 700, size: 10 });
+		page.drawLink("Link 2", "https://two.com", { x: 50, y: 680, size: 10 });
+
+		const saved = doc.save();
+		const pdfStr = new TextDecoder("latin1").decode(saved);
+
+		expect(pdfStr).toContain("/URI (https://one.com)");
+		expect(pdfStr).toContain("/URI (https://two.com)");
+
+		// Both should be in the page Annots array
+		const annotsMatch = pdfStr.match(/\/Annots\s*\[([^\]]+)\]/);
+		expect(annotsMatch).not.toBeNull();
+		// Should have at least 2 refs
+		const refs = annotsMatch![1]!.trim().split(/\s+/).filter((s: string) => s === "R");
+		expect(refs.length).toBeGreaterThanOrEqual(2);
+	});
+
+	it("link annotations coexist with signature widget annotations", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawLink("Verify", "https://verify.com", { x: 50, y: 700, size: 10 });
+
+		const { pdf: signed } = doc.saveWithPlaceholder({ reason: "Test" });
+		const pdfStr = new TextDecoder("latin1").decode(signed);
+
+		// Both link and widget annotations present
+		expect(pdfStr).toContain("/Subtype /Link");
+		expect(pdfStr).toContain("/Subtype /Widget");
+		expect(pdfStr).toContain("/URI (https://verify.com)");
+	});
+
+	it("no annotation when drawLink is not called", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawText("Just text", { x: 50, y: 700 });
+
+		const saved = doc.save();
+		const pdfStr = new TextDecoder("latin1").decode(saved);
+
+		expect(pdfStr).not.toContain("/Subtype /Link");
+	});
+
+	it("escapes special characters in URL", () => {
+		const pdfBytes = createMinimalPdf();
+		const doc = loadPdf(pdfBytes);
+		const page = doc.getPage(0);
+
+		page.drawLink("Search", "https://example.com/search?q=hello&lang=en", { x: 50, y: 700, size: 10 });
+
+		const saved = doc.save();
+		const pdfStr = new TextDecoder("latin1").decode(saved);
+
+		expect(pdfStr).toContain("https://example.com/search?q=hello&lang=en");
+	});
+});
+
 describe("binary byte search helpers (internal — tested via findByteRange)", () => {
 	it("findByteRange: works correctly on PDF with binary (non-ASCII) bytes in content", () => {
 		// Create a PDF and save with placeholder — the output binary contains

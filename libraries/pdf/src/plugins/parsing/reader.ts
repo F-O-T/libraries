@@ -1,249 +1,314 @@
-import { PDFParser } from "./parser.ts";
-import type { PDFDictionary, PDFRef, PDFArray } from "../../types.ts";
+import { inflateSync } from "node:zlib";
+import {
+	parseTrailer,
+	buildObjectIndex,
+	extractObjectDictContent,
+	getMediaBox,
+} from "../editing/parser.ts";
+import type { PDFRef } from "../../types.ts";
 import { PDFParseError } from "../../errors.ts";
 
 /**
  * Parsed PDF Document
  */
 export interface ParsedPDF {
-   version: string;
-   catalog: PDFRef;
-   pages: ParsedPDFPage[];
-   objects: Map<number, any>;
+	version: string;
+	catalog: PDFRef;
+	pages: ParsedPDFPage[];
+	objects: Map<number, any>;
 }
 
 /**
  * Parsed PDF Page
  */
 export interface ParsedPDFPage {
-   ref: PDFRef;
-   size: { width: number; height: number };
-   content: string;
+	ref: PDFRef;
+	size: { width: number; height: number };
+	content: string;
 }
 
 /**
- * PDF Reader - reads and parses existing PDFs
+ * PDF Reader - reads and parses existing PDFs using string-based parsing.
+ *
+ * Supports both traditional xref tables and cross-reference streams (PDF 1.5+),
+ * object streams, indirect Length references, and FlateDecode-compressed content streams.
  */
 export class PDFReader {
-   private data: Uint8Array;
-   private objects: Map<number, any> = new Map();
-   private xrefTable: Map<number, number> = new Map();
+	private data: Uint8Array;
+	private pdfStr: string;
+	private objIndex: Map<number, number>;
 
-   constructor(data: Uint8Array) {
-      this.data = data;
-   }
+	constructor(data: Uint8Array) {
+		this.data = data;
+		// Decode as latin1 once — same approach as editing parser
+		this.pdfStr = new TextDecoder("latin1").decode(data);
+		this.objIndex = buildObjectIndex(this.pdfStr);
+	}
 
-   /**
-    * Lazily resolve an object by number — parses on first access.
-    */
-   private resolveObject(objectNum: number): any {
-      if (this.objects.has(objectNum)) return this.resolveObject(objectNum);
-      const offset = this.xrefTable.get(objectNum);
-      if (offset === undefined) return undefined;
-      try {
-         const parser = new PDFParser(this.data.subarray(offset));
-         const obj = parser.parseIndirectObject();
-         this.objects.set(objectNum, obj.value);
-         return obj.value;
-      } catch {
-         return undefined;
-      }
-   }
+	/**
+	 * Parse PDF file
+	 */
+	parse(): ParsedPDF {
+		const trailer = parseTrailer(this.pdfStr);
+		const version = this.parseVersion();
 
-   /**
-    * Parse PDF file
-    */
-   parse(): ParsedPDF {
-      // 1. Find and parse xref table
-      const xrefOffset = this.findStartXRef();
-      this.xrefTable = this.parseXRefTable(xrefOffset);
+		// Find page objects via Root -> Pages -> Kids
+		const pageNums = this.findPageObjects(trailer.root);
 
-      // 2. Parse trailer
-      const trailer = this.parseTrailer(xrefOffset);
-      const catalogRef = trailer.Root as PDFRef;
+		const catalogRef: PDFRef = {
+			objectNumber: trailer.root,
+			generation: 0,
+		};
 
-      // 3. Get PDF version from header
-      const version = this.parseVersion();
+		const pages: ParsedPDFPage[] = [];
+		for (const pageNum of pageNums) {
+			const page = this.parsePage(pageNum);
+			if (page) pages.push(page);
+		}
 
-      // 4. Parse pages (objects are resolved lazily on demand)
-      const pages = this.parsePages(catalogRef);
+		return {
+			version,
+			catalog: catalogRef,
+			pages,
+			objects: new Map(),
+		};
+	}
 
-      return {
-         version,
-         catalog: catalogRef,
-         pages,
-         objects: this.objects,
-      };
-   }
+	/**
+	 * Parse PDF version from header
+	 */
+	private parseVersion(): string {
+		const match = this.pdfStr.slice(0, 20).match(/%PDF-(\d+\.\d+)/);
+		return match ? match[1]! : "1.7";
+	}
 
-   /**
-    * Find startxref offset by scanning backwards from EOF.
-    * Only decodes the last 256 bytes instead of the entire PDF.
-    */
-   private findStartXRef(): number {
-      const tailSize = Math.min(256, this.data.length);
-      const tail = new TextDecoder().decode(
-         this.data.subarray(this.data.length - tailSize),
-      );
-      const match = tail.match(/startxref\s+(\d+)/);
-      if (!match) {
-         throw new PDFParseError("Could not find startxref");
-      }
-      return parseInt(match[1]!, 10);
-   }
+	/**
+	 * Find all leaf page object numbers by following Root -> Pages -> Kids
+	 */
+	private findPageObjects(rootNum: number): number[] {
+		const rootContent = extractObjectDictContent(
+			this.pdfStr,
+			rootNum,
+			this.objIndex,
+		);
+		const pagesMatch = rootContent.match(/\/Pages\s+(\d+)\s+\d+\s+R/);
+		if (!pagesMatch)
+			throw new PDFParseError("Cannot find Pages ref in Root catalog");
+		const pagesNum = parseInt(pagesMatch[1]!, 10);
+		return this.collectPageLeafs(pagesNum, new Set());
+	}
 
-   /**
-    * Parse xref table
-    */
-   private parseXRefTable(offset: number): Map<number, number> {
-      const content = new TextDecoder().decode(this.data.subarray(offset));
-      const lines = content.split("\n");
+	/**
+	 * Recursively collect leaf Page object numbers
+	 */
+	private collectPageLeafs(
+		objNum: number,
+		visited: Set<number>,
+	): number[] {
+		if (visited.has(objNum)) return [];
+		visited.add(objNum);
 
-      const xref = new Map<number, number>();
-      let i = 0;
+		const content = extractObjectDictContent(
+			this.pdfStr,
+			objNum,
+			this.objIndex,
+		);
 
-      // Skip "xref" keyword
-      while (i < lines.length && !lines[i]!.trim().startsWith("xref")) i++;
-      i++;
+		const typeMatch = content.match(/\/Type\s+\/(\w+)/);
+		if (typeMatch?.[1] === "Page") {
+			return [objNum];
+		}
 
-      // Parse subsections
-      while (i < lines.length && !lines[i]!.trim().startsWith("trailer")) {
-         const subsection = lines[i]!.trim().split(/\s+/);
-         if (subsection.length === 2) {
-            const start = parseInt(subsection[0]!, 10);
-            const count = parseInt(subsection[1]!, 10);
-            i++;
+		const kidsMatch = content.match(/\/Kids\s*\[([^\]]+)\]/);
+		if (!kidsMatch) return [objNum];
 
-            // Parse entries
-            for (let j = 0; j < count; j++) {
-               const entry = lines[i]!.trim().split(/\s+/);
-               if (entry.length >= 3 && entry[2] === "n") {
-                  const offset = parseInt(entry[0]!, 10);
-                  xref.set(start + j, offset);
-               }
-               i++;
-            }
-         } else {
-            i++;
-         }
-      }
+		const refs: number[] = [];
+		const refRegex = /(\d+)\s+\d+\s+R/g;
+		let m: RegExpExecArray | null;
+		while ((m = refRegex.exec(kidsMatch[1]!)) !== null) {
+			refs.push(parseInt(m[1]!, 10));
+		}
 
-      return xref;
-   }
+		const pages: number[] = [];
+		for (const ref of refs) {
+			pages.push(...this.collectPageLeafs(ref, visited));
+		}
+		return pages;
+	}
 
-   /**
-    * Parse trailer dictionary
-    */
-   private parseTrailer(xrefOffset: number): PDFDictionary {
-      const content = new TextDecoder().decode(this.data.subarray(xrefOffset));
-      const trailerMatch = content.match(/trailer\s*<<[\s\S]*?>>/);
-      if (!trailerMatch) {
-         throw new PDFParseError("Could not find trailer");
-      }
+	/**
+	 * Parse a single page
+	 */
+	private parsePage(pageObjNum: number): ParsedPDFPage | null {
+		try {
+			const mediaBox = getMediaBox(this.pdfStr, pageObjNum, this.objIndex);
+			const size = {
+				width: mediaBox[2] - mediaBox[0],
+				height: mediaBox[3] - mediaBox[1],
+			};
 
-      const parser = new PDFParser(new TextEncoder().encode(trailerMatch[0].replace("trailer", "")));
-      return parser.parseValue() as PDFDictionary;
-   }
+			const pageContent = extractObjectDictContent(
+				this.pdfStr,
+				pageObjNum,
+				this.objIndex,
+			);
 
-   /**
-    * Parse PDF version from header
-    */
-   private parseVersion(): string {
-      const header = new TextDecoder().decode(this.data.subarray(0, 20));
-      const match = header.match(/%PDF-(\d+\.\d+)/);
-      return match ? match[1]! : "1.7";
-   }
+			// Extract text from content stream(s)
+			let content = "";
+			const contentsMatch = pageContent.match(
+				/\/Contents\s+(\d+)\s+\d+\s+R/,
+			);
+			if (contentsMatch) {
+				const contentsNum = parseInt(contentsMatch[1]!, 10);
+				content = this.extractText(contentsNum);
+			}
 
-   /**
-    * Parse pages from catalog
-    */
-   private parsePages(catalogRef: PDFRef): ParsedPDFPage[] {
-      const catalog = this.resolveObject(catalogRef.objectNumber) as PDFDictionary;
-      if (!catalog) {
-         throw new PDFParseError("Catalog not found");
-      }
+			return {
+				ref: { objectNumber: pageObjNum, generation: 0 },
+				size,
+				content,
+			};
+		} catch {
+			return null;
+		}
+	}
 
-      const pagesRef = catalog.Pages as PDFRef;
-      const pagesTree = this.resolveObject(pagesRef.objectNumber) as PDFDictionary;
-      if (!pagesTree) {
-         throw new PDFParseError("Pages tree not found");
-      }
+	/**
+	 * Extract text from a content stream object, handling FlateDecode compression
+	 */
+	private extractText(objNum: number): string {
+		const streamData = this.extractStreamData(objNum);
+		if (!streamData) return "";
 
-      const kids = pagesTree.Kids as PDFArray;
-      const pages: ParsedPDFPage[] = [];
+		return this.parseTextOperators(streamData);
+	}
 
-      for (const kidRef of kids) {
-         if (kidRef != null && typeof kidRef === "object" && "objectNumber" in kidRef) {
-            const page = this.parsePage(kidRef as PDFRef);
-            if (page) pages.push(page);
-         }
-      }
+	/**
+	 * Extract raw stream data from an object, decompressing if needed
+	 */
+	private extractStreamData(objNum: number): string | null {
+		const pos = this.objIndex.get(objNum);
+		if (pos === undefined) return null;
 
-      return pages;
-   }
+		// Find the dictionary and stream
+		const dictStart = this.pdfStr.indexOf("<<", pos);
+		if (dictStart === -1) return null;
 
-   /**
-    * Parse a single page
-    */
-   private parsePage(ref: PDFRef): ParsedPDFPage | null {
-      const pageDict = this.resolveObject(ref.objectNumber) as PDFDictionary;
-      if (!pageDict) return null;
+		const dictEnd = this.findMatchingDictEnd(dictStart);
+		if (dictEnd === -1) return null;
 
-      const mediaBox = pageDict.MediaBox as PDFArray;
-      const size = {
-         width: mediaBox[2] as number,
-         height: mediaBox[3] as number,
-      };
+		const dictContent = this.pdfStr.slice(dictStart + 2, dictEnd);
 
-      // Extract content
-      let content = "";
-      const contentsRef = pageDict.Contents as PDFRef;
-      if (contentsRef && typeof contentsRef === "object" && "objectNumber" in contentsRef) {
-         content = this.extractText(contentsRef);
-      }
+		// Find "stream" keyword after the dict
+		const afterDict = this.pdfStr.indexOf("stream", dictEnd);
+		if (afterDict === -1) return null;
 
-      return { ref, size, content };
-   }
+		// Stream data starts after "stream\n" or "stream\r\n"
+		let streamStart = afterDict + 6; // "stream".length
+		if (this.pdfStr[streamStart] === "\r") streamStart++;
+		if (this.pdfStr[streamStart] === "\n") streamStart++;
 
-   /**
-    * Extract text from content stream
-    */
-   private extractText(ref: PDFRef): string {
-      const stream = this.resolveObject(ref.objectNumber);
-      if (!stream || !stream.data) return "";
+		// Find endstream
+		const endstream = this.pdfStr.indexOf("endstream", streamStart);
+		if (endstream === -1) return null;
 
-      const content = new TextDecoder().decode(stream.data);
+		// Trim trailing whitespace before endstream
+		let streamEnd = endstream;
+		while (
+			streamEnd > streamStart &&
+			(this.pdfStr[streamEnd - 1] === "\n" ||
+				this.pdfStr[streamEnd - 1] === "\r")
+		) {
+			streamEnd--;
+		}
 
-      const texts: string[] = [];
+		const isCompressed = /\/Filter\s*\/FlateDecode/.test(dictContent);
 
-      // Match (text) Tj — single string show
-      const tjRegex = /\(([^)]*)\)\s*Tj/g;
-      let match;
-      while ((match = tjRegex.exec(content)) !== null) {
-         texts.push(match[1]!);
-      }
+		if (isCompressed) {
+			// Extract raw bytes from the latin1 string
+			const rawBytes = new Uint8Array(streamEnd - streamStart);
+			for (let i = 0; i < rawBytes.length; i++) {
+				rawBytes[i] = this.pdfStr.charCodeAt(streamStart + i);
+			}
+			try {
+				const decompressed = inflateSync(rawBytes);
+				return new TextDecoder("latin1").decode(decompressed);
+			} catch {
+				return null;
+			}
+		}
 
-      // Match [...] TJ — array show (mix of strings and kerning numbers)
-      const tjArrayRegex = /\[((?:[^[\]]*?))\]\s*TJ/gi;
-      while ((match = tjArrayRegex.exec(content)) !== null) {
-         const arrayContent = match[1]!;
-         const stringParts: string[] = [];
-         const partRegex = /\(([^)]*)\)/g;
-         let partMatch;
-         while ((partMatch = partRegex.exec(arrayContent)) !== null) {
-            stringParts.push(partMatch[1]!);
-         }
-         if (stringParts.length > 0) {
-            texts.push(stringParts.join(""));
-         }
-      }
+		return this.pdfStr.slice(streamStart, streamEnd);
+	}
 
-      // Match ' and " operators (move to next line and show)
-      const quoteRegex = /\(([^)]*)\)\s*['"]/g;
-      while ((match = quoteRegex.exec(content)) !== null) {
-         texts.push(match[1]!);
-      }
+	/**
+	 * Find matching >> for a << at the given position
+	 */
+	private findMatchingDictEnd(startPos: number): number {
+		let depth = 0;
+		let i = startPos;
+		while (i < this.pdfStr.length - 1) {
+			if (this.pdfStr[i] === "(") {
+				i++;
+				while (i < this.pdfStr.length && this.pdfStr[i] !== ")") {
+					if (this.pdfStr[i] === "\\") i++;
+					i++;
+				}
+				i++;
+			} else if (
+				this.pdfStr[i] === "<" &&
+				this.pdfStr[i + 1] === "<"
+			) {
+				depth++;
+				i += 2;
+			} else if (
+				this.pdfStr[i] === ">" &&
+				this.pdfStr[i + 1] === ">"
+			) {
+				depth--;
+				if (depth === 0) return i;
+				i += 2;
+			} else {
+				i++;
+			}
+		}
+		return -1;
+	}
 
-      return texts.join(" ");
-   }
+	/**
+	 * Parse text operators from content stream data
+	 */
+	private parseTextOperators(content: string): string {
+		const texts: string[] = [];
+
+		// Match (text) Tj — single string show
+		const tjRegex = /\(([^)]*)\)\s*Tj/g;
+		let match;
+		while ((match = tjRegex.exec(content)) !== null) {
+			texts.push(match[1]!);
+		}
+
+		// Match [...] TJ — array show (mix of strings and kerning numbers)
+		const tjArrayRegex = /\[((?:[^[\]]*?))\]\s*TJ/gi;
+		while ((match = tjArrayRegex.exec(content)) !== null) {
+			const arrayContent = match[1]!;
+			const stringParts: string[] = [];
+			const partRegex = /\(([^)]*)\)/g;
+			let partMatch;
+			while ((partMatch = partRegex.exec(arrayContent)) !== null) {
+				stringParts.push(partMatch[1]!);
+			}
+			if (stringParts.length > 0) {
+				texts.push(stringParts.join(""));
+			}
+		}
+
+		// Match ' and " operators (move to next line and show)
+		const quoteRegex = /\(([^)]*)\)\s*['"]/g;
+		while ((match = quoteRegex.exec(content)) !== null) {
+			texts.push(match[1]!);
+		}
+
+		return texts.join(" ");
+	}
 }

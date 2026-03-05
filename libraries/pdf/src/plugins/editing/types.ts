@@ -35,6 +35,8 @@ export type PdfPage = {
 	drawRectangle(options: RectOptions): void;
 	/** Draw an embedded image on the page */
 	drawImage(image: PdfImage, options: ImageOptions): void;
+	/** Draw text as a clickable hyperlink */
+	drawLink(text: string, url: string, options: TextOptions): void;
 };
 
 /**
