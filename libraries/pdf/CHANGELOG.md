@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.2] - 2026-03-05
+
+### Fixed
+- `buildContentStream` no longer re-encodes WinAnsi bytes as UTF-8 — fixes accented characters like "á" (0xE1) being corrupted into multi-byte sequences ("Ã¡") in the PDF content stream
+- `parseStream` now handles indirect `Length` references (e.g. `/Length 5 0 R`) by scanning raw bytes for `endstream` marker instead of tokenizing binary stream data — fixes freezes when parsing react-pdf PDFs with CIDFont fonts and embedded images
+
+### Changed
+- `PDFReader` now lazily parses objects on demand instead of eagerly parsing every xref entry — only objects actually accessed (e.g. catalog, pages tree, content streams) are parsed, dramatically reducing startup time for large PDFs
+- Stream parsing skips past stream data directly instead of tokenizing through it, avoiding O(N) lexer calls on binary content
+
 ## [0.4.1] - 2026-03-04
 
 ### Fixed

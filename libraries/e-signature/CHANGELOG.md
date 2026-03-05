@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-03-05
+
+### Fixed
+- Signer name no longer includes trailing `:CNPJ` suffix (e.g. "CS HUB JACOBINA LTDA:59840764000138" → "CS HUB JACOBINA LTDA") — the CNPJ is already displayed on its own line
+
+### Changed
+- Smaller signature stamp: auto dimensions reduced from 420×120 to 340×95 points
+- Stamp font sizes reduced (header 9→7pt, info 7.5→6pt, link 6→5pt, QR max 80→65)
+- Bump `@f-o-t/pdf` dependency to `^0.4.2` (fixes encoding corruption, indirect stream Length freeze, lazy object parsing)
+
 ## [1.6.2] - 2026-03-05
 
 ### Fixed

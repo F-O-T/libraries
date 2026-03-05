@@ -66,7 +66,7 @@ export function drawSignatureAppearance(
             return doc.embedPng(qrPng);
          })();
 
-      qrSize = Math.min(80, height - 20);
+      qrSize = Math.min(65, height - 15);
 
       page.drawImage(qrImage, {
          x: x + 10,
@@ -93,7 +93,7 @@ export function drawSignatureAppearance(
    page.drawText(linkText, {
       x: linkX,
       y: y - 10,
-      size: 6,
+      size: 5,
       color: "#888888",
    });
 }
@@ -113,23 +113,24 @@ function drawCertInfo(
    },
 ): void {
    const textX = opts.x + opts.qrOffset;
-   let textY = opts.y + opts.height - 16;
-   const fontSize = 7.5;
-   const lineHeight = 10;
+   let textY = opts.y + opts.height - 14;
+   const fontSize = 6;
+   const lineHeight = 8;
 
    // Green header
    page.drawText("ASSINADO DIGITALMENTE", {
       x: textX,
       y: textY,
-      size: 9,
+      size: 7,
       color: "#008000",
    });
    textY -= lineHeight * 1.3;
 
    if (certInfo) {
-      // Signer name
-      const signerName = certInfo.subject.commonName || "N/A";
-      page.drawText(`Signatário: ${signerName}`, {
+      // Signer name — strip trailing :CNPJ or :CPF suffix (shown separately below)
+      let signerName = certInfo.subject.commonName || "N/A";
+      signerName = signerName.replace(/:\d{11,14}$/, "").trim();
+      page.drawText(`Signat\u00e1rio: ${signerName}`, {
          x: textX,
          y: textY,
          size: fontSize,

@@ -27,9 +27,27 @@ export interface ParsedPDFPage {
 export class PDFReader {
    private data: Uint8Array;
    private objects: Map<number, any> = new Map();
+   private xrefTable: Map<number, number> = new Map();
 
    constructor(data: Uint8Array) {
       this.data = data;
+   }
+
+   /**
+    * Lazily resolve an object by number — parses on first access.
+    */
+   private resolveObject(objectNum: number): any {
+      if (this.objects.has(objectNum)) return this.resolveObject(objectNum);
+      const offset = this.xrefTable.get(objectNum);
+      if (offset === undefined) return undefined;
+      try {
+         const parser = new PDFParser(this.data.subarray(offset));
+         const obj = parser.parseIndirectObject();
+         this.objects.set(objectNum, obj.value);
+         return obj.value;
+      } catch {
+         return undefined;
+      }
    }
 
    /**
@@ -38,19 +56,16 @@ export class PDFReader {
    parse(): ParsedPDF {
       // 1. Find and parse xref table
       const xrefOffset = this.findStartXRef();
-      const xrefTable = this.parseXRefTable(xrefOffset);
+      this.xrefTable = this.parseXRefTable(xrefOffset);
 
       // 2. Parse trailer
       const trailer = this.parseTrailer(xrefOffset);
       const catalogRef = trailer.Root as PDFRef;
 
-      // 3. Read all objects using xref table
-      this.readObjects(xrefTable);
-
-      // 4. Get PDF version from header
+      // 3. Get PDF version from header
       const version = this.parseVersion();
 
-      // 5. Parse pages
+      // 4. Parse pages (objects are resolved lazily on demand)
       const pages = this.parsePages(catalogRef);
 
       return {
@@ -131,23 +146,6 @@ export class PDFReader {
    }
 
    /**
-    * Read all objects from xref table.
-    * Uses subarray (zero-copy view) instead of slice to avoid O(N × fileSize) allocations.
-    */
-   private readObjects(xrefTable: Map<number, number>): void {
-      for (const [objectNum, offset] of xrefTable) {
-         try {
-           const objData = this.data.subarray(offset);
-           const parser = new PDFParser(objData);
-           const obj = parser.parseIndirectObject();
-           this.objects.set(objectNum, obj.value);
-         } catch (error) {
-           // Skip malformed objects
-         }
-      }
-   }
-
-   /**
     * Parse PDF version from header
     */
    private parseVersion(): string {
@@ -160,13 +158,13 @@ export class PDFReader {
     * Parse pages from catalog
     */
    private parsePages(catalogRef: PDFRef): ParsedPDFPage[] {
-      const catalog = this.objects.get(catalogRef.objectNumber) as PDFDictionary;
+      const catalog = this.resolveObject(catalogRef.objectNumber) as PDFDictionary;
       if (!catalog) {
          throw new PDFParseError("Catalog not found");
       }
 
       const pagesRef = catalog.Pages as PDFRef;
-      const pagesTree = this.objects.get(pagesRef.objectNumber) as PDFDictionary;
+      const pagesTree = this.resolveObject(pagesRef.objectNumber) as PDFDictionary;
       if (!pagesTree) {
          throw new PDFParseError("Pages tree not found");
       }
@@ -188,7 +186,7 @@ export class PDFReader {
     * Parse a single page
     */
    private parsePage(ref: PDFRef): ParsedPDFPage | null {
-      const pageDict = this.objects.get(ref.objectNumber) as PDFDictionary;
+      const pageDict = this.resolveObject(ref.objectNumber) as PDFDictionary;
       if (!pageDict) return null;
 
       const mediaBox = pageDict.MediaBox as PDFArray;
@@ -211,7 +209,7 @@ export class PDFReader {
     * Extract text from content stream
     */
    private extractText(ref: PDFRef): string {
-      const stream = this.objects.get(ref.objectNumber);
+      const stream = this.resolveObject(ref.objectNumber);
       if (!stream || !stream.data) return "";
 
       const content = new TextDecoder().decode(stream.data);

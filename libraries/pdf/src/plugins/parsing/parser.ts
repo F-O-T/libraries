@@ -220,16 +220,42 @@ export class PDFParser {
          streamDataStart++;
       }
 
-      // Get stream length
-      const length = dictionary.Length as number;
-      if (typeof length !== "number") {
-         throw new Error("Stream dictionary missing Length");
+      // Get stream length — may be a direct number or an indirect reference
+      const lengthVal = dictionary.Length;
+      let data: Uint8Array;
+
+      if (typeof lengthVal === "number") {
+         // Direct length: slice exactly
+         data = this.data.slice(streamDataStart, streamDataStart + lengthVal);
+      } else {
+         // Indirect reference or missing — scan raw bytes for 'endstream' marker
+         // instead of tokenizing binary data (which freezes the lexer)
+         const marker = new TextEncoder().encode("endstream");
+         let endPos = streamDataStart;
+         while (endPos < this.data.length - marker.length) {
+            if (this.data[endPos] === marker[0]) {
+               let match = true;
+               for (let j = 1; j < marker.length; j++) {
+                  if (this.data[endPos + j] !== marker[j]) { match = false; break; }
+               }
+               if (match) break;
+            }
+            endPos++;
+         }
+         // Trim trailing whitespace (\r\n or \n before endstream)
+         let dataEnd = endPos;
+         if (dataEnd > streamDataStart && this.data[dataEnd - 1] === 0x0A) dataEnd--;
+         if (dataEnd > streamDataStart && this.data[dataEnd - 1] === 0x0D) dataEnd--;
+         data = this.data.slice(streamDataStart, dataEnd);
       }
 
-      // Extract stream data
-      const data = this.data.slice(streamDataStart, streamDataStart + length);
+      // Skip past stream data — create a new lexer starting after the stream
+      // to avoid tokenizing binary content byte-by-byte
+      const afterStream = streamDataStart + data.length;
+      this.lexer = new PDFLexer(this.data.subarray(afterStream));
+      this.currentToken = this.lexer.nextToken();
 
-      // Skip to endstream
+      // Skip any whitespace tokens until we hit endstream
       while (this.currentToken.type !== TokenType.ENDSTREAM && this.currentToken.type !== TokenType.EOF) {
          this.advance();
       }

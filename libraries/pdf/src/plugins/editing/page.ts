@@ -194,7 +194,14 @@ export class PdfPageImpl implements PdfPage {
 	 */
 	buildContentStream(): Uint8Array {
 		const content = this.operators.join("\n");
-		return new TextEncoder().encode(content);
+		// Write raw bytes — toWinAnsi already produced byte values in the
+		// 0x00-0xFF range. TextEncoder would re-encode bytes >= 0x80 as
+		// multi-byte UTF-8 sequences, corrupting WinAnsi characters like "á".
+		const bytes = new Uint8Array(content.length);
+		for (let i = 0; i < content.length; i++) {
+			bytes[i] = content.charCodeAt(i);
+		}
+		return bytes;
 	}
 
 	/**
