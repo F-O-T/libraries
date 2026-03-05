@@ -40,7 +40,7 @@ import {
 } from "./icp-brasil.ts";
 import { pdfSignOptionsSchema } from "./schemas.ts";
 import { requestTimestamp, TIMESTAMP_TOKEN_OID } from "./timestamp.ts";
-import type { PdfSignOptions } from "./types.ts";
+import type { PdfSignOptions, SignatureAppearance } from "./types.ts";
 
 /**
  * Sign a PDF document with a digital certificate.
@@ -115,37 +115,40 @@ export async function signPdf(
    // 2. Load PDF via editing plugin
    const doc = loadPdf(pdfBytes);
 
-   // Resolve "auto" appearance via position detection
-   let resolvedAppearance = opts.appearance as
-      | Exclude<typeof opts.appearance, "auto">
-      | undefined;
+   // Resolve "auto" appearance — stamp on ALL pages
+   let resolvedAppearance: Exclude<typeof opts.appearance, "auto"> | undefined;
+   let autoAppearances: SignatureAppearance[] | undefined;
+
    if (opts.appearance === "auto") {
+      const width = 350;
+      const height = 120;
+
+      // Try to detect best position on a representative page
       const detected = detectSigningPosition(pdfBytes, {
          signerName: certInfo?.subject.commonName ?? undefined,
          organization: certInfo?.subject.organization ?? undefined,
          preferredPage: -1,
-         width: 350,
-         height: 120,
+         width,
+         height,
       });
 
-      if (detected) {
-         resolvedAppearance = {
-            x: detected.x,
-            y: detected.y,
-            width: 350,
-            height: 120,
-            page: detected.page,
-         };
-      } else {
-         // Fallback: bottom of first page
-         resolvedAppearance = {
-            x: 50,
-            y: 700,
-            width: 350,
-            height: 120,
-            page: 0,
-         };
+      const baseX = detected?.x ?? 50;
+      const baseY = detected?.y ?? 700;
+
+      // Generate one appearance per page
+      autoAppearances = [];
+      for (let i = 0; i < doc.pageCount; i++) {
+         autoAppearances.push({
+            x: baseX,
+            y: baseY,
+            width,
+            height,
+            page: i,
+         });
       }
+
+      // Clear single appearance — we use appearances[] instead
+      resolvedAppearance = false;
    } else {
       resolvedAppearance = opts.appearance === false ? false : opts.appearance;
    }
@@ -170,18 +173,19 @@ export async function signPdf(
       });
    }
 
-   // 3b. Draw multiple visual signature appearances if provided
-   if (opts.appearances && opts.appearances.length > 0) {
-      // Pre-embed the QR image once so all appearances share a single PDF XObject.
-      // This collapses N embedPng calls (and N IDAT buffer allocations) into 1.
-      const needsQr = opts.appearances.some((a) => a.showQrCode !== false);
-      // Pre-embed the QR once. Safe to pass to all appearances — drawSignatureAppearance
-      // ignores it when showQrCode is false (inner guard in appearance.ts).
+   // 3b. Draw multiple visual signature appearances
+   const allAppearances = [
+      ...(autoAppearances ?? []),
+      ...(opts.appearances ?? []),
+   ];
+
+   if (allAppearances.length > 0) {
+      const needsQr = allAppearances.some((a) => a.showQrCode !== false);
       const sharedQrImage = needsQr
          ? precomputeSharedQrImage(doc, certInfo, pdfBytes, opts.qrCode)
          : undefined;
 
-      for (const app of opts.appearances) {
+      for (const app of allAppearances) {
          const pageIndex = app.page ?? 0;
 
          if (pageIndex < 0 || pageIndex >= doc.pageCount) {
