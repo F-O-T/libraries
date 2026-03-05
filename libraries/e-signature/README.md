@@ -68,6 +68,38 @@ function SignForm() {
 
 `pdf` and `p12` accept `File`, `Blob`, or `Uint8Array` — the hook converts `File`/`Blob` to `Uint8Array` automatically before calling `signPdf`.
 
+## Web Worker Signing
+
+`signPdf` performs CPU-intensive work (PKCS#12 KDF, PDF parsing, appearance rendering) that blocks the main thread in browsers. Use `signPdfInWorker` to run signing in a Web Worker.
+
+```ts
+import { signPdfInWorker } from "@f-o-t/e-signature/plugins/worker";
+
+const worker = new Worker(
+  new URL("@f-o-t/e-signature/plugins/worker-entry", import.meta.url),
+  { type: "module" },
+);
+
+const signed = await signPdfInWorker(worker, pdfBytes, {
+  certificate: { p12, password: "secret" },
+  appearance: "auto",
+  policy: "pades-icp-brasil",
+});
+
+// Reuse the worker for multiple signings, or terminate when done
+worker.terminate();
+```
+
+### `signPdfInWorker(worker, pdf, options)`
+
+Same parameters as `signPdf`, plus a `Worker` as the first argument. The PDF bytes are transferred (zero-copy) to the worker thread.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `worker` | `Worker` | A Worker running the `worker-entry` plugin |
+| `pdf` | `Uint8Array` | PDF document bytes |
+| `options` | `PdfSignOptions` | Same options as `signPdf()` |
+
 ## Automatic Signature Positioning
 
 ### Using `appearance: "auto"`
