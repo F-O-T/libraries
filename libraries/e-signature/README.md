@@ -70,7 +70,7 @@ function SignForm() {
 
 ## Web Worker Signing
 
-`signPdf` performs CPU-intensive work (PKCS#12 KDF, PDF parsing, appearance rendering) that blocks the main thread in browsers. Use `signPdfInWorker` to run signing in a Web Worker.
+Runs signing off the main thread to prevent browser freezes.
 
 ```ts
 import { signPdfInWorker } from "@f-o-t/e-signature/plugins/worker";
@@ -90,15 +90,9 @@ const signed = await signPdfInWorker(worker, pdfBytes, {
 worker.terminate();
 ```
 
-### `signPdfInWorker(worker, pdf, options)`
+### `signPdfInWorker(worker: Worker, pdf: Uint8Array, options: PdfSignOptions): Promise<Uint8Array>`
 
-Same parameters as `signPdf`, plus a `Worker` as the first argument. The PDF bytes are transferred (zero-copy) to the worker thread.
-
-| Parameter | Type | Description |
-|---|---|---|
-| `worker` | `Worker` | A Worker running the `worker-entry` plugin |
-| `pdf` | `Uint8Array` | PDF document bytes |
-| `options` | `PdfSignOptions` | Same options as `signPdf()` |
+Same as `signPdf` but takes a `Worker` as the first argument. PDF bytes are transferred (zero-copy) to the worker thread.
 
 ## Automatic Signature Positioning
 

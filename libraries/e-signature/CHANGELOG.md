@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `@f-o-t/e-signature/plugins/worker` — `signPdfInWorker()` runs PDF signing in a Web Worker to prevent main-thread freezes in browsers
-- `@f-o-t/e-signature/plugins/worker-entry` — standalone worker entry script for use with `new Worker()`
+- Web Worker signing via `signPdfInWorker()` — runs signing off the main thread to prevent browser freezes (`plugins/worker` + `plugins/worker-entry`)
 
 ## [1.5.0] - 2026-03-04
 
