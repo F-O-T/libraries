@@ -20,37 +20,39 @@ import type { WorkerRequest, WorkerResponse } from "../worker-entry/index.ts";
  * ```
  */
 export function signPdfInWorker(
-	worker: Worker,
-	pdf: Uint8Array,
-	options: PdfSignOptions,
+   worker: Worker,
+   pdf: Uint8Array,
+   options: PdfSignOptions,
 ): Promise<Uint8Array> {
-	return new Promise((resolve, reject) => {
-		const id = nextId++;
+   return new Promise((resolve, reject) => {
+      const id = nextId++;
 
-		function onMessage(e: MessageEvent<WorkerResponse>) {
-			if (e.data.id !== id) return;
-			worker.removeEventListener("message", onMessage);
-			worker.removeEventListener("error", onError);
+      function onMessage(e: MessageEvent<WorkerResponse>) {
+         if (e.data.id !== id) return;
+         worker.removeEventListener("message", onMessage);
+         worker.removeEventListener("error", onError);
 
-			if (e.data.ok) {
-				resolve(e.data.result);
-			} else {
-				reject(new Error(e.data.error));
-			}
-		}
+         if (e.data.ok) {
+            resolve(e.data.result);
+         } else {
+            reject(new Error(e.data.error));
+         }
+      }
 
-		function onError(e: ErrorEvent) {
-			worker.removeEventListener("message", onMessage);
-			worker.removeEventListener("error", onError);
-			reject(new Error(e.message || "Worker error"));
-		}
+      function onError(e: ErrorEvent) {
+         worker.removeEventListener("message", onMessage);
+         worker.removeEventListener("error", onError);
+         reject(new Error(e.message || "Worker error"));
+      }
 
-		worker.addEventListener("message", onMessage);
-		worker.addEventListener("error", onError);
+      worker.addEventListener("message", onMessage);
+      worker.addEventListener("error", onError);
 
-		const transfer = pdf.buffer instanceof ArrayBuffer ? [pdf.buffer] : [];
-		worker.postMessage({ id, pdf, options } satisfies WorkerRequest, { transfer });
-	});
+      const transfer = pdf.buffer instanceof ArrayBuffer ? [pdf.buffer] : [];
+      worker.postMessage({ id, pdf, options } satisfies WorkerRequest, {
+         transfer,
+      });
+   });
 }
 
 let nextId = 1;

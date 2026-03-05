@@ -1,48 +1,48 @@
 {
-  "name": "@f-o-t/e-signature",
-  "version": "0.1.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "module": "./dist/index.js",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./plugins/react": {
-      "types": "./dist/plugins/react/index.d.ts",
-      "module": "./dist/plugins/react/index.js",
-      "import": "./dist/plugins/react/index.js",
-      "default": "./dist/plugins/react/index.js"
-    },
-    "./plugins/worker": {
-      "types": "./dist/plugins/worker/index.d.ts",
-      "module": "./dist/plugins/worker/index.js",
-      "import": "./dist/plugins/worker/index.js",
-      "default": "./dist/plugins/worker/index.js"
-    },
-    "./plugins/worker-entry": {
-      "types": "./dist/plugins/worker-entry/index.d.ts",
-      "module": "./dist/plugins/worker-entry/index.js",
-      "import": "./dist/plugins/worker-entry/index.js",
-      "default": "./dist/plugins/worker-entry/index.js"
-    }
-  },
-  "scripts": {
-    "build": "fot build",
-    "test": "fot test",
-    "lint": "fot lint",
-    "format": "fot format"
-  },
-  "devDependencies": {
-    "@f-o-t/cli": "workspace:*",
-    "@f-o-t/config": "workspace:*"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/F-O-T/libraries.git",
-    "directory": "libraries/e-signature"
-  }
+   "name": "@f-o-t/e-signature",
+   "version": "0.1.0",
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "module": "./dist/index.js",
+         "import": "./dist/index.js",
+         "default": "./dist/index.js"
+      },
+      "./plugins/react": {
+         "types": "./dist/plugins/react/index.d.ts",
+         "module": "./dist/plugins/react/index.js",
+         "import": "./dist/plugins/react/index.js",
+         "default": "./dist/plugins/react/index.js"
+      },
+      "./plugins/worker": {
+         "types": "./dist/plugins/worker/index.d.ts",
+         "module": "./dist/plugins/worker/index.js",
+         "import": "./dist/plugins/worker/index.js",
+         "default": "./dist/plugins/worker/index.js"
+      },
+      "./plugins/worker-entry": {
+         "types": "./dist/plugins/worker-entry/index.d.ts",
+         "module": "./dist/plugins/worker-entry/index.js",
+         "import": "./dist/plugins/worker-entry/index.js",
+         "default": "./dist/plugins/worker-entry/index.js"
+      }
+   },
+   "scripts": {
+      "build": "fot build",
+      "test": "fot test",
+      "lint": "fot lint",
+      "format": "fot format"
+   },
+   "devDependencies": {
+      "@f-o-t/cli": "workspace:*",
+      "@f-o-t/config": "workspace:*"
+   },
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/libraries.git",
+      "directory": "libraries/e-signature"
+   }
 }
