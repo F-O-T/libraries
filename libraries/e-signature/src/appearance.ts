@@ -66,7 +66,7 @@ export function drawSignatureAppearance(
             return doc.embedPng(qrPng);
          })();
 
-      qrSize = Math.min(100, height - 20);
+      qrSize = Math.min(80, height - 20);
 
       page.drawImage(qrImage, {
          x: x + 10,
@@ -89,11 +89,11 @@ export function drawSignatureAppearance(
 
    // Reference link below the box
    const linkText = "validar.iti.gov.br";
-   const linkX = x + width / 2 - linkText.length * 2.5;
+   const linkX = x + width / 2 - linkText.length * 2;
    page.drawText(linkText, {
       x: linkX,
-      y: y - 12,
-      size: 8,
+      y: y - 10,
+      size: 6,
       color: "#888888",
    });
 }
@@ -113,18 +113,18 @@ function drawCertInfo(
    },
 ): void {
    const textX = opts.x + opts.qrOffset;
-   let textY = opts.y + opts.height - 20;
-   const fontSize = 10;
-   const lineHeight = 14;
+   let textY = opts.y + opts.height - 16;
+   const fontSize = 7.5;
+   const lineHeight = 10;
 
    // Green header
    page.drawText("ASSINADO DIGITALMENTE", {
       x: textX,
       y: textY,
-      size: 12,
+      size: 9,
       color: "#008000",
    });
-   textY -= lineHeight * 1.5;
+   textY -= lineHeight * 1.3;
 
    if (certInfo) {
       // Signer name

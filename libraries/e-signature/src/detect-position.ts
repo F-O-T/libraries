@@ -50,7 +50,11 @@ export function detectSigningPosition(
          ? pages.length - 1
          : (options.preferredPage ?? pages.length - 1);
 
-   for (let i = 0; i < pages.length; i++) {
+   // Only scan the last few pages for signals — signatures are
+   // almost always near the end, and scanning every page of a
+   // large document is expensive (causes browser freezes).
+   const scanStart = Math.max(0, pages.length - 3);
+   for (let i = scanStart; i < pages.length; i++) {
       const page = pages[i]!;
       const text = page.content.toLowerCase();
 

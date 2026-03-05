@@ -89,8 +89,8 @@ For more control, call `detectSigningPosition()` to inspect the detected positio
 import { detectSigningPosition } from "@f-o-t/e-signature";
 
 const position = detectSigningPosition(pdfBytes, {
-  signerName: "Lucas Furtado Barbosa",
-  organization: "VERSA SOLUCOES LTDA",
+  signerName: "John Doe",
+  organization: "Acme Corp",
 });
 
 if (position) {

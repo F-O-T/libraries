@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-03-04
+
+### Fixed
+- Reduced signature appearance font sizes (header 12→9pt, body 10→7.5pt, link 8→6pt) and QR code max size (100→80pt) to prevent text overflow in the stamp box
+- Signature position detection now only scans the last 3 pages instead of every page, fixing browser freezes on large multi-page PDFs
+
 ## [1.4.0] - 2026-03-04
 
 ### Changed
