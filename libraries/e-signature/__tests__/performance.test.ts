@@ -290,3 +290,214 @@ describe("performance benchmarks", () => {
       expect(ratio).toBeLessThan(6);
    });
 });
+
+function createHeavyMultiPage(count: number): Uint8Array {
+   const doc = new PDFDocument();
+   // Simulate real-world PDFs with substantial text content per page
+   const loremIpsum =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ";
+   for (let i = 0; i < count; i++) {
+      const page = doc.addPage({ size: "Letter" });
+      // ~20 lines of text per page to simulate a real document
+      for (let line = 0; line < 20; line++) {
+         page.drawText(`${loremIpsum}Page ${i + 1} Line ${line + 1}`, {
+            x: 50,
+            y: 700 - line * 30,
+            size: 10,
+         });
+      }
+   }
+   return doc.save();
+}
+
+describe("auto mode performance", () => {
+   it("auto mode: 1-page PDF", async () => {
+      const p12 = await loadP12();
+      const pdf = createOnePage();
+
+      const result = await asyncBenchmark(
+         "auto 1-page",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         5,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(3000);
+   });
+
+   it("auto mode: 10-page PDF", async () => {
+      const p12 = await loadP12();
+      const pdf = createMultiPage(10);
+
+      const result = await asyncBenchmark(
+         "auto 10-page",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         5,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(5000);
+   });
+
+   it("auto mode: 50-page PDF", async () => {
+      const p12 = await loadP12();
+      const pdf = createMultiPage(50);
+
+      const result = await asyncBenchmark(
+         "auto 50-page",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         3,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(10000);
+   });
+
+   it("auto mode: 100-page PDF", async () => {
+      const p12 = await loadP12();
+      const pdf = createMultiPage(100);
+
+      const result = await asyncBenchmark(
+         "auto 100-page",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         3,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(30000);
+   });
+
+   it("auto mode: 50-page heavy PDF (realistic content)", async () => {
+      const p12 = await loadP12();
+      const pdf = createHeavyMultiPage(50);
+      console.log(`  [heavy 50-page PDF size: ${(pdf.byteLength / 1024).toFixed(0)} KB]`);
+
+      const result = await asyncBenchmark(
+         "auto 50-page heavy",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         3,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(15000);
+   });
+
+   it("auto mode: 100-page heavy PDF (realistic content)", async () => {
+      const p12 = await loadP12();
+      const pdf = createHeavyMultiPage(100);
+      console.log(`  [heavy 100-page PDF size: ${(pdf.byteLength / 1024).toFixed(0)} KB]`);
+
+      const result = await asyncBenchmark(
+         "auto 100-page heavy",
+         async () => {
+            await signPdf(pdf, {
+               certificate: { p12, password: "test123" },
+               appearance: "auto",
+            });
+         },
+         3,
+      );
+
+      console.log(
+         `[${result.name}] avg=${result.avgMs.toFixed(1)}ms min=${result.minMs.toFixed(1)}ms max=${result.maxMs.toFixed(1)}ms`,
+      );
+      expect(result.avgMs).toBeLessThan(30000);
+   });
+
+   it("auto mode: breakdown by phase (100-page heavy PDF)", async () => {
+      const p12 = await loadP12();
+      const pdf = createHeavyMultiPage(100);
+      console.log(`  [PDF size: ${(pdf.byteLength / 1024).toFixed(0)} KB, 100 pages]`);
+
+      const { detectSigningPosition } = await import("../src/detect-position.ts");
+      const { parsePkcs12 } = await import("@f-o-t/crypto");
+      const { loadPdf } = await import("@f-o-t/pdf/plugins/editing");
+      const { drawSignatureAppearance, precomputeSharedQrImage } = await import("../src/appearance.ts");
+
+      // Phase 1: parsePkcs12
+      const certResult = await asyncBenchmark("parsePkcs12", async () => {
+         await parsePkcs12(p12, "test123");
+      }, 5);
+
+      // Phase 2: detectSigningPosition (full PDF parse + text scan)
+      const detectResult = await asyncBenchmark("detectSigningPosition", async () => {
+         detectSigningPosition(pdf, {
+            signerName: "Test",
+            organization: "FOT",
+            preferredPage: -1,
+            width: 420,
+            height: 120,
+         });
+      }, 5);
+
+      // Phase 3: loadPdf (editing plugin parse)
+      const loadResult = await asyncBenchmark("loadPdf", async () => {
+         loadPdf(pdf);
+      }, 5);
+
+      // Phase 4: draw 100 appearances (QR + text on each page)
+      const drawResult = await asyncBenchmark("draw 100 appearances", async () => {
+         const d = loadPdf(pdf);
+         const qr = precomputeSharedQrImage(d, null, pdf);
+         for (let i = 0; i < 100; i++) {
+            const page = d.getPage(i);
+            drawSignatureAppearance(d, page, {
+               x: 50, y: 50, width: 420, height: 120, page: i,
+            }, null, {
+               pdfData: pdf,
+               preEmbeddedQr: qr,
+            });
+         }
+      }, 3);
+
+      // Phase 5: full auto sign (end-to-end)
+      const fullResult = await asyncBenchmark("full auto sign", async () => {
+         await signPdf(pdf, {
+            certificate: { p12, password: "test123" },
+            appearance: "auto",
+         });
+      }, 3);
+
+      console.log(`\n  === Auto Mode Breakdown (100 heavy pages) ===`);
+      console.log(`  parsePkcs12:          ${certResult.avgMs.toFixed(1)}ms`);
+      console.log(`  detectSigningPosition: ${detectResult.avgMs.toFixed(1)}ms`);
+      console.log(`  loadPdf:              ${loadResult.avgMs.toFixed(1)}ms`);
+      console.log(`  draw 100 appearances: ${drawResult.avgMs.toFixed(1)}ms`);
+      console.log(`  full auto sign:       ${fullResult.avgMs.toFixed(1)}ms`);
+   });
+});

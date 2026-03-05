@@ -59,6 +59,45 @@ export function parseCertificate(
 }
 
 /**
+ * Build CertificateInfo from already-extracted DER bytes (skips P12 parsing).
+ *
+ * Use this when you already have the raw certificate and private key DER
+ * (e.g. from a prior `parsePkcs12` call) to avoid the expensive PBKDF2
+ * key derivation a second time.
+ */
+export function parseCertificateFromDer(
+   certDer: Uint8Array,
+   keyDer: Uint8Array,
+   pfx: Uint8Array,
+   password: string,
+): CertificateInfo {
+   const certPem = derToPem(certDer, "CERTIFICATE");
+   const keyPem = derToPem(keyDer, "PRIVATE KEY");
+
+   const x509 = parseX509Certificate(certPem);
+
+   const isValid = checkValidity(x509.validity);
+   const brazilian = extractBrazilianFields(
+      x509.subject.raw,
+      x509.subjectAltName || undefined,
+   );
+
+   return {
+      serialNumber: x509.serialNumber,
+      subject: x509.subject,
+      issuer: x509.issuer,
+      validity: x509.validity,
+      fingerprint: x509.fingerprint,
+      isValid,
+      brazilian,
+      certPem,
+      keyPem,
+      pfxBuffer: pfx,
+      pfxPassword: password,
+   };
+}
+
+/**
  * Check if a certificate is currently valid (not expired)
  */
 export function isCertificateValid(cert: CertificateInfo): boolean {

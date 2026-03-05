@@ -62,12 +62,15 @@ export class PDFReader {
    }
 
    /**
-    * Find startxref offset
+    * Find startxref offset by scanning backwards from EOF.
+    * Only decodes the last 256 bytes instead of the entire PDF.
     */
    private findStartXRef(): number {
-      const decoder = new TextDecoder();
-      const content = decoder.decode(this.data);
-      const match = content.match(/startxref\s+(\d+)/);
+      const tailSize = Math.min(256, this.data.length);
+      const tail = new TextDecoder().decode(
+         this.data.subarray(this.data.length - tailSize),
+      );
+      const match = tail.match(/startxref\s+(\d+)/);
       if (!match) {
          throw new PDFParseError("Could not find startxref");
       }
@@ -78,8 +81,7 @@ export class PDFReader {
     * Parse xref table
     */
    private parseXRefTable(offset: number): Map<number, number> {
-      const decoder = new TextDecoder();
-      const content = decoder.decode(this.data.slice(offset));
+      const content = new TextDecoder().decode(this.data.subarray(offset));
       const lines = content.split("\n");
 
       const xref = new Map<number, number>();
@@ -118,8 +120,7 @@ export class PDFReader {
     * Parse trailer dictionary
     */
    private parseTrailer(xrefOffset: number): PDFDictionary {
-      const decoder = new TextDecoder();
-      const content = decoder.decode(this.data.slice(xrefOffset));
+      const content = new TextDecoder().decode(this.data.subarray(xrefOffset));
       const trailerMatch = content.match(/trailer\s*<<[\s\S]*?>>/);
       if (!trailerMatch) {
          throw new PDFParseError("Could not find trailer");
@@ -130,12 +131,13 @@ export class PDFReader {
    }
 
    /**
-    * Read all objects from xref table
+    * Read all objects from xref table.
+    * Uses subarray (zero-copy view) instead of slice to avoid O(N × fileSize) allocations.
     */
    private readObjects(xrefTable: Map<number, number>): void {
       for (const [objectNum, offset] of xrefTable) {
          try {
-           const objData = this.data.slice(offset);
+           const objData = this.data.subarray(offset);
            const parser = new PDFParser(objData);
            const obj = parser.parseIndirectObject();
            this.objects.set(objectNum, obj.value);
@@ -149,8 +151,7 @@ export class PDFReader {
     * Parse PDF version from header
     */
    private parseVersion(): string {
-      const decoder = new TextDecoder();
-      const header = decoder.decode(this.data.slice(0, 20));
+      const header = new TextDecoder().decode(this.data.subarray(0, 20));
       const match = header.match(/%PDF-(\d+\.\d+)/);
       return match ? match[1]! : "1.7";
    }
@@ -213,8 +214,7 @@ export class PDFReader {
       const stream = this.objects.get(ref.objectNumber);
       if (!stream || !stream.data) return "";
 
-      const decoder = new TextDecoder();
-      const content = decoder.decode(stream.data);
+      const content = new TextDecoder().decode(stream.data);
 
       const texts: string[] = [];
 

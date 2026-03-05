@@ -21,7 +21,7 @@ import {
    parsePkcs12,
 } from "@f-o-t/crypto";
 import type { CertificateInfo } from "@f-o-t/digital-certificate";
-import { parseCertificate } from "@f-o-t/digital-certificate";
+import { parseCertificateFromDer } from "@f-o-t/digital-certificate";
 import {
    embedSignature,
    extractBytesToSign,
@@ -101,10 +101,12 @@ export async function signPdf(
       opts.certificate.password,
    );
 
-   // 1b. Parse certificate for rich display info (CPF/CNPJ, subject CN, etc.)
+   // 1b. Build display info from already-parsed cert (avoids second P12 parse)
    let certInfo: CertificateInfo | null = null;
    try {
-      certInfo = parseCertificate(
+      certInfo = parseCertificateFromDer(
+         certificate,
+         privateKey,
          opts.certificate.p12,
          opts.certificate.password,
       );
@@ -112,7 +114,7 @@ export async function signPdf(
       // If parsing fails, continue without cert info for display
    }
 
-   // 2. Load PDF via editing plugin
+   // 2. Load PDF via editing plugin (single parse — reused for drawing + saving)
    const doc = loadPdf(pdfBytes);
 
    // Resolve "auto" appearance — stamp on ALL pages
@@ -120,10 +122,12 @@ export async function signPdf(
    let autoAppearances: SignatureAppearance[] | undefined;
 
    if (opts.appearance === "auto") {
-      const width = 350;
+      const width = 420;
       const height = 120;
 
-      // Try to detect best position on a representative page
+      // Use the already-loaded doc for page dimensions to avoid a second parse.
+      // detectSigningPosition still does its own lightweight parse for text scanning,
+      // but we use doc.pageCount and page dimensions from the editing plugin.
       const detected = detectSigningPosition(pdfBytes, {
          signerName: certInfo?.subject.commonName ?? undefined,
          organization: certInfo?.subject.organization ?? undefined,
@@ -132,8 +136,10 @@ export async function signPdf(
          height,
       });
 
-      const baseX = detected?.x ?? 50;
-      const baseY = detected?.y ?? 700;
+      // Fallback: center horizontally, place near bottom of first page
+      const firstPage = doc.getPage(0);
+      const baseX = detected?.x ?? Math.max(10, (firstPage.width - width) / 2);
+      const baseY = detected?.y ?? Math.max(10, firstPage.height - height - 50);
 
       // Generate one appearance per page
       autoAppearances = [];

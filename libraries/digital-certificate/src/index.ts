@@ -18,6 +18,7 @@ export {
    getPemPair,
    isCertificateValid,
    parseCertificate,
+   parseCertificateFromDer,
 } from "./certificate.ts";
 
 // =============================================================================

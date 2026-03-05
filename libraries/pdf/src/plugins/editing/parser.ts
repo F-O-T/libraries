@@ -24,6 +24,8 @@ export type PdfStructure = {
 	pageNums: number[];
 	rootDictContent: string;
 	pageDictContents: string[];
+	/** Pre-built object position index for O(1) lookups */
+	objIndex: Map<number, number>;
 };
 
 /**
@@ -93,20 +95,52 @@ export function parseTrailer(pdfStr: string): {
 }
 
 /**
+ * Build an index mapping object numbers to their position (end of "N 0 obj" marker)
+ * in a single O(fileSize) pass. Callers look up objects in O(1) instead of
+ * scanning the entire string with a new regex per object.
+ */
+export function buildObjectIndex(pdfStr: string): Map<number, number> {
+	const index = new Map<number, number>();
+	const regex = /(?:^|\s)(\d+)\s+0\s+obj/gm;
+	let m: RegExpExecArray | null;
+	while ((m = regex.exec(pdfStr)) !== null) {
+		const objNum = parseInt(m[1]!, 10);
+		if (!index.has(objNum)) {
+			index.set(objNum, m.index! + m[0].length);
+		}
+	}
+	return index;
+}
+
+/**
  * Extract the dictionary content (between outer << and >>) for a given object number.
  * Returns the content string without the delimiters.
+ *
+ * When called with a pre-built objIndex, lookups are O(1).
+ * Falls back to a per-call regex search if no index is provided.
  */
 export function extractObjectDictContent(
 	pdfStr: string,
 	objNum: number,
+	objIndex?: Map<number, number>,
 ): string {
-	const objRegex = new RegExp(`(?:^|\\s)${objNum}\\s+0\\s+obj`, "m");
-	const match = pdfStr.match(objRegex);
-	if (!match || match.index === undefined) {
-		throw new Error(`Cannot find object ${objNum} in PDF`);
+	let searchStart: number;
+
+	if (objIndex) {
+		const pos = objIndex.get(objNum);
+		if (pos === undefined) {
+			throw new Error(`Cannot find object ${objNum} in PDF`);
+		}
+		searchStart = pos;
+	} else {
+		const objRegex = new RegExp(`(?:^|\\s)${objNum}\\s+0\\s+obj`, "m");
+		const match = pdfStr.match(objRegex);
+		if (!match || match.index === undefined) {
+			throw new Error(`Cannot find object ${objNum} in PDF`);
+		}
+		searchStart = match.index + match[0].length;
 	}
 
-	const searchStart = match.index + match[0].length;
 	const dictStart = pdfStr.indexOf("<<", searchStart);
 	if (dictStart === -1 || dictStart > searchStart + 200) {
 		throw new Error(`Cannot find dictionary start for object ${objNum}`);
@@ -134,6 +168,20 @@ export function findPageObjects(pdfStr: string, rootNum: number): number[] {
 	const pagesNum = parseInt(pagesMatch[1]!, 10);
 
 	return collectPageLeafs(pdfStr, pagesNum, new Set());
+}
+
+/** Index-accelerated version of findPageObjects */
+function findPageObjectsIndexed(
+	pdfStr: string,
+	rootNum: number,
+	objIndex: Map<number, number>,
+): number[] {
+	const rootContent = extractObjectDictContent(pdfStr, rootNum, objIndex);
+	const pagesMatch = rootContent.match(/\/Pages\s+(\d+)\s+\d+\s+R/);
+	if (!pagesMatch) throw new Error("Cannot find Pages ref in Root catalog");
+	const pagesNum = parseInt(pagesMatch[1]!, 10);
+
+	return collectPageLeafsIndexed(pdfStr, pagesNum, new Set(), objIndex);
 }
 
 /**
@@ -178,6 +226,42 @@ function collectPageLeafs(
 	return pages;
 }
 
+/** Index-accelerated version of collectPageLeafs */
+function collectPageLeafsIndexed(
+	pdfStr: string,
+	objNum: number,
+	visited: Set<number>,
+	objIndex: Map<number, number>,
+): number[] {
+	if (visited.has(objNum)) return [];
+	visited.add(objNum);
+
+	const content = extractObjectDictContent(pdfStr, objNum, objIndex);
+
+	const typeMatch = content.match(/\/Type\s+\/(\w+)/);
+	if (typeMatch?.[1] === "Page") {
+		return [objNum];
+	}
+
+	const kidsMatch = content.match(/\/Kids\s*\[([^\]]+)\]/);
+	if (!kidsMatch) {
+		return [objNum];
+	}
+
+	const refs: number[] = [];
+	const refRegex = /(\d+)\s+\d+\s+R/g;
+	let m: RegExpExecArray | null;
+	while ((m = refRegex.exec(kidsMatch[1]!)) !== null) {
+		refs.push(parseInt(m[1]!, 10));
+	}
+
+	const pages: number[] = [];
+	for (const ref of refs) {
+		pages.push(...collectPageLeafsIndexed(pdfStr, ref, visited, objIndex));
+	}
+	return pages;
+}
+
 /**
  * Get the MediaBox for a page object: [x1, y1, x2, y2].
  *
@@ -187,13 +271,14 @@ function collectPageLeafs(
 export function getMediaBox(
 	pdfStr: string,
 	pageObjNum: number,
+	objIndex?: Map<number, number>,
 ): [number, number, number, number] {
 	const visited = new Set<number>(); // guard against malformed circular refs
 	let objNum: number | null = pageObjNum;
 
 	while (objNum !== null && !visited.has(objNum)) {
 		visited.add(objNum);
-		const content = extractObjectDictContent(pdfStr, objNum);
+		const content = extractObjectDictContent(pdfStr, objNum, objIndex);
 
 		const mediaBoxMatch = content.match(
 			/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/,
@@ -224,14 +309,17 @@ export function parsePdfStructure(pdfStr: string): PdfStructure {
 	const xrefOffset = findStartXref(pdfStr);
 	const trailer = parseTrailer(pdfStr);
 
-	const rootContent = extractObjectDictContent(pdfStr, trailer.root);
+	// Build object position index once — all subsequent lookups are O(1)
+	const objIndex = buildObjectIndex(pdfStr);
+
+	const rootContent = extractObjectDictContent(pdfStr, trailer.root, objIndex);
 	const pagesMatch = rootContent.match(/\/Pages\s+(\d+)\s+\d+\s+R/);
 	if (!pagesMatch) throw new Error("Cannot find Pages ref in Root catalog");
 	const pagesNum = parseInt(pagesMatch[1]!, 10);
 
-	const pageNums = findPageObjects(pdfStr, trailer.root);
+	const pageNums = findPageObjectsIndexed(pdfStr, trailer.root, objIndex);
 	const pageDictContents = pageNums.map((pn) =>
-		extractObjectDictContent(pdfStr, pn),
+		extractObjectDictContent(pdfStr, pn, objIndex),
 	);
 
 	return {
@@ -243,6 +331,7 @@ export function parsePdfStructure(pdfStr: string): PdfStructure {
 		pageNums,
 		rootDictContent: rootContent,
 		pageDictContents,
+		objIndex,
 	};
 }
 
@@ -320,6 +409,7 @@ function findMatchingArrayEnd(str: string, startPos: number): number {
 export function parseResourcesDict(
 	pageContent: string,
 	pdfStr: string,
+	objIndex?: Map<number, number>,
 ): Record<string, string> {
 	const result: Record<string, string> = {};
 
@@ -342,7 +432,7 @@ export function parseResourcesDict(
 	const refMatch = pageContent.match(/\/Resources\s+(\d+)\s+\d+\s+R/);
 	if (refMatch) {
 		const objNum = parseInt(refMatch[1]!, 10);
-		const objContent = extractObjectDictContent(pdfStr, objNum);
+		const objContent = extractObjectDictContent(pdfStr, objNum, objIndex);
 		return parseResourceEntries(objContent);
 	}
 

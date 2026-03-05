@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.1] - 2026-03-04
+
+### Fixed
+- `drawText` now properly encodes Unicode characters to WinAnsiEncoding — fixes garbled accented characters (e.g. "Signatário" rendering as "Signat`jrio") by converting UTF-16 code points to WinAnsi byte values and declaring `/Encoding /WinAnsiEncoding` on the Helvetica font
+
+### Changed
+- `PDFReader.readObjects` uses `subarray()` (zero-copy views) instead of `slice()` — eliminates O(N × fileSize) buffer allocations when parsing objects
+- `PDFReader.findStartXRef` now only decodes the last 256 bytes of the PDF instead of the entire file
+- `parsePdfStructure` builds an object position index in a single O(fileSize) pass — subsequent object lookups are O(1) instead of scanning the entire string with a per-object regex; `loadPdf` is ~100x faster on 100-page PDFs (417ms → 4ms)
+- `getMediaBox` and `parseResourcesDict` accept an optional pre-built object index for O(1) lookups
+
 ## [0.4.0] - 2026-03-04
 
 ### Added

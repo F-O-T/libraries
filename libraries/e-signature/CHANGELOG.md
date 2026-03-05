@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-04
+
+### Fixed
+- Signature appearance "Signatário" text now renders correctly instead of garbled "Signat`jrio" — fixed by WinAnsiEncoding support in `@f-o-t/pdf`
+- Auto-appearance width increased from 350pt to 420pt to prevent text clipping
+
+### Changed
+- Signing no longer parses the P12 certificate twice — uses `parseCertificateFromDer` to build display info from the already-extracted DER bytes, eliminating ~90ms of redundant PBKDF2 key derivation
+- Bump `@f-o-t/pdf` dependency to `^0.4.1` (100x faster `loadPdf` via object position indexing)
+- Bump `@f-o-t/digital-certificate` dependency to `^2.3.1`
+- Full auto-sign on a 100-page 571KB PDF: **732ms → 173ms** (4.2x faster)
+
 ## [1.4.1] - 2026-03-04
 
 ### Fixed

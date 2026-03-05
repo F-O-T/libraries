@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.3.1] - 2026-03-04
+
+### Added
+- `parseCertificateFromDer(certDer, keyDer, pfx, password)` — builds `CertificateInfo` from already-extracted DER bytes, skipping the expensive PBKDF2 key derivation in `parsePkcs12`; use when you already have cert/key DER from a prior P12 parse
+
 ## [2.3.0] - 2026-02-19
 
 ### Added

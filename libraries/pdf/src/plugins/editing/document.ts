@@ -134,10 +134,11 @@ export class PdfDocumentImpl implements PdfDocument {
 		this.nextObjNum = this.structure.size;
 		this.fontObjNum = this.nextObjNum++;
 
-		// Build page objects
+		// Build page objects (reuse pre-built object index for O(1) lookups)
+		const { objIndex } = this.structure;
 		for (let i = 0; i < this.structure.pageNums.length; i++) {
 			const pageNum = this.structure.pageNums[i]!;
-			const mediaBox = getMediaBox(this.pdfStr, pageNum);
+			const mediaBox = getMediaBox(this.pdfStr, pageNum, objIndex);
 			const width = mediaBox[2] - mediaBox[0];
 			const height = mediaBox[3] - mediaBox[1];
 			const dictContent = this.structure.pageDictContents[i]!;
@@ -210,7 +211,7 @@ export class PdfDocumentImpl implements PdfDocument {
 		if (anyDirty || this.embeddedImages.length > 0) {
 			objects.push({
 				objNum: this.fontObjNum,
-				content: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+				content: "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
 			});
 		}
 
@@ -329,7 +330,7 @@ export class PdfDocumentImpl implements PdfDocument {
 			}
 
 			// Parse existing Resources from page
-			const existingResources = parseResourcesDict(pageContent, this.pdfStr);
+			const existingResources = parseResourcesDict(pageContent, this.pdfStr, this.structure.objIndex);
 
 			// Merge existing with new
 			const mergedResources = mergeResourcesDicts(existingResources, newResources);
