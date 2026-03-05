@@ -122,8 +122,8 @@ export async function signPdf(
    let autoAppearances: SignatureAppearance[] | undefined;
 
    if (opts.appearance === "auto") {
-      const width = 340;
-      const height = 95;
+      const width = 260;
+      const height = 75;
 
       // Use the already-loaded doc for page dimensions to avoid a second parse.
       // detectSigningPosition still does its own lightweight parse for text scanning,

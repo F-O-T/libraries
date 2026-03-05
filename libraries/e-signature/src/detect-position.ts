@@ -99,7 +99,7 @@ export function detectSigningPosition(
    // No signals: fallback to bottom of last page, centered horizontally
    if (signals.length === 0) {
       const lastPage = pages[pages.length - 1]!;
-      const sigWidth = options.width ?? 340;
+      const sigWidth = options.width ?? 260;
       return {
          page: pages.length - 1,
          x: Math.max(10, (lastPage.size.width - sigWidth) / 2),

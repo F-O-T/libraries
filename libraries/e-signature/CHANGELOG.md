@@ -5,12 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2026-03-05
+
+### Changed
+- "validar.iti.gov.br" link moved above the stamp (was below, overlapping page content)
+- Smaller stamp: auto dimensions reduced from 340×95 to 260×75 points
+- Smaller QR code: max size reduced from 65 to 50 points with tighter padding (10→5pt)
+- Smaller fonts: header 7→6pt, info 6→5pt, line height 8→7pt
+
 ## [1.7.2] - 2026-03-05
 
 ### Changed
 - Removed silver border rectangle around signature appearance
-- "validar.iti.gov.br" link text is now a clickable hyperlink pointing to `https://validar.iti.gov.br`
-- Reduced gap between signature box and validation link from 10pt to 4pt
+- "validar.iti.gov.br" is now a clickable hyperlink pointing to `https://validar.iti.gov.br`
 - Bump `@f-o-t/pdf` dependency to `^0.5.2` (new `drawLink` API)
 
 ### Fixed

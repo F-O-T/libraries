@@ -56,11 +56,11 @@ export function drawSignatureAppearance(
             return doc.embedPng(qrPng);
          })();
 
-      qrSize = Math.min(65, height - 15);
+      qrSize = Math.min(50, height - 15);
 
       page.drawImage(qrImage, {
-         x: x + 10,
-         y: y + 10,
+         x: x + 5,
+         y: y + 5,
          width: qrSize,
          height: qrSize,
       });
@@ -73,16 +73,16 @@ export function drawSignatureAppearance(
          y,
          width,
          height,
-         qrOffset: qrSize > 0 ? qrSize + 20 : 10,
+         qrOffset: qrSize > 0 ? qrSize + 12 : 8,
       });
    }
 
-   // Reference link below the box
+   // Reference link above the box
    const linkText = "validar.iti.gov.br";
    const linkX = x + width / 2 - linkText.length * 2;
    page.drawLink(linkText, VALIDATION_URL, {
       x: linkX,
-      y: y - 4,
+      y: y + height + 3,
       size: 5,
       color: "#888888",
    });
@@ -103,18 +103,18 @@ function drawCertInfo(
    },
 ): void {
    const textX = opts.x + opts.qrOffset;
-   let textY = opts.y + opts.height - 14;
-   const fontSize = 6;
-   const lineHeight = 8;
+   let textY = opts.y + opts.height - 11;
+   const fontSize = 5;
+   const lineHeight = 7;
 
    // Green header
    page.drawText("ASSINADO DIGITALMENTE", {
       x: textX,
       y: textY,
-      size: 7,
+      size: 6,
       color: "#008000",
    });
-   textY -= lineHeight * 1.3;
+   textY -= lineHeight * 1.2;
 
    if (certInfo) {
       // Signer name — strip trailing :CNPJ or :CPF suffix (shown separately below)
