@@ -10,5 +10,5 @@ export default defineFotConfig({
       "@f-o-t/digital-certificate",
       "react",
    ],
-   plugins: ["react"],
+   plugins: ["react", "worker", "worker-entry"],
 });
