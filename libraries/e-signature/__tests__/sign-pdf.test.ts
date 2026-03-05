@@ -295,6 +295,30 @@ describe("signPdf", () => {
       expect(pdfStr).toContain("validar.iti.gov.br");
    });
 
+   it("appearance auto stamps every page of a multi-page PDF", async () => {
+      const doc = new PDFDocument();
+      doc.addPage({ width: 612, height: 792 });
+      doc.addPage({ width: 612, height: 792 });
+      doc.addPage({ width: 612, height: 792 });
+      const pdf = doc.save();
+      const p12 = await loadP12();
+
+      const signed = await signPdf(pdf, {
+         certificate: { p12, password: "test123" },
+         appearance: "auto",
+      });
+
+      // Verify signed PDF is larger than original (appearances were drawn)
+      expect(signed.length).toBeGreaterThan(pdf.length);
+
+      // Load the signed PDF and verify all 3 pages were modified
+      // (each page dict should have our font resource /F1)
+      const text = new TextDecoder("latin1").decode(signed);
+      const f1Matches = text.match(/\/F1\s+\d+\s+\d+\s+R/g);
+      // At least 3 /F1 refs — one per page that got a signature appearance
+      expect(f1Matches!.length).toBeGreaterThanOrEqual(3);
+   });
+
    it("applies both appearance and appearances when both are given", async () => {
       const multiDoc = new PDFDocument();
       multiDoc.addPage({ width: 612, height: 792 });
