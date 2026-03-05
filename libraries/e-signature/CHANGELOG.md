@@ -10,12 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Restore `"files"`, `dependencies`, `peerDependencies`, and `description` to package.json — fields were lost during `fot generate` causing empty npm publish in 1.6.0
+- Remove `plugins/worker-entry` — bundled chunk imports don't resolve in Worker context; consumer now creates a worker file in their own project (bundler handles imports correctly)
 
 ## [1.6.0] - 2026-03-05
 
 ### Added
 
-- Web Worker signing via `signPdfInWorker()` — runs signing off the main thread to prevent browser freezes (`plugins/worker` + `plugins/worker-entry`)
+- Web Worker signing via `signPdfInWorker()` — runs signing off the main thread to prevent browser freezes (`plugins/worker`)
 
 ## [1.5.0] - 2026-03-04
 

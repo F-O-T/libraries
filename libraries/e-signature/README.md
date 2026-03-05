@@ -72,11 +72,29 @@ function SignForm() {
 
 Runs signing off the main thread to prevent browser freezes.
 
+**Step 1.** Create a worker file in your project (e.g. `workers/sign-pdf.ts`):
+
+```ts
+import { signPdf } from "@f-o-t/e-signature";
+
+self.onmessage = async (e: MessageEvent) => {
+  const { id, pdf, options } = e.data;
+  try {
+    const result = await signPdf(pdf, options);
+    self.postMessage({ id, ok: true, result }, { transfer: [result.buffer] });
+  } catch (err) {
+    self.postMessage({ id, ok: false, error: err instanceof Error ? err.message : String(err) });
+  }
+};
+```
+
+**Step 2.** Use `signPdfInWorker` from your component:
+
 ```ts
 import { signPdfInWorker } from "@f-o-t/e-signature/plugins/worker";
 
 const worker = new Worker(
-  new URL("@f-o-t/e-signature/plugins/worker-entry", import.meta.url),
+  new URL("../workers/sign-pdf", import.meta.url),
   { type: "module" },
 );
 

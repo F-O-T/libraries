@@ -23,12 +23,6 @@
          "module": "./dist/plugins/worker/index.js",
          "import": "./dist/plugins/worker/index.js",
          "default": "./dist/plugins/worker/index.js"
-      },
-      "./plugins/worker-entry": {
-         "types": "./dist/plugins/worker-entry/index.d.ts",
-         "module": "./dist/plugins/worker-entry/index.js",
-         "import": "./dist/plugins/worker-entry/index.js",
-         "default": "./dist/plugins/worker-entry/index.js"
       }
    },
    "files": [
