@@ -32,6 +32,17 @@ import { createLexer, createParser, createReader } from "@f-o-t/pdf/plugins/pars
 
 Load existing PDFs, modify them, and save with incremental updates. Also supports creating signature placeholders for digital signing workflows.
 
+#### `countPdfPages(data: Uint8Array): number`
+
+Count the number of pages in a PDF without fully loading it for editing.
+
+```ts
+import { countPdfPages } from "@f-o-t/pdf";
+// or: import { countPdfPages } from "@f-o-t/pdf/plugins/editing";
+
+const pages = countPdfPages(pdfBytes);
+```
+
 #### `loadPdf(data: Uint8Array): PdfDocument`
 
 Load an existing PDF for editing. Returns a `PdfDocument` that can be modified and saved.

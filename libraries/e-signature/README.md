@@ -72,12 +72,12 @@ function SignForm() {
 
 ### Using `appearance: "auto"`
 
-Pass `appearance: "auto"` to let `signPdf` automatically detect where to place the visual signature based on the signer's certificate information:
+Pass `appearance: "auto"` to let `signPdf` automatically detect where to place the visual signature based on the signer's certificate information. **By default, auto mode stamps every page** of the PDF:
 
 ```ts
 const signed = await signPdf(pdfBytes, {
   certificate: { p12, password: "secret" },
-  appearance: "auto", // auto-detect signing position
+  appearance: "auto", // stamps all pages automatically
 });
 ```
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2026-03-04
+
+### Added
+- `countPdfPages(data)` — lightweight page count without full PDF loading, exported from both main entry and `plugins/editing`
+
 ## [0.3.10] - 2026-03-04
 
 ### Fixed
