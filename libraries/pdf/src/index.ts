@@ -5,3 +5,4 @@ export * from "./plugins/generation/index.ts";
 export * from "./plugins/parsing/index.ts";
 export * from "./schemas.ts";
 export * from "./types.ts";
+export { countPdfPages } from "./plugins/editing/index.ts";
