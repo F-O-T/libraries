@@ -60,7 +60,7 @@ export function drawSignatureAppearance(
 
       page.drawImage(qrImage, {
          x: x + 5,
-         y: y + (height - qrSize) / 2,
+         y: y + height - 11 - qrSize,
          width: qrSize,
          height: qrSize,
       });
