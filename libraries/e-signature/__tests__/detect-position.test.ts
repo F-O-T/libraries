@@ -35,7 +35,8 @@ describe("detectSigningPosition", () => {
       const result = detectSigningPosition(pdf);
       expect(result).not.toBeNull();
       expect(result?.page).toBe(0);
-      expect(result?.x).toBe(50);
+      // Centered horizontally on the parsed page width
+      expect(result?.x).toBe(127.5);
       expect(result?.y).toBeGreaterThan(500);
       expect(result?.confidence).toBe(0.1);
    });

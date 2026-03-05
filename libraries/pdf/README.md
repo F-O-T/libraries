@@ -78,6 +78,7 @@ type PdfPage = {
   drawText(text: string, options: TextOptions): void;
   drawRectangle(options: RectOptions): void;
   drawImage(image: PdfImage, options: ImageOptions): void;
+  drawLink(text: string, url: string, options: TextOptions): void;
 };
 ```
 
@@ -101,6 +102,9 @@ page.drawRectangle({
   borderColor: "#333333",
   borderWidth: 1,
 });
+
+// Draw a clickable hyperlink
+page.drawLink("Visit site", "https://example.com", { x: 50, y: 720, size: 10, color: "#0000FF" });
 
 // Embed and draw a PNG image
 const pngBytes = await Bun.file("logo.png").bytes();

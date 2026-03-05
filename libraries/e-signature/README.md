@@ -10,6 +10,8 @@ bun add @f-o-t/e-signature
 
 ## Features
 
+- Visual signature appearances with clickable validation link (`validar.iti.gov.br`)
+- Automatic horizontal centering of signature stamp on the page
 - Visual signature appearances preserve all original page fonts and resources
 - Works with PDFs from @react-pdf/renderer with CIDFont fonts
 - PAdES-BES and ICP-Brasil compliant signatures

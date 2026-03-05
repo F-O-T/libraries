@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.1] - 2026-03-05
+## [0.5.2] - 2026-03-05
 
 ### Added
 - `drawLink(text, url, options)` method on `PdfPage` — draws text as a clickable URI hyperlink by creating a `/Link` annotation with the given URL; the annotation is automatically serialized into the page's `/Annots` array during incremental update
