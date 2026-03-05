@@ -23,6 +23,7 @@ export interface PackageJson {
    main: string;
    types: string;
    exports: Record<string, PackageExport>;
+   files: string[];
    scripts: Record<string, string>;
    dependencies?: Record<string, string>;
    devDependencies: Record<string, string>;
@@ -78,6 +79,7 @@ export function generatePackageJson(
       main: "./dist/index.js",
       types: "./dist/index.d.ts",
       exports,
+      files: ["dist"],
       scripts: {
          build: "fot build",
          test: "fot test",
