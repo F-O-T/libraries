@@ -179,7 +179,7 @@
     },
     "libraries/e-signature": {
       "name": "@f-o-t/e-signature",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "dependencies": {
         "@f-o-t/asn1": "^1.0.0",
         "@f-o-t/crypto": "^1.3.0",
