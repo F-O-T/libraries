@@ -13,8 +13,8 @@ const fixturesDir = join(import.meta.dir, "fixtures");
 const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
 const testPassword = "test1234";
 
-describe("mTLS utilities", () => {
-   const cert = parseCertificate(testPfx, testPassword);
+describe("mTLS utilities", async () => {
+   const cert = await parseCertificate(testPfx, testPassword);
 
    describe("createTlsContext", () => {
       it("creates a TLS secure context", () => {

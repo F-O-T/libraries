@@ -28,11 +28,11 @@ import { extractCnpj, extractCpf, parseDistinguishedName } from "./utils.ts";
  * @returns Parsed certificate information
  * @throws {Error} If the PFX cannot be parsed or the password is wrong
  */
-export function parseCertificate(
+export async function parseCertificate(
    pfx: Uint8Array,
    password: string,
-): CertificateInfo {
-   const { certPem, keyPem } = extractPemFromPfx(pfx, password);
+): Promise<CertificateInfo> {
+   const { certPem, keyPem } = await extractPemFromPfx(pfx, password);
 
    // Parse the X.509 certificate using pure JavaScript (no OpenSSL)
    const x509 = parseX509Certificate(certPem);
@@ -128,13 +128,13 @@ export function getPemPair(cert: CertificateInfo): {
 // PFX Extraction via @f-o-t/crypto
 // =============================================================================
 
-function extractPemFromPfx(
+async function extractPemFromPfx(
    pfx: Uint8Array,
    password: string,
-): { certPem: string; keyPem: string } {
+): Promise<{ certPem: string; keyPem: string }> {
    let result;
    try {
-      result = parsePkcs12(pfx, password);
+      result = await parsePkcs12(pfx, password);
    } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       throw new Error(

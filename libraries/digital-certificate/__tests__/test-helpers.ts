@@ -37,9 +37,9 @@ export interface LoadCertificateOptions {
  *   password: process.env.REAL_CERT_PASSWORD || 'your-password'
  * });
  */
-export function loadCertificate(
+export async function loadCertificate(
 	options: LoadCertificateOptions = {},
-): CertificateInfo {
+): Promise<CertificateInfo> {
 	const { useReal = false, password, customPath } = options;
 
 	// Custom path provided
@@ -106,9 +106,9 @@ export function loadCertificate(
  * // Load real certificate P12
  * const { p12, password, name } = loadCertificateP12({ useReal: true });
  */
-export function loadCertificateP12(
+export async function loadCertificateP12(
 	options: LoadCertificateOptions = {},
-): { p12: Buffer; password?: string; name?: string } {
+): Promise<{ p12: Buffer; password?: string; name?: string }> {
 	const { useReal = false, password, customPath } = options;
 
 	// Custom path provided
@@ -139,7 +139,7 @@ export function loadCertificateP12(
 		
 		// Try to get the certificate name from parsed cert
 		try {
-			const cert = loadCertificate({ useReal: true, password: certPassword });
+			const cert = await loadCertificate({ useReal: true, password: certPassword });
 			return { p12, password: certPassword, name: cert.subject.commonName };
 		} catch {
 			return { p12, password: certPassword };

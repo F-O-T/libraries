@@ -49,6 +49,34 @@ function benchmark(
    return { avgMs, iterations, maxMs, minMs, name, opsPerSec, totalMs };
 }
 
+async function benchmarkAsync(
+   name: string,
+   fn: () => Promise<void>,
+   iterations = 100,
+): Promise<BenchmarkResult> {
+   const times: number[] = [];
+
+   // Warmup
+   for (let i = 0; i < 5; i++) {
+      await fn();
+   }
+
+   for (let i = 0; i < iterations; i++) {
+      const start = performance.now();
+      await fn();
+      const end = performance.now();
+      times.push(end - start);
+   }
+
+   const totalMs = times.reduce((a, b) => a + b, 0);
+   const avgMs = totalMs / iterations;
+   const minMs = Math.min(...times);
+   const maxMs = Math.max(...times);
+   const opsPerSec = 1000 / avgMs;
+
+   return { avgMs, iterations, maxMs, minMs, name, opsPerSec, totalMs };
+}
+
 function formatResult(result: BenchmarkResult): string {
    return `${result.name}: avg=${result.avgMs.toFixed(3)}ms, min=${result.minMs.toFixed(3)}ms, max=${result.maxMs.toFixed(3)}ms, ops/s=${result.opsPerSec.toFixed(2)}`;
 }
@@ -56,13 +84,13 @@ function formatResult(result: BenchmarkResult): string {
 const fixturesDir = join(import.meta.dir, "fixtures");
 const testPassword = "test1234";
 
-test("performance: parseCertificate (P12 → CertificateInfo)", () => {
+test("performance: parseCertificate (P12 → CertificateInfo)", async () => {
    const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
 
-   const result = benchmark(
+   const result = await benchmarkAsync(
       "parse-certificate",
-      () => {
-         parseCertificate(testPfx, testPassword);
+      async () => {
+         await parseCertificate(testPfx, testPassword);
       },
       20,
    );
@@ -75,13 +103,13 @@ test("performance: parseCertificate (P12 → CertificateInfo)", () => {
    expect(result.avgMs).toBeLessThan(200);
 
    // Also assert that cert.subject.commonName is defined
-   const cert = parseCertificate(testPfx, testPassword);
+   const cert = await parseCertificate(testPfx, testPassword);
    expect(cert.subject.commonName).toBeDefined();
 });
 
-test("performance: getPemPair from P12", () => {
+test("performance: getPemPair from P12", async () => {
    const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
-   const cert = parseCertificate(testPfx, testPassword);
+   const cert = await parseCertificate(testPfx, testPassword);
 
    const result = benchmark(
       "get-pem-pair",
@@ -95,9 +123,9 @@ test("performance: getPemPair from P12", () => {
    expect(result.avgMs).toBeLessThan(100);
 });
 
-test("performance: isCertificateValid (pure computation)", () => {
+test("performance: isCertificateValid (pure computation)", async () => {
    const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
-   const cert = parseCertificate(testPfx, testPassword);
+   const cert = await parseCertificate(testPfx, testPassword);
 
    const result = benchmark(
       "is-certificate-valid",
@@ -111,9 +139,9 @@ test("performance: isCertificateValid (pure computation)", () => {
    expect(result.avgMs).toBeLessThan(1);
 });
 
-test("performance: daysUntilExpiry calculation", () => {
+test("performance: daysUntilExpiry calculation", async () => {
    const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
-   const cert = parseCertificate(testPfx, testPassword);
+   const cert = await parseCertificate(testPfx, testPassword);
 
    const result = benchmark(
       "days-until-expiry",

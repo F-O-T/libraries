@@ -50,7 +50,7 @@ const password = "your-certificate-password";
 // const pfxBuffer = new Uint8Array(await file.arrayBuffer());
 
 // Parse certificate
-const cert = parseCertificate(pfxBuffer, password);
+const cert = await parseCertificate(pfxBuffer, password);
 
 // Check validity
 console.log("Valid:", isCertificateValid(cert));
@@ -75,7 +75,7 @@ Parse .pfx/.p12 certificate files:
 ```typescript
 import { parseCertificate } from "@f-o-t/digital-certificate";
 
-const cert = parseCertificate(pfxBuffer, password);
+const cert = await parseCertificate(pfxBuffer, password);
 
 // Certificate structure
 console.log(cert.serialNumber);        // Certificate serial number
@@ -315,7 +315,7 @@ import { signXml } from "@f-o-t/digital-certificate/plugins/xml-signer";
 import { parseXml } from "@f-o-t/xml";
 
 // Parse certificate
-const cert = parseCertificate(pfxBuffer, password);
+const cert = await parseCertificate(pfxBuffer, password);
 
 // Parse XML document
 const doc = parseXml(`
@@ -371,7 +371,7 @@ import { createMtlsContext, createMtlsAgent } from "@f-o-t/digital-certificate/p
 import https from "https";
 
 // Parse certificate
-const cert = parseCertificate(pfxBuffer, password);
+const cert = await parseCertificate(pfxBuffer, password);
 
 // Create mTLS context
 const context = createMtlsContext(cert);
@@ -424,7 +424,7 @@ const agent = new https.Agent({
 import { parseCertificate, isCertificateValid } from "@f-o-t/digital-certificate";
 
 // Parse certificate
-const cert = parseCertificate(pfxBuffer, password);
+const cert = await parseCertificate(pfxBuffer, password);
 
 // Basic validation
 if (!isCertificateValid(cert)) {
@@ -454,7 +454,7 @@ const certificates = [
   { file: "cert2.pfx", password: "pass2" }
 ].map(({ file, password }) => {
   const buffer = readFileSync(file);
-  return parseCertificate(buffer, password);
+  return await parseCertificate(buffer, password);
 });
 
 // Find valid certificates
@@ -522,7 +522,7 @@ if (!pfxPath || !password) {
   throw new Error("Certificate configuration missing");
 }
 
-const cert = parseCertificate(
+const cert = await parseCertificate(
   readFileSync(pfxPath),
   password
 );
@@ -534,9 +534,9 @@ const cert = parseCertificate(
 // Parse once, reuse many times
 let cachedCert: CertificateInfo | null = null;
 
-function getCertificate(): CertificateInfo {
+async function getCertificate(): Promise<CertificateInfo> {
   if (!cachedCert) {
-    cachedCert = parseCertificate(pfxBuffer, password);
+    cachedCert = await parseCertificate(pfxBuffer, password);
   }
 
   // Verify still valid
@@ -575,7 +575,7 @@ setInterval(() => checkCertificateExpiry(cert), 24 * 60 * 60 * 1000);
 
 ```typescript
 try {
-  const cert = parseCertificate(pfxBuffer, password);
+  const cert = await parseCertificate(pfxBuffer, password);
 } catch (error) {
   if (error instanceof Error) {
     if (error.message.includes("password")) {
@@ -618,7 +618,7 @@ function safeSignXml(doc: XmlDocument, cert: CertificateInfo) {
 
 ```typescript
 try {
-  const cert = parseCertificate(pfxBuffer, password);
+  const cert = await parseCertificate(pfxBuffer, password);
 
   if (!isCertificateValid(cert)) {
     throw new Error(`Certificate expired on ${cert.validity.notAfter}`);
@@ -657,9 +657,9 @@ Measured on modern hardware with Bun runtime (pure-TS implementation, no OpenSSL
 ```typescript
 let cachedCert: CertificateInfo | null = null;
 
-function getCertificate(): CertificateInfo {
+async function getCertificate(): Promise<CertificateInfo> {
   if (!cachedCert) {
-    cachedCert = parseCertificate(pfxBuffer, password); // ~30–40ms, once
+    cachedCert = await parseCertificate(pfxBuffer, password); // ~30–40ms, once
   }
   if (!isCertificateValid(cachedCert)) throw new Error("Certificate expired");
   return cachedCert;

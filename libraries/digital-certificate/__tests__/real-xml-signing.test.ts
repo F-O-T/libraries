@@ -16,8 +16,8 @@ const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
   </Data>
 </Document>`;
 
-describe.skipIf(!hasRealCertificate())("Real Certificate - XML Signing", () => {
-	const cert = loadCertificate({ useReal: true });
+describe.skipIf(!hasRealCertificate())("Real Certificate - XML Signing", async () => {
+	const cert = await loadCertificate({ useReal: true });
 
 	it("signs XML document with real certificate", () => {
 		const signed = signXml(sampleXml, {

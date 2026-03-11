@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.4.0] - 2026-03-11
+
+### Changed
+- **BREAKING**: `parseCertificate` is now `async` and returns `Promise<CertificateInfo>` — callers must `await` the result
+- This fixes certificate parsing silently failing since `@f-o-t/crypto@1.3.0` made `parsePkcs12` async; the unawaited Promise caused all PFX parsing to fail with "invalid certificate file"
+
+### Fixed
+- Certificate upload broken for all users since `@f-o-t/crypto@1.3.0` — `parsePkcs12()` was called without `await`, resulting in a Promise object instead of the parsed result
+
 ## [2.3.1] - 2026-03-04
 
 ### Added

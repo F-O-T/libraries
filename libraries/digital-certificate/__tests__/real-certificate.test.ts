@@ -9,8 +9,8 @@ import { describe, expect, it } from "bun:test";
 import { hasRealCertificate, loadCertificate } from "./test-helpers.ts";
 
 describe.skipIf(!hasRealCertificate())("Real Certificate Tests", () => {
-	it("loads and parses real certificate", () => {
-		const cert = loadCertificate({ useReal: true, password: "12345678" });
+	it("loads and parses real certificate", async () => {
+		const cert = await loadCertificate({ useReal: true, password: "12345678" });
 
 		expect(cert).toBeDefined();
 		expect(cert.serialNumber).toBeDefined();
@@ -18,8 +18,8 @@ describe.skipIf(!hasRealCertificate())("Real Certificate Tests", () => {
 		expect(cert.keyPem).toContain("-----BEGIN PRIVATE KEY-----");
 	});
 
-	it("validates real certificate is valid", () => {
-		const cert = loadCertificate({ useReal: true });
+	it("validates real certificate is valid", async () => {
+		const cert = await loadCertificate({ useReal: true });
 
 		// Check if certificate is currently valid
 		console.log("Certificate validity:");
@@ -32,8 +32,8 @@ describe.skipIf(!hasRealCertificate())("Real Certificate Tests", () => {
 		expect(cert.validity.notAfter).toBeInstanceOf(Date);
 	});
 
-	it("extracts Brazilian fields from real certificate", () => {
-		const cert = loadCertificate({ useReal: true });
+	it("extracts Brazilian fields from real certificate", async () => {
+		const cert = await loadCertificate({ useReal: true });
 
 		console.log("Brazilian fields:");
 		console.log("  CNPJ:", cert.brazilian.cnpj);
@@ -44,8 +44,8 @@ describe.skipIf(!hasRealCertificate())("Real Certificate Tests", () => {
 		expect(hasBrazilianField).toBeTruthy();
 	});
 
-	it("displays certificate information", () => {
-		const cert = loadCertificate({ useReal: true });
+	it("displays certificate information", async () => {
+		const cert = await loadCertificate({ useReal: true });
 
 		console.log("\n=== Real Certificate Information ===");
 		console.log("Serial Number:", cert.serialNumber);
