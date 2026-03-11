@@ -28,7 +28,7 @@ export function createTlsContext(
    const opts = mtlsOptionsSchema.parse(options ?? {});
 
    const contextOptions: tls.SecureContextOptions = {
-      pfx: certificate.pfxBuffer,
+      pfx: Buffer.from(certificate.pfxBuffer),
       passphrase: certificate.pfxPassword,
    };
 
@@ -56,7 +56,7 @@ export function createHttpsAgent(
    const opts = mtlsOptionsSchema.parse(options ?? {});
 
    const agentOptions: https.AgentOptions = {
-      pfx: certificate.pfxBuffer,
+      pfx: Buffer.from(certificate.pfxBuffer),
       passphrase: certificate.pfxPassword,
       rejectUnauthorized: opts.rejectUnauthorized,
    };

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.2] - 2026-03-11
+
+### Fixed
+- Fix mTLS plugin build: wrap `Uint8Array` pfxBuffer with `Buffer.from()` for Node.js `tls.SecureContextOptions` and `https.AgentOptions` type compatibility
+- Fix CI build failure caused by TS2322 error in `plugins/mtls/index.ts`
+
 ## [2.4.1] - 2026-03-11
 
 ### Added
