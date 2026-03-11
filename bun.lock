@@ -164,7 +164,7 @@
     },
     "libraries/digital-certificate": {
       "name": "@f-o-t/digital-certificate",
-      "version": "2.4.2",
+      "version": "2.4.3",
       "dependencies": {
         "@f-o-t/asn1": "^1.0.0",
         "@f-o-t/crypto": "^1.2.0",
