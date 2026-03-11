@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.4.1] - 2026-03-11
+
+### Added
+- `CertificateParseError` class with structured `code` field for programmatic error handling
+- `CertificateErrorCode` type — `EMPTY_FILE`, `INVALID_FORMAT`, `WRONG_PASSWORD`, `UNSUPPORTED_ALGORITHM`, `NO_CERTIFICATE`, `NO_PRIVATE_KEY`, `CORRUPTED_FILE`, `X509_PARSE_FAILED`, `PEM_EXTRACTION_FAILED`, `UNKNOWN`
+- Input validation: empty file detection, file type sniffing (rejects PDFs, images, ZIPs, PEM text with helpful messages)
+- Original low-level error preserved as `cause` on all `CertificateParseError` instances
+
+### Changed
+- All `parseCertificate` errors now throw `CertificateParseError` instead of generic `Error` — consumers can `switch` on `error.code` for specific handling
+- Error messages are now user-facing and actionable (e.g. "Wrong certificate password. Please verify and try again." instead of "PKCS#12 MAC verification failed (wrong password?)")
+
 ## [2.4.0] - 2026-03-11
 
 ### Changed

@@ -7,6 +7,7 @@
 
 import { parsePkcs12, derToPem } from "@f-o-t/crypto";
 import { parseX509Certificate } from "./x509.ts";
+import { CertificateParseError, classifyPkcs12Error } from "./errors.ts";
 import type {
    BrazilianFields,
    CertificateInfo,
@@ -26,16 +27,43 @@ import { extractCnpj, extractCpf, parseDistinguishedName } from "./utils.ts";
  * @param pfx - The PFX/P12 file contents as a Uint8Array
  * @param password - The password to decrypt the PFX file
  * @returns Parsed certificate information
- * @throws {Error} If the PFX cannot be parsed or the password is wrong
+ * @throws {CertificateParseError} With a structured `code` field for programmatic handling
  */
 export async function parseCertificate(
    pfx: Uint8Array,
    password: string,
 ): Promise<CertificateInfo> {
+   // --- Input validation ---
+   if (!pfx || pfx.length === 0) {
+      throw new CertificateParseError(
+         "EMPTY_FILE",
+         "Certificate file is empty (0 bytes). Ensure the file was uploaded correctly.",
+      );
+   }
+
+   if (!isLikelyPkcs12(pfx)) {
+      const detectedType = detectFileType(pfx);
+      throw new CertificateParseError(
+         "INVALID_FORMAT",
+         `The file does not appear to be a PKCS#12 (.pfx/.p12) certificate${detectedType ? ` (detected: ${detectedType})` : ""}. Expected a .pfx or .p12 file.`,
+      );
+   }
+
+   // --- PFX extraction ---
    const { certPem, keyPem } = await extractPemFromPfx(pfx, password);
 
-   // Parse the X.509 certificate using pure JavaScript (no OpenSSL)
-   const x509 = parseX509Certificate(certPem);
+   // --- X.509 parsing ---
+   let x509;
+   try {
+      x509 = parseX509Certificate(certPem);
+   } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      throw new CertificateParseError(
+         "X509_PARSE_FAILED",
+         `Certificate was extracted from PFX but X.509 parsing failed: ${message}`,
+         { cause: e },
+      );
+   }
 
    const isValid = checkValidity(x509.validity);
    const brazilian = extractBrazilianFields(
@@ -137,17 +165,17 @@ async function extractPemFromPfx(
       result = await parsePkcs12(pfx, password);
    } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
-      throw new Error(
-         `Failed to parse PFX: ${message}. Ensure the file is a valid PKCS#12 archive and the password is correct.`,
-      );
+      const { code, userMessage } = classifyPkcs12Error(message);
+      throw new CertificateParseError(code, userMessage, { cause: e });
    }
 
    const certPem = derToPem(result.certificate, "CERTIFICATE");
    const keyPem = derToPem(result.privateKey, "PRIVATE KEY");
 
    if (!certPem.includes("-----BEGIN CERTIFICATE-----")) {
-      throw new Error(
-         "Failed to extract certificate from PFX. Ensure the file is a valid PKCS#12 archive and the password is correct.",
+      throw new CertificateParseError(
+         "PEM_EXTRACTION_FAILED",
+         "Failed to extract certificate PEM from PFX. The file may be corrupted.",
       );
    }
 
@@ -155,8 +183,9 @@ async function extractPemFromPfx(
       !keyPem.includes("-----BEGIN PRIVATE KEY-----") &&
       !keyPem.includes("-----BEGIN RSA PRIVATE KEY-----")
    ) {
-      throw new Error(
-         "Failed to extract private key from PFX. Ensure the file is a valid PKCS#12 archive and the password is correct.",
+      throw new CertificateParseError(
+         "PEM_EXTRACTION_FAILED",
+         "Failed to extract private key PEM from PFX. The file may be corrupted.",
       );
    }
 
@@ -185,4 +214,51 @@ function extractBrazilianFields(
    }
 
    return { cnpj, cpf };
+}
+
+// =============================================================================
+// Input Validation Helpers
+// =============================================================================
+
+/**
+ * Quick check: PKCS#12 files start with ASN.1 SEQUENCE tag (0x30).
+ * This catches obviously wrong file types (images, text, zip, etc.)
+ * before we attempt expensive crypto operations.
+ */
+function isLikelyPkcs12(data: Uint8Array): boolean {
+   return data.length >= 4 && data[0] === 0x30;
+}
+
+/**
+ * Best-effort file type detection for better error messages.
+ */
+function detectFileType(data: Uint8Array): string | null {
+   if (data.length < 4) return "file too small";
+
+   // PDF: %PDF
+   if (data[0] === 0x25 && data[1] === 0x50 && data[2] === 0x44 && data[3] === 0x46) {
+      return "PDF document";
+   }
+
+   // PNG: \x89PNG
+   if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) {
+      return "PNG image";
+   }
+
+   // JPEG: \xFF\xD8\xFF
+   if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) {
+      return "JPEG image";
+   }
+
+   // ZIP / DOCX / XLSX: PK\x03\x04
+   if (data[0] === 0x50 && data[1] === 0x4b && data[2] === 0x03 && data[3] === 0x04) {
+      return "ZIP archive (or Office document)";
+   }
+
+   // PEM text: -----BEGIN
+   if (data[0] === 0x2d && data[1] === 0x2d && data[2] === 0x2d && data[3] === 0x2d) {
+      return "PEM-encoded file (expected binary .pfx/.p12, not PEM text)";
+   }
+
+   return null;
 }

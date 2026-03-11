@@ -7,6 +7,7 @@ import {
    isCertificateValid,
    parseCertificate,
 } from "../src/certificate.ts";
+import { CertificateParseError } from "../src/errors.ts";
 
 const fixturesDir = join(import.meta.dir, "fixtures");
 const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
@@ -75,14 +76,69 @@ describe("parseCertificate", () => {
       expect(cert.pfxPassword).toBe(testPassword);
    });
 
-   it("throws on wrong password", async () => {
-      expect(parseCertificate(testPfx, "wrongpassword")).rejects.toThrow();
+   it("throws WRONG_PASSWORD on wrong password", async () => {
+      try {
+         await parseCertificate(testPfx, "wrongpassword");
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).code).toBe("WRONG_PASSWORD");
+      }
    });
 
-   it("throws on invalid PFX data", async () => {
-      expect(
-         parseCertificate(Buffer.from("not a pfx"), testPassword),
-      ).rejects.toThrow();
+   it("throws INVALID_FORMAT on non-PFX data", async () => {
+      try {
+         await parseCertificate(Buffer.from("not a pfx"), testPassword);
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).code).toBe("INVALID_FORMAT");
+      }
+   });
+
+   it("throws EMPTY_FILE on empty buffer", async () => {
+      try {
+         await parseCertificate(new Uint8Array(0), testPassword);
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).code).toBe("EMPTY_FILE");
+      }
+   });
+
+   it("throws INVALID_FORMAT with detected type for PDF file", async () => {
+      // PDF magic bytes: %PDF
+      const fakePdf = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e]);
+      try {
+         await parseCertificate(fakePdf, testPassword);
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).code).toBe("INVALID_FORMAT");
+         expect((e as CertificateParseError).message).toContain("PDF");
+      }
+   });
+
+   it("throws INVALID_FORMAT with detected type for PNG image", async () => {
+      const fakePng = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]);
+      try {
+         await parseCertificate(fakePng, testPassword);
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).code).toBe("INVALID_FORMAT");
+         expect((e as CertificateParseError).message).toContain("PNG");
+      }
+   });
+
+   it("preserves original error as cause", async () => {
+      try {
+         await parseCertificate(testPfx, "wrongpassword");
+         expect.unreachable("should have thrown");
+      } catch (e) {
+         expect(e).toBeInstanceOf(CertificateParseError);
+         expect((e as CertificateParseError).cause).toBeDefined();
+      }
    });
 });
 
