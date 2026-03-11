@@ -164,7 +164,7 @@
     },
     "libraries/digital-certificate": {
       "name": "@f-o-t/digital-certificate",
-      "version": "2.3.1",
+      "version": "2.4.0",
       "dependencies": {
         "@f-o-t/asn1": "^1.0.0",
         "@f-o-t/crypto": "^1.2.0",
@@ -179,7 +179,7 @@
     },
     "libraries/e-signature": {
       "name": "@f-o-t/e-signature",
-      "version": "1.7.2",
+      "version": "1.7.5",
       "dependencies": {
         "@f-o-t/asn1": "^1.0.0",
         "@f-o-t/crypto": "^1.3.0",
