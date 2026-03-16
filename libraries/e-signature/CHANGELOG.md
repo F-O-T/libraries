@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-03-16
+
+### Added
+- `SignatureAppearance` now supports layout controls for stamp composition: `padding`, `qrSize`, `qrOffsetX`, `qrOffsetY`, `contentAlign`, and `verticalAlign`
+- Added explicit unit tests for `drawSignatureAppearance` layout alignment and `showQrCode: false` behavior
+
+### Fixed
+- QR code and certificate text are now positioned from a shared content box, so `appearance.x`/`appearance.y` anchors the full visible stamp consistently
+- QR vertical placement now aligns with the certificate info block instead of using an independent full-height calculation
+
 ## [1.7.5] - 2026-03-05
 
 ### Fixed

@@ -17,6 +17,7 @@ bun add @f-o-t/e-signature
 - PAdES-BES and ICP-Brasil compliant signatures
 - RFC 3161 timestamp support
 - QR code generation for signature verification
+- Unified signature layout box: QR + certificate text are vertically aligned as one content block
 - Configurable DocMDP permissions for document modification control
 - **Browser compatible** — no `Buffer` or Node-only APIs; runs in browsers, Edge Runtime, and Cloudflare Workers
 - **Non-blocking crypto** — PBKDF2 key derivation and RSA/ECDSA signing use the native [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) (`SubtleCrypto`) when available, avoiding main-thread freezes; pure-JS implementations serve as automatic fallback
@@ -345,6 +346,18 @@ type SignatureAppearance = {
   page?: number;
   showQrCode?: boolean;
   showCertInfo?: boolean;
+  /** Inner content padding in points (default: 5) */
+  padding?: number;
+  /** Rendered QR size in points (default: auto, max 50) */
+  qrSize?: number;
+  /** Extra QR X offset in points */
+  qrOffsetX?: number;
+  /** Extra QR Y offset in points */
+  qrOffsetY?: number;
+  /** Vertical content alignment (alias for verticalAlign) */
+  contentAlign?: "top" | "middle" | "bottom";
+  /** Vertical content alignment (default: "top") */
+  verticalAlign?: "top" | "middle" | "bottom";
 };
 
 type QrCodeConfig = {

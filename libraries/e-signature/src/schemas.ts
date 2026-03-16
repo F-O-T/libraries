@@ -12,6 +12,12 @@ const signatureAppearanceSchema = z.object({
    page: z.number().int().min(0).optional(),
    showQrCode: z.boolean().optional(),
    showCertInfo: z.boolean().optional(),
+   padding: z.number().nonnegative().optional(),
+   qrSize: z.number().positive().optional(),
+   qrOffsetX: z.number().optional(),
+   qrOffsetY: z.number().optional(),
+   contentAlign: z.enum(["top", "middle", "bottom"]).optional(),
+   verticalAlign: z.enum(["top", "middle", "bottom"]).optional(),
 });
 
 const qrCodeConfigSchema = z.object({

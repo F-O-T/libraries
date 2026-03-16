@@ -34,6 +34,12 @@ describe("pdfSignOptionsSchema", () => {
             page: 0,
             showQrCode: true,
             showCertInfo: true,
+            padding: 6,
+            qrSize: 40,
+            qrOffsetX: 2,
+            qrOffsetY: -1,
+            contentAlign: "middle",
+            verticalAlign: "top",
          },
          qrCode: {
             data: "https://example.com",
@@ -44,6 +50,13 @@ describe("pdfSignOptionsSchema", () => {
 
       expect(result.policy).toBe("pades-icp-brasil");
       expect(result.docMdpPermission).toBe(2);
+      expect(result.appearance).toBeDefined();
+      if (result.appearance && typeof result.appearance === "object") {
+         expect(result.appearance.padding).toBe(6);
+         expect(result.appearance.qrSize).toBe(40);
+         expect(result.appearance.contentAlign).toBe("middle");
+         expect(result.appearance.verticalAlign).toBe("top");
+      }
    });
 
    it("accepts appearance: false", () => {

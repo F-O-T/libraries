@@ -22,6 +22,18 @@ export type SignatureAppearance = {
    showQrCode?: boolean;
    /** Whether to display certificate info text (default: true) */
    showCertInfo?: boolean;
+   /** Inner content padding in points (default: 5) */
+   padding?: number;
+   /** Rendered QR size in points (default: auto, capped by available height and 50) */
+   qrSize?: number;
+   /** Additional QR X offset in points within the content box (default: 0) */
+   qrOffsetX?: number;
+   /** Additional QR Y offset in points within the content box (default: 0) */
+   qrOffsetY?: number;
+   /** Vertical alignment for content block (alias for verticalAlign) */
+   contentAlign?: "top" | "middle" | "bottom";
+   /** Vertical alignment for content block (default: top) */
+   verticalAlign?: "top" | "middle" | "bottom";
 };
 
 /**
