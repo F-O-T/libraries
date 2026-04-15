@@ -69,11 +69,13 @@ function decodeTlv(data: Uint8Array, offset: number): [Asn1Node, number] {
    offset++;
    let length: number;
 
-   if (lengthByte === 0x80) {
-      throw new Error("Indefinite length is not valid in DER encoding");
-   }
+   let indefinite = false;
 
-   if (lengthByte < 0x80) {
+   if (lengthByte === 0x80) {
+      // BER indefinite length — only valid for constructed encodings
+      indefinite = true;
+      length = 0; // determined at parse time
+   } else if (lengthByte < 0x80) {
       // Short form
       length = lengthByte;
    } else {
@@ -92,6 +94,31 @@ function decodeTlv(data: Uint8Array, offset: number): [Asn1Node, number] {
       }
    }
 
+   let value: Uint8Array | Asn1Node[];
+
+   if (indefinite) {
+      // Scan children until end-of-content octets (00 00)
+      if (!constructed) {
+         throw new Error("Indefinite length on primitive encoding is invalid");
+      }
+      const children: Asn1Node[] = [];
+      let childOffset = offset;
+      while (true) {
+         if (childOffset + 1 >= data.length) {
+            throw new Error("Truncated indefinite-length encoding: missing end-of-content");
+         }
+         // End-of-content: tag 0x00, length 0x00
+         if (data[childOffset] === 0x00 && data[childOffset + 1] === 0x00) {
+            childOffset += 2;
+            break;
+         }
+         const [child, nextOffset] = decodeTlv(data, childOffset);
+         children.push(child);
+         childOffset = nextOffset;
+      }
+      return [{ tag, constructed, class: asn1Class, value: children }, childOffset];
+   }
+
    // Read value
    if (offset + length > data.length) {
       throw new Error(
@@ -100,8 +127,6 @@ function decodeTlv(data: Uint8Array, offset: number): [Asn1Node, number] {
    }
 
    const endOffset = offset + length;
-
-   let value: Uint8Array | Asn1Node[];
 
    if (constructed) {
       // Recursively decode children

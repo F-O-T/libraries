@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.3.1] - 2026-04-15
+
+### Fixed
+- `parsePkcs12` now handles BER-encoded PFX files with constructed OCTET STRINGs (segments concatenated via `readOctetString` helper), enabling parsing of Lacuna Software test certificates and other legacy PKCS#12 files
+
 ## [1.3.0] - 2026-02-19
 
 ### Changed

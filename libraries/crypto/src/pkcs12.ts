@@ -71,12 +71,7 @@ export async function parsePkcs12(
 
    // Extract the OCTET STRING content from [0] EXPLICIT
    const authSafeContent = unwrapContextTag(authSafe[1]!, 0);
-   let authSafeData: Uint8Array;
-   if (authSafeContent.tag === 4 && !authSafeContent.constructed) {
-      authSafeData = authSafeContent.value as Uint8Array;
-   } else {
-      throw new Pkcs12Error("Expected OCTET STRING for authSafe content");
-   }
+   const authSafeData = readOctetString(authSafeContent, "authSafe content");
 
    // Verify MAC if present
    if (pfxChildren.length >= 3) {
@@ -97,7 +92,7 @@ export async function parsePkcs12(
       if (ciOid === OID_DATA) {
          // plaintext SafeContents inside OCTET STRING
          const content = unwrapContextTag(ciChildren[1]!, 0);
-         const octetData = content.value as Uint8Array;
+         const octetData = readOctetString(content, "SafeContents");
          const bags = parseSafeBags(decodeDer(octetData));
          for (const bag of bags) {
             if (bag.type === "cert") {
@@ -681,7 +676,7 @@ function extractCertFromBag(certBagNode: Asn1Node): Uint8Array | null {
 
    // certValue is [0] EXPLICIT wrapping an OCTET STRING containing the DER cert
    const certValue = unwrapContextTag(fields[1]!, 0);
-   return certValue.value as Uint8Array;
+   return readOctetString(certValue, "CertBag certValue");
 }
 
 async function decryptShroudedKeyBag(
@@ -727,6 +722,23 @@ function expectSequence(node: Asn1Node, label: string): Asn1Node[] {
       );
    }
    return node.value;
+}
+
+/**
+ * Read an OCTET STRING node, supporting both primitive (DER) and
+ * constructed (BER) encodings by concatenating segments.
+ */
+function readOctetString(node: Asn1Node, label = "OCTET STRING"): Uint8Array {
+   if (node.tag !== 4) {
+      throw new Pkcs12Error(`Expected ${label}, got tag 0x${node.tag.toString(16)}`);
+   }
+   if (!node.constructed) {
+      return node.value as Uint8Array;
+   }
+   // BER constructed OCTET STRING — concatenate fragments
+   const children = node.value as Asn1Node[];
+   const parts = children.map((c) => (c.constructed ? readOctetString(c) : (c.value as Uint8Array)));
+   return concat(...parts);
 }
 
 function readOid(node: Asn1Node): string {
