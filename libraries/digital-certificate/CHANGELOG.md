@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.4.5] - 2026-04-15
+
+### Changed
+- Bump `@f-o-t/asn1` to `^1.0.2` and `@f-o-t/crypto` to `^1.3.1` — gains BER indefinite-length and constructed OCTET STRING support, enabling parsing of Lacuna Software test certificates and other legacy PFX files
+
 ## [2.4.4] - 2026-03-11
 
 ### Fixed
