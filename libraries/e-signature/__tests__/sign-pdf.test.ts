@@ -45,6 +45,24 @@ async function loadP12(): Promise<Uint8Array> {
    return new Uint8Array(await Bun.file(p12Path).arrayBuffer());
 }
 
+async function signOk(
+   pdf: Uint8Array | ReadableStream<Uint8Array>,
+   options: Parameters<typeof signPdf>[1],
+): Promise<Uint8Array> {
+   const result = await signPdf(pdf, options);
+   if (result.isErr()) throw result.error;
+   return result.value;
+}
+
+async function signErr(
+   pdf: Uint8Array | ReadableStream<Uint8Array>,
+   options: Parameters<typeof signPdf>[1],
+): Promise<PdfSignError> {
+   const result = await signPdf(pdf, options);
+   if (result.isOk()) throw new Error("Expected signPdf to fail");
+   return result.error;
+}
+
 describe("signPdf", () => {
    it("embeds RFC 3161 timestamp token as unauthenticated attribute in CMS when timestamp:true", async () => {
       // Minimal valid TimeStampResp DER:
@@ -74,7 +92,7 @@ describe("signPdf", () => {
          const pdf = createTestPdf();
          const p12 = await loadP12();
 
-         const result = await signPdf(pdf, {
+         const result = await signOk(pdf, {
             certificate: { p12, password: "test123" },
             appearance: false,
             timestamp: true,
@@ -98,7 +116,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: false,
       });
@@ -111,7 +129,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: false,
       });
@@ -125,7 +143,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          reason: "Test signing",
          location: "Test Location",
@@ -147,7 +165,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          reason: "Approval",
          location: "Office",
@@ -165,23 +183,21 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const badP12 = new Uint8Array([0x00, 0x01, 0x02]);
 
-      await expect(
-         signPdf(pdf, {
-            certificate: { p12: badP12, password: "wrong" },
-            appearance: false,
-         }),
-      ).rejects.toThrow();
+      const error = await signErr(pdf, {
+         certificate: { p12: badP12, password: "wrong" },
+         appearance: false,
+      });
+      expect(error).toBeInstanceOf(PdfSignError);
    });
 
    it("rejects empty P12 data", async () => {
       const pdf = createTestPdf();
 
-      await expect(
-         signPdf(pdf, {
-            certificate: { p12: new Uint8Array(0), password: "" },
-            appearance: false,
-         }),
-      ).rejects.toThrow();
+      const error = await signErr(pdf, {
+         certificate: { p12: new Uint8Array(0), password: "" },
+         appearance: false,
+      });
+      expect(error).toBeInstanceOf(PdfSignError);
    });
 
    it("signs a PDF with appearances array (multi-page stamps)", async () => {
@@ -192,7 +208,7 @@ describe("signPdf", () => {
       const pdf = multiDoc.save();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearances: [
             { x: 50, y: 730, width: 200, height: 80, page: 0 },
@@ -209,7 +225,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearances: [],
       });
@@ -222,15 +238,14 @@ describe("signPdf", () => {
       const pdf = createTestPdf(); // single-page PDF
       const p12 = await loadP12();
 
-      await expect(
-         signPdf(pdf, {
-            certificate: { p12, password: "test123" },
-            appearances: [
-               { x: 50, y: 730, width: 200, height: 80, page: 0 },
-               { x: 50, y: 730, width: 200, height: 80, page: 5 },
-            ],
-         }),
-      ).rejects.toThrow(PdfSignError);
+      const error = await signErr(pdf, {
+         certificate: { p12, password: "test123" },
+         appearances: [
+            { x: 50, y: 730, width: 200, height: 80, page: 0 },
+            { x: 50, y: 730, width: 200, height: 80, page: 5 },
+         ],
+      });
+      expect(error).toBeInstanceOf(PdfSignError);
    });
 
    it("signs with appearance 'auto' and produces valid PDF", async () => {
@@ -245,7 +260,7 @@ describe("signPdf", () => {
       const pdf = doc.save();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: "auto",
       });
@@ -262,7 +277,7 @@ describe("signPdf", () => {
       const pdf = createTestPdf();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: {
             x: 50,
@@ -305,7 +320,7 @@ describe("signPdf", () => {
       const pdf = doc.save();
       const p12 = await loadP12();
 
-      const signed = await signPdf(pdf, {
+      const signed = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: "auto",
       });
@@ -328,7 +343,7 @@ describe("signPdf", () => {
       const pdf = multiDoc.save();
       const p12 = await loadP12();
 
-      const result = await signPdf(pdf, {
+      const result = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearance: { x: 10, y: 10, width: 100, height: 50, page: 0 },
          appearances: [{ x: 50, y: 730, width: 200, height: 80, page: 1 }],

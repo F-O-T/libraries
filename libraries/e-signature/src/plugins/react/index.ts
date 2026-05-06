@@ -110,16 +110,17 @@ export function useSignPdf(): UseSignPdfReturn {
             const pdfBytes = await toUint8Array(input.pdf);
             const p12Bytes = await toUint8Array(input.p12);
 
-            const signed = await signPdf(pdfBytes, {
+            const signedResult = await signPdf(pdfBytes, {
                ...input.options,
                certificate: {
                   p12: p12Bytes,
                   password: input.password,
                },
             });
+            if (signedResult.isErr()) throw signedResult.error;
 
-            dispatch({ type: "SUCCESS", result: signed });
-            return signed;
+            dispatch({ type: "SUCCESS", result: signedResult.value });
+            return signedResult.value;
          } catch (err) {
             const error =
                err instanceof Error ? err : new Error("Unknown signing error");

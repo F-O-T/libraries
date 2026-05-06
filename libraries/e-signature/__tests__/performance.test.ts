@@ -39,6 +39,15 @@ async function loadP12(): Promise<Uint8Array> {
    return new Uint8Array(await Bun.file(p12Path).arrayBuffer());
 }
 
+async function signOk(
+   pdf: Uint8Array | ReadableStream<Uint8Array>,
+   options: Parameters<typeof signPdf>[1],
+): Promise<Uint8Array> {
+   const result = await signPdf(pdf, options);
+   if (result.isErr()) throw result.error;
+   return result.value;
+}
+
 function createOnePage(): Uint8Array {
    const doc = new PDFDocument();
    const page = doc.addPage({ size: "Letter" });
@@ -101,7 +110,7 @@ describe("performance benchmarks", () => {
       const result = await asyncBenchmark(
          "sign single page, no appearance",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                reason: "Performance test",
                appearance: false,
@@ -124,7 +133,7 @@ describe("performance benchmarks", () => {
       const result = await asyncBenchmark(
          "sign single page with appearance",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                reason: "Performance test",
                appearance: {
@@ -154,7 +163,7 @@ describe("performance benchmarks", () => {
       const result = await asyncBenchmark(
          "sign 5-page doc with appearances array",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                reason: "Performance test",
                appearances: [
@@ -182,7 +191,7 @@ describe("performance benchmarks", () => {
 
       const start = performance.now();
       for (let i = 0; i < 10; i++) {
-         await signPdf(pdf, {
+         await signOk(pdf, {
             certificate: { p12, password: "test123" },
             reason: `Sequential sign ${i + 1}`,
             appearance: false,
@@ -207,7 +216,7 @@ describe("performance benchmarks", () => {
       const startMem = process.memoryUsage().heapUsed;
 
       for (let i = 0; i < 5; i++) {
-         await signPdf(pdf, {
+         await signOk(pdf, {
             certificate: { p12, password: "test123" },
             reason: `Memory test ${i + 1}`,
             appearance: false,
@@ -226,7 +235,7 @@ describe("performance benchmarks", () => {
       const p12 = await loadP12();
       const pdf = createMultiPage(5);
 
-      const signed = await signPdf(pdf, {
+      const signed = await signOk(pdf, {
          certificate: { p12, password: "test123" },
          appearances: [
             { x: 50, y: 50, width: 200, height: 80, page: 0 },
@@ -255,7 +264,7 @@ describe("performance benchmarks", () => {
       const bench1 = await asyncBenchmark(
          "appearances: 1",
          async () => {
-            await signPdf(pdf1, {
+            await signOk(pdf1, {
                certificate: { p12, password: "test123" },
                appearances: [{ x: 50, y: 50, width: 200, height: 80, page: 0 }],
             });
@@ -266,7 +275,7 @@ describe("performance benchmarks", () => {
       const bench10 = await asyncBenchmark(
          "appearances: 10",
          async () => {
-            await signPdf(pdf10, {
+            await signOk(pdf10, {
                certificate: { p12, password: "test123" },
                appearances: Array.from({ length: 10 }, (_, i) => ({
                   x: 50,
@@ -318,7 +327,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 1-page",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -339,7 +348,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 10-page",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -360,7 +369,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 50-page",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -381,7 +390,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 100-page",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -405,7 +414,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 50-page heavy",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -429,7 +438,7 @@ describe("auto mode performance", () => {
       const result = await asyncBenchmark(
          "auto 100-page heavy",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });
@@ -525,7 +534,7 @@ describe("auto mode performance", () => {
       const fullResult = await asyncBenchmark(
          "full auto sign",
          async () => {
-            await signPdf(pdf, {
+            await signOk(pdf, {
                certificate: { p12, password: "test123" },
                appearance: "auto",
             });

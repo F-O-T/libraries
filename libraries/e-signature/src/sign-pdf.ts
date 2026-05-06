@@ -41,6 +41,7 @@ import {
 import { pdfSignOptionsSchema } from "./schemas.ts";
 import { requestTimestamp, TIMESTAMP_TOKEN_OID } from "./timestamp.ts";
 import type { PdfSignOptions, SignatureAppearance } from "./types.ts";
+import { ResultAsync } from "neverthrow";
 
 /**
  * Sign a PDF document with a digital certificate.
@@ -62,7 +63,14 @@ import type { PdfSignOptions, SignatureAppearance } from "./types.ts";
  * });
  * ```
  */
-export async function signPdf(
+export function signPdf(
+   pdf: Uint8Array | ReadableStream<Uint8Array>,
+   options: PdfSignOptions,
+): ResultAsync<Uint8Array, PdfSignError> {
+   return ResultAsync.fromPromise(signPdfUnsafe(pdf, options), toPdfSignError);
+}
+
+async function signPdfUnsafe(
    pdf: Uint8Array | ReadableStream<Uint8Array>,
    options: PdfSignOptions,
 ): Promise<Uint8Array> {
@@ -104,11 +112,13 @@ export async function signPdf(
    // 1b. Build display info from already-parsed cert (avoids second P12 parse)
    let certInfo: CertificateInfo | null = null;
    try {
-      certInfo = parseCertificateFromDer(
-         certificate,
-         privateKey,
-         opts.certificate.p12,
-         opts.certificate.password,
+      certInfo = unwrapCertificateInfoResult(
+         parseCertificateFromDer(
+            certificate,
+            privateKey,
+            opts.certificate.p12,
+            opts.certificate.password,
+         ),
       );
    } catch {
       // If parsing fails, continue without cert info for display
@@ -351,6 +361,32 @@ function extractSignatureValue(contentInfoDer: Uint8Array): Uint8Array {
    const signerInfo = (signerInfosSet.value as Asn1Node[])[0]!;
    const signatureNode = (signerInfo.value as Asn1Node[])[5]!;
    return signatureNode.value as Uint8Array;
+}
+
+function unwrapCertificateInfoResult(result: unknown): CertificateInfo {
+   if (
+      result &&
+      typeof result === "object" &&
+      "isOk" in result &&
+      "isErr" in result
+   ) {
+      const maybeResult = result as {
+         isOk(): boolean;
+         value?: CertificateInfo;
+         error?: unknown;
+      };
+
+      if (maybeResult.isOk() && maybeResult.value) return maybeResult.value;
+      throw maybeResult.error;
+   }
+
+   return result as CertificateInfo;
+}
+
+function toPdfSignError(error: unknown): PdfSignError {
+   if (error instanceof PdfSignError) return error;
+   const message = error instanceof Error ? error.message : String(error);
+   return new PdfSignError(message);
 }
 
 // ---------------------------------------------------------------------------
