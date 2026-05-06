@@ -29,11 +29,9 @@
       "dist"
    ],
    "scripts": {
-      "build": "bun x --bun fot build",
-      "test": "bun x --bun fot test",
-      "lint": "bun x --bun fot lint",
-      "format": "bun x --bun fot format",
-      "check": "bun x --bun fot check"
+      "build": "bunup",
+      "test": "bun test",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
       "@f-o-t/asn1": "^1.0.0",
@@ -41,15 +39,15 @@
       "@f-o-t/digital-certificate": "^2.3.0",
       "@f-o-t/pdf": "^0.5.2",
       "@f-o-t/qrcode": "^1.0.2",
+      "neverthrow": "^8.2.0",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.6",
-      "@f-o-t/config": "^1.0.6",
       "@testing-library/react": "^16.0.0",
       "@types/bun": "latest",
       "@types/react": "^19.0.0",
       "@types/react-dom": "^19.0.0",
+      "bunup": "0.16.20",
       "happy-dom": "^20.6.3",
       "react": "^19.0.0",
       "react-dom": "^19.0.0"

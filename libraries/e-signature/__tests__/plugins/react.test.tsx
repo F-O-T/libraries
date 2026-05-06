@@ -7,6 +7,7 @@
 
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 // ── Mock signPdf ──────────────────────────────────────────────────────────────
 
@@ -15,10 +16,10 @@ let mockSignResult: Uint8Array = new Uint8Array([1, 2, 3, 4]);
 let lastSignCall: { pdf: Uint8Array; options: unknown } | null = null;
 
 mock.module("../../src/sign-pdf.ts", () => ({
-   signPdf: async (pdf: Uint8Array, options: unknown) => {
+   signPdf: (pdf: Uint8Array, options: unknown) => {
       lastSignCall = { pdf, options };
-      if (mockSignError !== null) throw new Error(mockSignError);
-      return mockSignResult;
+      if (mockSignError !== null) return errAsync(new Error(mockSignError));
+      return okAsync(mockSignResult);
    },
 }));
 
@@ -285,9 +286,11 @@ describe("useSignPdf", () => {
       // Override mock to hold until manually resolved
       let signCallCount = 0;
       mock.module("../../src/sign-pdf.ts", () => ({
-         signPdf: async () => {
+         signPdf: () => {
             signCallCount++;
-            return holdSign;
+            return ResultAsync.fromPromise(holdSign, (error) =>
+               error instanceof Error ? error : new Error(String(error)),
+            );
          },
       }));
 
@@ -325,10 +328,10 @@ describe("useSignPdf", () => {
 
       // Restore default mock for remaining tests
       mock.module("../../src/sign-pdf.ts", () => ({
-         signPdf: async (pdf: Uint8Array, options: unknown) => {
+         signPdf: (pdf: Uint8Array, options: unknown) => {
             lastSignCall = { pdf, options };
-            if (mockSignError !== null) throw new Error(mockSignError);
-            return mockSignResult;
+            if (mockSignError !== null) return errAsync(new Error(mockSignError));
+            return okAsync(mockSignResult);
          },
       }));
    });

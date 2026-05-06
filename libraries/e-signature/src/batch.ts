@@ -55,13 +55,14 @@ export async function* signPdfBatch(
          // Merge per-file options with base options (file.options takes priority)
          const mergedOptions: PdfSignOptions = { ...options, ...file.options };
 
-         const signed = await signPdf(file.pdf, mergedOptions);
+         const signedResult = await signPdf(file.pdf, mergedOptions);
+         if (signedResult.isErr()) throw signedResult.error;
 
          yield {
             type: "file_complete",
             fileIndex: i,
             filename: file.filename,
-            signed,
+            signed: signedResult.value,
          };
       } catch (err) {
          errorCount++;
