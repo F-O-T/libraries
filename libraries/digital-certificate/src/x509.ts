@@ -18,6 +18,16 @@ const OID_STATE = "2.5.4.8";
 const OID_ORGANIZATION = "2.5.4.10";
 const OID_ORGANIZATIONAL_UNIT = "2.5.4.11";
 const OID_SUBJECT_ALT_NAME = "2.5.29.17";
+const ICP_BRASIL_OID_LABELS: Record<string, string> = {
+	"2.16.76.1.3.1": "CPF",
+	"2.16.76.1.3.2": "ICP-Brasil-Name",
+	"2.16.76.1.3.3": "CNPJ",
+	"2.16.76.1.3.4": "ICP-Brasil-Responsible",
+	"2.16.76.1.3.5": "ICP-Brasil-Voter",
+	"2.16.76.1.3.6": "ICP-Brasil-INSS",
+	"2.16.76.1.3.7": "ICP-Brasil-CEI",
+	"2.16.76.1.3.8": "ICP-Brasil-OAB",
+};
 
 export interface X509Info {
 	serialNumber: string;
@@ -125,7 +135,7 @@ export function parseX509Certificate(certPem: string): X509Info {
 	let subjectAltName: string | null = null;
 	while (idx < tbs.length) {
 		const node = tbs[idx];
-		if (node?.tag === 0xa3) {
+		if (node?.class === "context" && node.tag === 3) {
 			// [3] EXPLICIT - extensions
 			subjectAltName = parseExtensions(node);
 		}
@@ -282,7 +292,7 @@ function parseExtensions(extensionsNode: Asn1Node): string | null {
 			if (sanSeq.constructed && Array.isArray(sanSeq.value)) {
 				const altNames: string[] = [];
 				for (const gn of sanSeq.value as Asn1Node[]) {
-					const value = decodeString(gn);
+					const value = parseGeneralName(gn);
 					if (value) altNames.push(value);
 				}
 				return altNames.join(", ");
@@ -291,6 +301,76 @@ function parseExtensions(extensionsNode: Asn1Node): string | null {
 	}
 
 	return null;
+}
+
+/**
+ * Parse GeneralName entries from Subject Alternative Name.
+ */
+function parseGeneralName(node: Asn1Node): string | null {
+	if (node.class !== "context") return decodeString(node);
+
+	if (node.tag === 0) {
+		return parseOtherName(node);
+	}
+
+	if (!node.constructed && node.value instanceof Uint8Array) {
+		const value = decodeString(node);
+		if (!value) return null;
+
+		if (node.tag === 1) return `email=${value}`;
+		if (node.tag === 2) return `DNS=${value}`;
+		if (node.tag === 6) return `URI=${value}`;
+		return value;
+	}
+
+	if (node.tag === 4 && node.constructed) {
+		const name = parseName(node);
+		const raw = formatDN(name);
+		return raw || null;
+	}
+
+	return null;
+}
+
+/**
+ * Parse otherName ::= SEQUENCE { type-id OBJECT IDENTIFIER, value [0] EXPLICIT ANY }.
+ */
+function parseOtherName(node: Asn1Node): string | null {
+	if (!node.constructed || !Array.isArray(node.value)) return null;
+
+	const children = node.value as Asn1Node[];
+	const oidNode = children[0];
+	const valueWrapper = children[1];
+	if (!oidNode || !valueWrapper) return null;
+
+	const oid = bytesToOid(oidNode.value as Uint8Array);
+	const label = ICP_BRASIL_OID_LABELS[oid] ?? oid;
+	const rawValue = unwrapExplicitValue(valueWrapper);
+	const value = rawValue ? decodeString(rawValue) : "";
+	const normalizedValue = normalizeIcpBrasilOtherNameValue(oid, value);
+
+	return normalizedValue ? `${label}=${normalizedValue}` : `${label}=${value}`;
+}
+
+function unwrapExplicitValue(node: Asn1Node): Asn1Node | null {
+	if (node.constructed && Array.isArray(node.value)) {
+		return node.value[0] ?? null;
+	}
+	return node;
+}
+
+function normalizeIcpBrasilOtherNameValue(oid: string, value: string): string {
+	const digits = value.replace(/\D/g, "");
+
+	if (oid === "2.16.76.1.3.1" && digits.length >= 19) {
+		return digits.slice(8, 19);
+	}
+
+	if (oid === "2.16.76.1.3.3" && digits.length >= 14) {
+		return digits.slice(0, 14);
+	}
+
+	return value;
 }
 
 /**

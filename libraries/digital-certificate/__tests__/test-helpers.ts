@@ -51,7 +51,7 @@ export async function loadCertificate(
 			throw new Error("Password is required for custom certificate");
 		}
 		const pfx = readFileSync(customPath);
-		return parseCertificate(pfx, password);
+		return unwrapCertificate(await parseCertificate(pfx, password));
 	}
 
 	// Use real certificate
@@ -82,14 +82,21 @@ export async function loadCertificate(
 		}
 
 		const pfx = readFileSync(realCertPath);
-		return parseCertificate(pfx, certPassword);
+		return unwrapCertificate(await parseCertificate(pfx, certPassword));
 	}
 
 	// Default: use test certificate
 	const testCertPath = join(fixturesDir, "test-certificate.pfx");
 	const testPassword = "test1234";
 	const pfx = readFileSync(testCertPath);
-	return parseCertificate(pfx, testPassword);
+	return unwrapCertificate(await parseCertificate(pfx, testPassword));
+}
+
+function unwrapCertificate(
+	result: Awaited<ReturnType<typeof parseCertificate>>,
+): CertificateInfo {
+	if (result.isErr()) throw result.error;
+	return result.value;
 }
 
 /**

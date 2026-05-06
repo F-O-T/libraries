@@ -26,7 +26,9 @@ const sampleNfse = `<?xml version="1.0" encoding="UTF-8"?>
 </CompNfse>`;
 
 describe("signXml", async () => {
-   const cert = await parseCertificate(testPfx, testPassword);
+   const certResult = await parseCertificate(testPfx, testPassword);
+   if (certResult.isErr()) throw certResult.error;
+   const cert = certResult.value;
 
    it("signs an XML document with SHA-256", () => {
       const signed = signXml(sampleNfse, {

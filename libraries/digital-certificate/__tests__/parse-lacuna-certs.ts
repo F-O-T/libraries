@@ -62,23 +62,35 @@ async function main() {
 
 		// ── 1. digital-certificate: parseCertificate ─────────────────────────
 		try {
-			const info = await parseCertificate(pfx, PASSWORD);
+			const result = await parseCertificate(pfx, PASSWORD);
+			if (result.isErr()) throw result.error;
+
+			const info = result.value;
 			ok("[digital-certificate] parseCertificate");
 			console.log(`     CN       : ${info.subject.commonName}`);
 			console.log(`     Issuer   : ${info.issuer.commonName}`);
 			console.log(
 				`     Valid to : ${info.validity.notAfter.toISOString().split("T")[0]}`,
 			);
-			const br = info.subject.brazilian;
+			const br = info.brazilian;
 			if (br?.cpf) {
 				console.log(`     CPF      : ${br.cpf}`);
-				if ("expectCpf" in cert && cert.expectCpf !== br.cpf) {
+				const expectedCpf =
+					"expectCpf" in cert ? cert.expectCpf.replace(/\D/g, "") : null;
+				if (expectedCpf && expectedCpf !== br.cpf) {
 					console.warn(
 						`     ⚠ Expected CPF ${cert.expectCpf}, got ${br.cpf}`,
 					);
+					failed++;
 				}
 			}
 			if (br?.cnpj) console.log(`     CNPJ     : ${br.cnpj}`);
+			if ("expectCpf" in cert && !br?.cpf) {
+				fail("[digital-certificate] CPF extraction", "CPF not found");
+			}
+			if ("expectCnpj" in cert && !br?.cnpj) {
+				fail("[digital-certificate] CNPJ extraction", "CNPJ not found");
+			}
 		} catch (err) {
 			fail("[digital-certificate] parseCertificate", err);
 		}
