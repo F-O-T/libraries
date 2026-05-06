@@ -5,7 +5,8 @@
  * and X.509 parsing (pure JavaScript, works in Bun without OpenSSL).
  */
 
-import { parsePkcs12, derToPem } from "@f-o-t/crypto";
+import { derToPem, parsePkcs12 } from "@f-o-t/crypto";
+import { err, errAsync, ok, okAsync, ResultAsync, type Result } from "neverthrow";
 import { parseX509Certificate } from "./x509.ts";
 import { CertificateParseError, classifyPkcs12Error } from "./errors.ts";
 import type {
@@ -26,16 +27,23 @@ import { extractCnpj, extractCpf, parseDistinguishedName } from "./utils.ts";
  *
  * @param pfx - The PFX/P12 file contents as a Uint8Array
  * @param password - The password to decrypt the PFX file
- * @returns Parsed certificate information
- * @throws {CertificateParseError} With a structured `code` field for programmatic handling
+ * @returns Parsed certificate information, or a structured parse error
  */
-export async function parseCertificate(
+export function parseCertificate(
    pfx: Uint8Array,
    password: string,
-): Promise<CertificateInfo> {
-   // --- Input validation ---
+): ResultAsync<CertificateInfo, CertificateParseError> {
+   const validationError = validatePfxInput(pfx);
+   if (validationError) return errAsync(validationError);
+
+   return extractPemFromPfx(pfx, password).andThen(({ certPem, keyPem }) =>
+      parseX509CertificateInfo(certPem, keyPem, pfx, password),
+   );
+}
+
+function validatePfxInput(pfx: Uint8Array): CertificateParseError | null {
    if (!pfx || pfx.length === 0) {
-      throw new CertificateParseError(
+      return new CertificateParseError(
          "EMPTY_FILE",
          "Certificate file is empty (0 bytes). Ensure the file was uploaded correctly.",
       );
@@ -43,47 +51,13 @@ export async function parseCertificate(
 
    if (!isLikelyPkcs12(pfx)) {
       const detectedType = detectFileType(pfx);
-      throw new CertificateParseError(
+      return new CertificateParseError(
          "INVALID_FORMAT",
          `The file does not appear to be a PKCS#12 (.pfx/.p12) certificate${detectedType ? ` (detected: ${detectedType})` : ""}. Expected a .pfx or .p12 file.`,
       );
    }
 
-   // --- PFX extraction ---
-   const { certPem, keyPem } = await extractPemFromPfx(pfx, password);
-
-   // --- X.509 parsing ---
-   let x509;
-   try {
-      x509 = parseX509Certificate(certPem);
-   } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      throw new CertificateParseError(
-         "X509_PARSE_FAILED",
-         `Certificate was extracted from PFX but X.509 parsing failed: ${message}`,
-         { cause: e },
-      );
-   }
-
-   const isValid = checkValidity(x509.validity);
-   const brazilian = extractBrazilianFields(
-      x509.subject.raw,
-      x509.subjectAltName || undefined,
-   );
-
-   return {
-      serialNumber: x509.serialNumber,
-      subject: x509.subject,
-      issuer: x509.issuer,
-      validity: x509.validity,
-      fingerprint: x509.fingerprint,
-      isValid,
-      brazilian,
-      certPem,
-      keyPem,
-      pfxBuffer: pfx,
-      pfxPassword: password,
-   };
+   return null;
 }
 
 /**
@@ -98,11 +72,42 @@ export function parseCertificateFromDer(
    keyDer: Uint8Array,
    pfx: Uint8Array,
    password: string,
-): CertificateInfo {
+): Result<CertificateInfo, CertificateParseError> {
    const certPem = derToPem(certDer, "CERTIFICATE");
    const keyPem = derToPem(keyDer, "PRIVATE KEY");
 
-   const x509 = parseX509Certificate(certPem);
+   return parseX509CertificateInfoSync(certPem, keyPem, pfx, password);
+}
+
+function parseX509CertificateInfo(
+   certPem: string,
+   keyPem: string,
+   pfx: Uint8Array,
+   password: string,
+): ResultAsync<CertificateInfo, CertificateParseError> {
+   const result = parseX509CertificateInfoSync(certPem, keyPem, pfx, password);
+   return result.isOk() ? okAsync(result.value) : errAsync(result.error);
+}
+
+function parseX509CertificateInfoSync(
+   certPem: string,
+   keyPem: string,
+   pfx: Uint8Array,
+   password: string,
+): Result<CertificateInfo, CertificateParseError> {
+   let x509;
+   try {
+      x509 = parseX509Certificate(certPem);
+   } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      return err(
+         new CertificateParseError(
+            "X509_PARSE_FAILED",
+            `Certificate was extracted from PFX but X.509 parsing failed: ${message}`,
+            { cause: e },
+         ),
+      );
+   }
 
    const isValid = checkValidity(x509.validity);
    const brazilian = extractBrazilianFields(
@@ -110,19 +115,20 @@ export function parseCertificateFromDer(
       x509.subjectAltName || undefined,
    );
 
-   return {
+   return ok({
       serialNumber: x509.serialNumber,
       subject: x509.subject,
       issuer: x509.issuer,
       validity: x509.validity,
       fingerprint: x509.fingerprint,
+      subjectAltName: x509.subjectAltName,
       isValid,
       brazilian,
       certPem,
       keyPem,
       pfxBuffer: pfx,
       pfxPassword: password,
-   };
+   });
 }
 
 /**
@@ -156,40 +162,41 @@ export function getPemPair(cert: CertificateInfo): {
 // PFX Extraction via @f-o-t/crypto
 // =============================================================================
 
-async function extractPemFromPfx(
+function extractPemFromPfx(
    pfx: Uint8Array,
    password: string,
-): Promise<{ certPem: string; keyPem: string }> {
-   let result;
-   try {
-      result = await parsePkcs12(pfx, password);
-   } catch (e: unknown) {
+): ResultAsync<{ certPem: string; keyPem: string }, CertificateParseError> {
+   return ResultAsync.fromPromise(parsePkcs12(pfx, password), (e: unknown) => {
       const message = e instanceof Error ? e.message : String(e);
       const { code, userMessage } = classifyPkcs12Error(message);
-      throw new CertificateParseError(code, userMessage, { cause: e });
-   }
+      return new CertificateParseError(code, userMessage, { cause: e });
+   }).andThen((result) => {
+      const certPem = derToPem(result.certificate, "CERTIFICATE");
+      const keyPem = derToPem(result.privateKey, "PRIVATE KEY");
 
-   const certPem = derToPem(result.certificate, "CERTIFICATE");
-   const keyPem = derToPem(result.privateKey, "PRIVATE KEY");
+      if (!certPem.includes("-----BEGIN CERTIFICATE-----")) {
+         return errAsync(
+            new CertificateParseError(
+               "PEM_EXTRACTION_FAILED",
+               "Failed to extract certificate PEM from PFX. The file may be corrupted.",
+            ),
+         );
+      }
 
-   if (!certPem.includes("-----BEGIN CERTIFICATE-----")) {
-      throw new CertificateParseError(
-         "PEM_EXTRACTION_FAILED",
-         "Failed to extract certificate PEM from PFX. The file may be corrupted.",
-      );
-   }
+      if (
+         !keyPem.includes("-----BEGIN PRIVATE KEY-----") &&
+         !keyPem.includes("-----BEGIN RSA PRIVATE KEY-----")
+      ) {
+         return errAsync(
+            new CertificateParseError(
+               "PEM_EXTRACTION_FAILED",
+               "Failed to extract private key PEM from PFX. The file may be corrupted.",
+            ),
+         );
+      }
 
-   if (
-      !keyPem.includes("-----BEGIN PRIVATE KEY-----") &&
-      !keyPem.includes("-----BEGIN RSA PRIVATE KEY-----")
-   ) {
-      throw new CertificateParseError(
-         "PEM_EXTRACTION_FAILED",
-         "Failed to extract private key PEM from PFX. The file may be corrupted.",
-      );
-   }
-
-   return { certPem: certPem.trim(), keyPem: keyPem.trim() };
+      return okAsync({ certPem: certPem.trim(), keyPem: keyPem.trim() });
+   });
 }
 
 // =============================================================================

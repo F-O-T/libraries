@@ -28,21 +28,19 @@
       }
    },
    "scripts": {
-      "build": "bun x --bun fot build",
-      "test": "bun x --bun fot test",
-      "lint": "bun x --bun fot lint",
-      "format": "bun x --bun fot format",
-      "typecheck": "bun x --bun fot typecheck"
+      "build": "bunup",
+      "test": "bun test",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
       "@f-o-t/asn1": "^1.0.2",
       "@f-o-t/crypto": "^1.3.1",
       "@f-o-t/xml": "^1.0.4",
+      "neverthrow": "^8.2.0",
       "zod": "^4.3.6"
    },
    "devDependencies": {
-      "@f-o-t/cli": "^1.0.1",
-      "@f-o-t/config": "^1.0.3",
+      "bunup": "0.16.20",
       "@types/bun": "latest"
    },
    "repository": {

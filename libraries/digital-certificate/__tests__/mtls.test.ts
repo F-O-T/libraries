@@ -14,7 +14,9 @@ const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
 const testPassword = "test1234";
 
 describe("mTLS utilities", async () => {
-   const cert = await parseCertificate(testPfx, testPassword);
+   const certResult = await parseCertificate(testPfx, testPassword);
+   if (certResult.isErr()) throw certResult.error;
+   const cert = certResult.value;
 
    describe("createTlsContext", () => {
       it("creates a TLS secure context", () => {
