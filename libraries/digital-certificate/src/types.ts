@@ -50,6 +50,8 @@ export interface CertificateInfo {
    validity: CertificateValidity;
    /** SHA-256 fingerprint of the certificate */
    fingerprint: string;
+   /** Parsed Subject Alternative Name extension, when present */
+   subjectAltName: string | null;
    /** Whether the certificate is currently valid */
    isValid: boolean;
    /** Brazilian-specific fields (CNPJ, CPF) */

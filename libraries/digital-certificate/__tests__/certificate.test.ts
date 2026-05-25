@@ -12,6 +12,7 @@ import { CertificateParseError } from "../src/errors.ts";
 const fixturesDir = join(import.meta.dir, "fixtures");
 const testPfx = readFileSync(join(fixturesDir, "test-certificate.pfx"));
 const testPassword = "test1234";
+const lacunaPassword = "1234";
 
 describe("parseCertificate", () => {
    it("parses a valid PFX file", async () => {
@@ -21,6 +22,31 @@ describe("parseCertificate", () => {
       expect(cert.serialNumber).toBeDefined();
       expect(cert.certPem).toContain("-----BEGIN CERTIFICATE-----");
       expect(cert.keyPem).toContain("-----BEGIN PRIVATE KEY-----");
+   });
+
+   it("parses ArrayBufferView input without losing byte offsets", async () => {
+      const padded = new Uint8Array(testPfx.length + 4);
+      padded.set([0xff, 0xff], 0);
+      padded.set(testPfx, 2);
+      const view = new DataView(padded.buffer, 2, testPfx.length);
+
+      const cert = await parseCertificate(view, testPassword);
+
+      expect(cert.serialNumber).toBeDefined();
+      expect(cert.pfxBuffer[0]).toBe(0x30);
+      expect(cert.pfxBuffer.length).toBe(testPfx.length);
+   });
+
+   it("parses binary string input", async () => {
+      let binary = "";
+      for (const byte of testPfx) {
+         binary += String.fromCharCode(byte);
+      }
+
+      const cert = await parseCertificate(binary, testPassword);
+
+      expect(cert.serialNumber).toBeDefined();
+      expect(cert.pfxBuffer[0]).toBe(0x30);
    });
 
    it("extracts subject fields", async () => {
@@ -67,6 +93,22 @@ describe("parseCertificate", () => {
       const cert = await parseCertificate(testPfx, testPassword);
 
       expect(cert.brazilian.cnpj).toBe("12345678000190");
+   });
+
+   it("extracts CPF from ICP-Brasil subjectAltName otherName", async () => {
+      const lacunaTuringPfx = readFileSync(join(fixturesDir, "lacuna-turing.pfx"));
+      const cert = await parseCertificate(lacunaTuringPfx, lacunaPassword);
+
+      expect(cert.brazilian.cpf).toBe("56072386105");
+      expect(cert.subjectAltName).toContain("CPF=56072386105");
+   });
+
+   it("extracts CNPJ from ICP-Brasil subjectAltName otherName", async () => {
+      const lacunaWaynePfx = readFileSync(join(fixturesDir, "lacuna-wayne.pfx"));
+      const cert = await parseCertificate(lacunaWaynePfx, lacunaPassword);
+
+      expect(cert.brazilian.cnpj).toBe("34785515000166");
+      expect(cert.subjectAltName).toContain("CNPJ=34785515000166");
    });
 
    it("stores PFX buffer and password", async () => {

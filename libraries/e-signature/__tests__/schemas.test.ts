@@ -13,6 +13,31 @@ describe("pdfSignOptionsSchema", () => {
       expect(result.certificate.password).toBe("test");
    });
 
+   it("normalizes ArrayBufferView p12 input with byte offsets", () => {
+      const padded = new Uint8Array([0xff, 0x30, 0x82, 0xff]);
+      const view = new DataView(padded.buffer, 1, 2);
+
+      const result = pdfSignOptionsSchema.parse({
+         certificate: {
+            p12: view,
+            password: "test",
+         },
+      });
+
+      expect(result.certificate.p12).toEqual(new Uint8Array([0x30, 0x82]));
+   });
+
+   it("normalizes binary string p12 input", () => {
+      const result = pdfSignOptionsSchema.parse({
+         certificate: {
+            p12: String.fromCharCode(0x30, 0x82),
+            password: "test",
+         },
+      });
+
+      expect(result.certificate.p12).toEqual(new Uint8Array([0x30, 0x82]));
+   });
+
    it("validates full options", () => {
       const result = pdfSignOptionsSchema.parse({
          certificate: {

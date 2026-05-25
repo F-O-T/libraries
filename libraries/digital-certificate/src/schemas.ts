@@ -66,6 +66,7 @@ export const certificateInfoSchema = z.object({
    issuer: certificateIssuerSchema,
    validity: certificateValiditySchema,
    fingerprint: z.string().regex(/^[a-f0-9]{64}$/, "Invalid SHA-256 fingerprint"),
+   subjectAltName: z.string().nullable(),
    isValid: z.boolean(),
    brazilian: brazilianFieldsSchema,
    certPem: z.string().regex(/-----BEGIN CERTIFICATE-----/, "Invalid PEM certificate"),

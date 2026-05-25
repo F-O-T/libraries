@@ -46,14 +46,20 @@ export type QrCodeConfig = {
    size?: number;
 };
 
+export type CertificateByteSource =
+   | Uint8Array
+   | ArrayBufferLike
+   | ArrayBufferView
+   | string;
+
 /**
  * Options for signing a PDF document
  */
 export type PdfSignOptions = {
    /** Certificate for signing */
    certificate: {
-      /** PKCS#12/PFX file contents */
-      p12: Uint8Array;
+      /** PKCS#12/PFX file contents as bytes, base64/data URL, or binary string */
+      p12: CertificateByteSource;
       /** Password for the P12/PFX file */
       password: string;
       /** Optional display name for the signer */

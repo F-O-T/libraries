@@ -30,19 +30,21 @@ import { extractCnpj, extractCpf, parseDistinguishedName } from "./utils.ts";
  * @throws {CertificateParseError} With a structured `code` field for programmatic handling
  */
 export async function parseCertificate(
-   pfx: Uint8Array,
+   pfx: Uint8Array | ArrayBufferLike | ArrayBufferView | string,
    password: string,
 ): Promise<CertificateInfo> {
+   const pfxBytes = normalizePfxInput(pfx);
+
    // --- Input validation ---
-   if (!pfx || pfx.length === 0) {
+   if (pfxBytes.length === 0) {
       throw new CertificateParseError(
          "EMPTY_FILE",
          "Certificate file is empty (0 bytes). Ensure the file was uploaded correctly.",
       );
    }
 
-   if (!isLikelyPkcs12(pfx)) {
-      const detectedType = detectFileType(pfx);
+   if (!isLikelyPkcs12(pfxBytes)) {
+      const detectedType = detectFileType(pfxBytes);
       throw new CertificateParseError(
          "INVALID_FORMAT",
          `The file does not appear to be a PKCS#12 (.pfx/.p12) certificate${detectedType ? ` (detected: ${detectedType})` : ""}. Expected a .pfx or .p12 file.`,
@@ -50,7 +52,7 @@ export async function parseCertificate(
    }
 
    // --- PFX extraction ---
-   const { certPem, keyPem } = await extractPemFromPfx(pfx, password);
+   const { certPem, keyPem } = await extractPemFromPfx(pfxBytes, password);
 
    // --- X.509 parsing ---
    let x509;
@@ -77,11 +79,12 @@ export async function parseCertificate(
       issuer: x509.issuer,
       validity: x509.validity,
       fingerprint: x509.fingerprint,
+      subjectAltName: x509.subjectAltName,
       isValid,
       brazilian,
       certPem,
       keyPem,
-      pfxBuffer: pfx,
+      pfxBuffer: pfxBytes,
       pfxPassword: password,
    };
 }
@@ -96,9 +99,10 @@ export async function parseCertificate(
 export function parseCertificateFromDer(
    certDer: Uint8Array,
    keyDer: Uint8Array,
-   pfx: Uint8Array,
+   pfx: Uint8Array | ArrayBufferLike | ArrayBufferView | string,
    password: string,
 ): CertificateInfo {
+   const pfxBytes = normalizePfxInput(pfx);
    const certPem = derToPem(certDer, "CERTIFICATE");
    const keyPem = derToPem(keyDer, "PRIVATE KEY");
 
@@ -116,11 +120,12 @@ export function parseCertificateFromDer(
       issuer: x509.issuer,
       validity: x509.validity,
       fingerprint: x509.fingerprint,
+      subjectAltName: x509.subjectAltName,
       isValid,
       brazilian,
       certPem,
       keyPem,
-      pfxBuffer: pfx,
+      pfxBuffer: pfxBytes,
       pfxPassword: password,
    };
 }
@@ -219,6 +224,79 @@ function extractBrazilianFields(
 // =============================================================================
 // Input Validation Helpers
 // =============================================================================
+
+function normalizePfxInput(
+   input: Uint8Array | ArrayBufferLike | ArrayBufferView | string,
+): Uint8Array {
+   if (input instanceof Uint8Array) return input;
+
+   if (typeof input === "string") {
+      return stringToBytes(input);
+   }
+
+   if (ArrayBuffer.isView(input)) {
+      return new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+   }
+
+   if (input instanceof ArrayBuffer) {
+      return new Uint8Array(input);
+   }
+
+   if (
+      typeof SharedArrayBuffer !== "undefined" &&
+      input instanceof SharedArrayBuffer
+   ) {
+      return new Uint8Array(input);
+   }
+
+   throw new CertificateParseError(
+      "INVALID_FORMAT",
+      "Certificate input must be raw bytes from a .pfx/.p12 file.",
+   );
+}
+
+function stringToBytes(input: string): Uint8Array {
+   const trimmed = input.trim();
+   const dataUrlMatch = trimmed.match(/^data:[^,]*;base64,(.+)$/i);
+   const payload = dataUrlMatch?.[1] ?? trimmed;
+
+   if (payload.includes("-----BEGIN")) {
+      const base64 = payload
+         .replace(/-----BEGIN [^-]+-----/g, "")
+         .replace(/-----END [^-]+-----/g, "")
+         .replace(/\s+/g, "");
+      return decodeBase64(base64);
+   }
+
+   if (/^[A-Za-z0-9+/=_\-\s]+$/.test(payload) && payload.length % 4 === 0) {
+      try {
+         return decodeBase64(payload.replace(/\s+/g, ""));
+      } catch {
+         // Fall back to binary string below.
+      }
+   }
+
+   const bytes = new Uint8Array(input.length);
+   for (let i = 0; i < input.length; i++) {
+      bytes[i] = input.charCodeAt(i) & 0xff;
+   }
+   return bytes;
+}
+
+function decodeBase64(input: string): Uint8Array {
+   const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+
+   if (typeof Buffer !== "undefined" && typeof Buffer.from === "function") {
+      return new Uint8Array(Buffer.from(normalized, "base64"));
+   }
+
+   const binary = atob(normalized);
+   const bytes = new Uint8Array(binary.length);
+   for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+   }
+   return bytes;
+}
 
 /**
  * Quick check: PKCS#12 files start with ASN.1 SEQUENCE tag (0x30).
