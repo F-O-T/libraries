@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.5.0] - 2026-05-25
+
+### Added
+- `subjectAltName` field on `CertificateInfo` — parsed SAN extension string (or `null`)
+- ICP-Brasil otherName parsing — extracts CPF/CNPJ from SAN OID fields (`2.16.76.1.3.1`, `2.16.76.1.3.3`)
+
+### Changed
+- `parseCertificate` and `parseCertificateFromDer` now accept `Uint8Array | ArrayBufferLike | ArrayBufferView | string` (base64, data URL, PEM, binary string) — input is normalized to `Uint8Array` internally
+- SAN GeneralName parsing now handles otherName, email, DNS, URI, and directoryName tags
+
 ## [2.4.5] - 2026-04-15
 
 ### Changed
